@@ -24,24 +24,22 @@ export default {
   width: 100%;
   position: relative;
 
-  background-image: url('../../../assets/images/aboutus.webp');
+  background-image: linear-gradient(to bottom, #3d3d3d, transparent),url('../../../assets/images/us-bg.png');
   background-position: center center;
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-size: cover;
   background-color: rgba(224, 224, 224, 0.4);
-  opacity: 0.7;
-
+  color: #ffffff ;
 }
 
 .header-intro-tit h1{
-  color: #000000 ;
   opacity: 1;
   position: absolute;
   left: 300px;
   font-size: 50px;
   line-height: 50px;
-  font-weight: 800;
+  font-weight: 600;
 }
 .header-intro-text{
   height: 70px;

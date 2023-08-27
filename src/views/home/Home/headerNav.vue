@@ -182,8 +182,8 @@ export default {
 }
 .el-dropdown-menu--medium{
 position: absolute;
-top: 40px !important;
-left: 1463px !important;
+top: 60px !important;
+left: 93% !important;
 transform-origin: center top;
 z-index: 2001;
 }

@@ -384,7 +384,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .app-container{
   padding:40px;
 }

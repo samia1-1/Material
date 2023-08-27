@@ -8,30 +8,35 @@
         <td
           @click="click1W2"
           :class="{highlight:this.stateSpan.showState1W2}"
+          style="width:20%"
         >
           <alloy-span nameShow="Co"></alloy-span>
         </td>
         <td
           @click="click1W3"
           :class="{highlight:this.stateSpan.showState1W3}"
+          style="width:20%"
         >
           <alloy-span nameShow="W"></alloy-span>
         </td>
         <td
           @click="click1W4"
           :class="{highlight:this.stateSpan.showState1W4}"
+          style="width:20%"
         >
           <alloy-span nameShow="Mo"></alloy-span>
         </td>
         <td
           @click="click1W22"
           :class="{highlight:this.stateSpan.showState1W22}"
+          style="width:20%"
         >
           <alloy-span nameShow="Co"></alloy-span>
         </td>
         <td
           @click="click1W5"
           :class="{highlight:this.stateSpan.showState1W5}"
+          style="width:20%"
         >
           <alloy-span nameShow="Cr"></alloy-span>
         </td>
@@ -50,30 +55,35 @@
         <td
           @click="click3W2"
           :class="{highlight:this.stateSpan.showState3W2}"
+          style="width:20%"
         >
           <alloy-span nameShow="Co"></alloy-span>
         </td>
         <td
           @click="click3W6"
           :class="{highlight:this.stateSpan.showState3W6}"
+          style="width:20%"
         >
           <alloy-span nameShow="Al"></alloy-span>
         </td>
         <td
           @click="click3W7"
           :class="{highlight:this.stateSpan.showState3W7}"
+          style="width:20%"
         >
           <alloy-span nameShow="Ti"></alloy-span>
         </td>
         <td
           @click="click3W22"
           :class="{highlight:this.stateSpan.showState3W22}"
+          style="width:20%"
         >
           <alloy-span nameShow="Co"></alloy-span>
         </td>
         <td
           @click="click3W8"
           :class="{highlight:this.stateSpan.showState3W8}"
+          style="width:20%"
         >
           <alloy-span nameShow="Ta"></alloy-span>
         </td>
@@ -92,30 +102,35 @@
         <td
           @click="click5W7"
           :class="{highlight:this.stateSpan.showState5W7}"
+          style="width:20%"
         >
           <alloy-span nameShow="Ti"></alloy-span>
         </td>
         <td
           @click="click5W3"
           :class="{highlight:this.stateSpan.showState5W3}"
+          style="width:20%"
         >
           <alloy-span nameShow="W"></alloy-span>
         </td>
         <td
           @click="click5W6"
           :class="{highlight:this.stateSpan.showState5W6}"
+          style="width:20%"
         >
           <alloy-span nameShow="Al"></alloy-span>
         </td>
         <td
           @click="click5W4"
           :class="{highlight:this.stateSpan.showState5W4}"
+          style="width:20%"
         >
           <alloy-span nameShow="Mo"></alloy-span>
         </td>
         <td
           @click="click5W77"
           :class="{highlight:this.stateSpan.showState5W77}"
+          style="width:20%"
         >
           <alloy-span nameShow="Ti"></alloy-span>
         </td>
@@ -126,42 +141,9 @@
       v-if="this.wShow"
     >
       <span v-for="(item,index) in points" class="pointer" :class="item" :key="index" @click="clickPoint(item)"></span>
-      <!-- <span
-        class="w123 pointer" ref="point" @click="this.state.statew134 = !this.state.statew134"
-      ></span>
-      <span
-        class="w134 pointer" ref="point" @click="this.state.statew134 = !this.state.statew134"
-      ></span>
-      <span
-        class="w125 pointer" ref="point" @click="this.state.statew125 = !this.state.statew125"
-      ></span>
-      <span
-        class="w126 pointer" ref="point" @click="this.state.statew126 = !this.state.statew126"
-      ></span>
-      <span
-        class="w136 pointer" ref="point" @click="this.state.statew136 = !this.state.statew136"
-      ></span>
-      <span
-        class="w142 pointer" ref="point" @click="this.state.statew142 = !this.state.statew142"
-      ></span>
-      <span
-        class="w147 pointer" ref="point" @click="this.state.statew147 = !this.state.statew147"
-      ></span>
-      <span
-        class="w164 pointer" ref="point" @click="this.state.statew164 = !this.state.statew164"
-      ></span>
-      <span
-        class="w167 pointer" ref="point" @click="this.state.statew167 = !this.state.statew167"
-      ></span>
-      <span
-        class="w172 pointer" ref="point" @click="this.state.statew172 = !this.state.statew172"
-      ></span>
-      <span
-        class="w173 pointer" ref="point" @click="this.state.statew173 = !this.state.statew173"
-      ></span> -->
     </div>
 
-    <div
+    <!-- <div
       class="zshow"
       v-else
     >
@@ -176,7 +158,7 @@
       <alloy-line class="z167"></alloy-line>
       <alloy-line class="z172"></alloy-line>
       <alloy-line class="z173"></alloy-line>
-    </div>
+    </div> -->
   </div>
 </template>
 

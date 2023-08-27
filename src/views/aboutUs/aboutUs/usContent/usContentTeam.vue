@@ -12,7 +12,7 @@
           alt=""
         >
         <div class="profile">
-          <div class="pofile-name">谭黎明 / Tan Liming</div>
+          <a class="pofile-name" href="https://faculty.csu.edu.cn/tanliming1/zh_CN/index.htm" target="_blank">谭黎明 / Tan Liming</a>
           <div class="profile-text">中国科协青年托举人才（第八届）</div>
           <div class="profile-text">中国有色金属工业科技进步一等奖</div>
         </div>
@@ -24,7 +24,7 @@
           alt=""
         >
         <div class="profile">
-          <div class="pofile-name">李伟夫 / Li Weifu</div>
+          <a class="pofile-name" href="https://lxy.hzau.edu.cn/info/1056/8155.htm" target="_blank">李伟夫 / Li Weifu</a>
           <div class="profile-text">华中农业大学信息学院副教授</div>
           <div class="profile-text">华中农业大学硕彦计划青年英才B岗</div>
         </div>

@@ -290,11 +290,11 @@ export default {
     };
   },
   created() {
-    this.$message({
-      message:"合金成分查询性能功能出现了一点小问题，正在维护中......",
-      type:"warning"
-    })
-    this.$router.replace('/datasearch')
+    // this.$message({
+    //   message:"合金成分查询性能功能出现了一点小问题，正在维护中......",
+    //   type:"warning"
+    // })
+    // this.$router.replace('/datasearch')
   },
   methods: {
     chooseCraft() {

@@ -28,12 +28,12 @@ export default {
   position: relative;
   color: #ffffff;
 
-  background-image: linear-gradient(to bottom, #797b9e, transparent),url('../../../assets/images/bg.webp') ;
+  background-image: linear-gradient(to bottom, #303030, transparent),url('../../../assets/images/index_bg.png') ;
   background-position: center center;
   background-attachment: fixed;
   background-repeat: no-repeat;
   background-size: cover;
-  box-shadow: 0 0 50px #797b9e;
+  box-shadow: 0 0 50px #000000;
 }
 .header-intro-tit{
   position: absolute;

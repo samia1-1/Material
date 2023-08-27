@@ -23,10 +23,10 @@
       </a>
     </div>
 
-    <div class="us-content-header-item">
+    <div class="us-content-header-item" @click="toUsMaterial">
       <a href="javascript:void(0)">
         <svg t="1692427235096" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="12398" width="14" height="14"><path d="M985.6 742.4L704 403.2V64h64V0H256v64h64v339.2L38.4 736c-25.6 38.4-38.4 76.8-38.4 115.2C0 947.2 76.8 1024 172.8 1024h678.4c96 0 172.8-76.8 172.8-172.8 0-38.4-12.8-76.8-38.4-108.8zM384 428.8V64h256v364.8L710.4 512H313.6L384 428.8z m467.2 531.2H172.8c-57.6 0-108.8-51.2-108.8-108.8 0-25.6 6.4-51.2 25.6-70.4L262.4 576H768l172.8 204.8c19.2 19.2 25.6 44.8 25.6 70.4-6.4 57.6-57.6 108.8-115.2 108.8zM640 640c-70.4 0-128 57.6-128 128s57.6 128 128 128 128-57.6 128-128-57.6-128-128-128z m0 192c-38.4 0-64-25.6-64-64s25.6-64 64-64 64 25.6 64 64-25.6 64-64 64z m-256-192c-38.4 0-64 25.6-64 64s25.6 64 64 64 64-25.6 64-64-25.6-64-64-64z m-128 128c-38.4 0-64 25.6-64 64s25.6 64 64 64 64-25.6 64-64-25.6-64-64-64z" fill="#8686A0" p-id="12399"></path></svg><br>
-      <span>铸造高温合金性能</span>
+      <span>铸造高温合金</span>
       </a>
     </div>
 
@@ -48,7 +48,10 @@ export default {
     },
     toUsNews(){
       this.$router.push('/aboutus/news')
-    }
+    },
+    toUsMaterial(){
+      this.$router.push('/aboutus/material')
+    },
   }
 }
 </script>
@@ -71,7 +74,7 @@ export default {
 }
 .us-content-header-item svg{
   margin: 15px 0 5px;
-  width: 70px;
-  height: 70px;
+  width: 60px;
+  height: 60px;
 }
 </style>

@@ -395,7 +395,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .el-input--small .el-input__inner{
   padding-right: 20px;
 }

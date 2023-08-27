@@ -23,7 +23,7 @@ export default {
   width: 100%;
   height: 100%;
 }
-.predict-main{
+.data-predict .predict-main{
   position: absolute;
   top: 80px;
   width: 80%;
@@ -31,7 +31,7 @@ export default {
   min-height: 750px;
   left: 10%;
 }
-.predict-main h2{
+.data-predict .predict-main h2{
   text-align: center;
 }
 </style>

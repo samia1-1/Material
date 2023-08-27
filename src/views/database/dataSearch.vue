@@ -6,9 +6,6 @@
       <router-view></router-view>
     </div>
 
-    <!-- <div class="alloy-show">
-      <alloy-composition></alloy-composition>
-    </div> -->
   </div>
 </template>
 
@@ -28,23 +25,11 @@ export default {
       };
     },
     methods: {
-      // getStretchData(){
-      //   this.router.replase('/datesearch')
-      // },
-      // getExtremesData(){
-      //   this.$router.push('/datesearch/extreme')
-      // },
-      // getPropertieData(){
-      //   this.$router.push('/datesearch/extreme')
-      // },
-      // getCreepData(){
-      //   this.$router.push('/datesearch/extreme')
-      // }
     }
 }
 </script>
 
-<style>
+<style scoped>
 .data-serach{
   width: 100%;
   position: relative;
@@ -52,11 +37,10 @@ export default {
 .data-select-show{
   min-height: 600px;
   position: absolute;
-  right: 80px;
+  right: 5%;
   top: 100px;
-  width: 1100px;
+  width: 65%;
   background-image: linear-gradient(to bottom,#ffffff,#eeeeee);
   border: 1px solid #eee;
-  margin-bottom: 130px;
 }
 </style>

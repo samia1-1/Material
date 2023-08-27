@@ -406,7 +406,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .app-container{
   padding:20px;
 }

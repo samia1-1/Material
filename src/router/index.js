@@ -158,10 +158,10 @@ export const constantRoutes = [
         path:'publications',
         component:() => import('@/views/aboutUs/aboutUs/usContent/usContentPublications.vue')
       },
-      // {
-      //   path:'',
-      //   component:() => import('@/views/aboutUs/aboutUs/usContent/usContentTeam.vue')
-      // },
+      {
+        path:'material',
+        component:() => import('@/views/aboutUs/aboutUs/usContent/usContentMaterial.vue')
+      },
     ]
   },
   {

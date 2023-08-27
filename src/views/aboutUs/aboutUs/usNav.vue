@@ -104,7 +104,7 @@ export default {
 <style lang="scss" scoped>
 .header-nav{
   height: 60px;
-  color: rgb(40, 41, 41);
+  color: rgb(255, 255, 255);
 }
 .header-left{
   display:flex;
@@ -120,11 +120,11 @@ export default {
 }
 .header-nav-item a{
   font-weight:500;
-  color: #000000 ;
+  color: #ffffff ;
   opacity: 1;
 }
 .header-nav-item a:hover{
-  color: #0011ff ;
+  color: #5d42e6 ;
   opacity: 1;
 }
 
@@ -186,7 +186,7 @@ export default {
 .el-dropdown-menu--medium{
   position: absolute;
   top: 40px !important;
-  left: 1463px !important;
+  left: 93% !important;
   transform-origin: center top;
   z-index: 2001;
 }
