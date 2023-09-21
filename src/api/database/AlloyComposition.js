@@ -8,3 +8,12 @@ export function getAlloyComposition(data) {
     data
   })
 }
+
+// 查询 static_ele
+export function getacStatic_ele(query) {
+  return request({
+    url: 'material/point/select_attribute',
+    method: 'GET',
+    params: query
+  })
+}

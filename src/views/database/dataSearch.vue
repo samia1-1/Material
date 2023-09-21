@@ -1,6 +1,6 @@
 <template>
   <div class="data-serach">
-    <data-nav></data-nav>
+    <small-nav></small-nav>
     <data-select></data-select>
     <div class="data-select-show">
       <router-view></router-view>
@@ -10,14 +10,12 @@
 </template>
 
 <script>
-import DataNav from './component/dataNav';
+import SmallNav from '../../components/smallNav/smallNav.vue';
 import DataSelect from './component/dataSelect';
-import AlloyComposition from '../database/AlloyComposition/alloyComposition.vue';
 export default {
   components:{
     DataSelect,
-    DataNav,
-    AlloyComposition,
+    SmallNav,
   },
   data() {
       return {
@@ -40,7 +38,7 @@ export default {
   right: 5%;
   top: 100px;
   width: 65%;
-  background-image: linear-gradient(to bottom,#ffffff,#eeeeee);
+  background-image: linear-gradient(to bottom,#ffffff,#dedede);
   border: 1px solid #eee;
 }
 </style>

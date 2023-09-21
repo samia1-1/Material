@@ -39,10 +39,11 @@ export default {
 };
 </script>
 <!--  -->
-<style>
+<style scoped>
 .home-inline{
   position: relative;
   height: 1970px;
+  width: 100%;
 }
 .home-main{
   width: 100%;

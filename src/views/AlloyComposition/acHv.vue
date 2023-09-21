@@ -1,6 +1,7 @@
 <template>
-  <div class="app-container">
-    <el-form
+  <div class="ac-hv">
+    <div class="ac-choose">
+      <el-form
       :model="queryParams"
       ref="queryForm"
       size="small"
@@ -137,6 +138,7 @@
           v-model="queryParams.Hf"
           placeholder="请输入铪"
           type="text" onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
+          :disabled="true"
         ></el-input>
       </el-form-item>
       <el-form-item
@@ -174,6 +176,8 @@
         >重置</el-button>
       </el-form-item>
     </el-form>
+    </div>
+
 
     <el-row
       :gutter="10"
@@ -219,21 +223,15 @@
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
     />
-
   </div>
 </template>
 
 <script>
 import {
   listPost,
-  getPost,
-  delPost,
-  addPost,
-  updatePost,
 } from "@/api/system/post";
 import { getAlloyComposition } from "@/api/database/AlloyComposition.js";
-import WzDesign from "../AlloyComposition/Design/wzDesign.vue";
-
+import WzDesign from "./Design/wzDesign.vue";
 export default {
   // name: "Post",
   dicts: ["sys_normal_disable"],
@@ -267,9 +265,6 @@ export default {
       open: false,
       // 查询参数
       queryParams: {
-        // pageNum: 1,
-        // pageSize: 10,
-        // postId:undefined,Al" prop="Al">
         Al: undefined,
         Ti: undefined,
         Cr: undefined,
@@ -277,7 +272,7 @@ export default {
         Ni: undefined,
         Nb: undefined,
         Mo: undefined,
-        Hf: undefined,
+        Hf: 0,
         Ta: undefined,
         W: undefined,
         wz: "粉末",
@@ -290,11 +285,6 @@ export default {
     };
   },
   created() {
-    // this.$message({
-    //   message:"合金成分查询性能功能出现了一点小问题，正在维护中......",
-    //   type:"warning"
-    // })
-    // this.$router.replace('/datasearch')
   },
   methods: {
     chooseCraft() {
@@ -411,14 +401,17 @@ export default {
       );
     },
   },
-};
+}
 </script>
 
-<style scoped>
+<style>
 .design1 .row {
   width: 500px;
   height: 50px;
   border-bottom: 0;
   cursor: pointer;
+}
+.ac-choose{
+  position: relative;
 }
 </style>

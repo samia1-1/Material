@@ -5,6 +5,10 @@
     </div>
 
     <div class="header-nav-item">
+      <a href="#" @click="toAlloyComposition">合金成分查询性能</a>
+    </div>
+
+    <div class="header-nav-item">
       <a href="#" @click="toDatapredict">性能预测</a>
     </div>
 
@@ -96,6 +100,9 @@ export default {
     toUser(){
       this.$router.push('/user/profile')
     },
+    toAlloyComposition(){
+      this.$router.push('/alloycomposition')
+    }
   }
 }
 </script>

@@ -65,18 +65,12 @@ export const constantRoutes = [
     path: '',
     redirect: 'index',
     component: () => import('@/views/index'),
-    meta: { title: '首页', icon: 'dashboard', affix: true, breadcrumb: false, },
     children: [{
       path: '',
       component: () => import('@/views/home/home.vue'),
     }
     ]
   },
-  // {
-  //   path: '/chemical',
-  //   component: () => import('@/views/database/Chemical.vue'),
-  //   meta: { title: '铸造高温合金成分.热处理', icon: 'chemical', affix: true },
-  // },
   {
     path: '/datasearch',
     component: () => import('@/views/database/dataSearch.vue'),
@@ -102,11 +96,21 @@ export const constantRoutes = [
         component: () => import('@/views/database/dataShow/dataCreep.vue'),
         meta: { title: '蠕变', icon: 'creep', affix: true },
       },
+    ]
+  },
+  {
+    path: '/alloycomposition',
+    component: () => import('@/views/AlloyComposition/alloyComposition.vue'),
+    // meta: { title: '合金成分查询性能', icon: 'composition', affix: true },
+    children:[
       {
-        path: 'alloycomposition',
-        component: () => import('@/views/database/AlloyComposition/alloyComposition.vue'),
-        meta: { title: '合金成分查询', icon: 'composition', affix: true },
+        path:'',
+        component:()=> import('@/views/AlloyComposition/acHv.vue'),
       },
+      {
+        path:'static_ele',
+        component:()=> import('@/views/AlloyComposition/static_ele.vue'),
+      }
     ]
   },
   {
@@ -124,43 +128,28 @@ export const constantRoutes = [
         component: () => import('@/views/datapredict/dataStretch.vue'),
         meta: { title: '拉伸性能.精铸试棒', icon: 'stretch', affix: true },
       },
-      // {
-      //   path:'extreme',
-      //   component: () => import('@/views/datapredict/dataExtremes.vue'),
-      //   meta: { title: '持久极限', icon: 'extreme', affix: true },
-      // },
-      // {
-      //   path:'propertie',
-      //   component: () => import('@/views/datapredict/dataPropertie.vue'),
-      //   meta: { title: '持久性能', icon: 'properties', affix: true },
-      // },
-      // {
-      //   path:'creep',
-      //   component: () => import('@/views/datapredict/dataCreep.vue'),
-      //   meta: { title: '蠕变', icon: 'creep', affix: true },
-      // },
     ]
   },
   {
     path: '/aboutus',
     component: () => import('@/views/aboutUs/aboutUs.vue'),
-    redirect:'team',
-    children:[
+    redirect: 'team',
+    children: [
       {
-        path:'',
-        component:() => import('@/views/aboutUs/aboutUs/usContent/usContentTeam.vue')
+        path: '',
+        component: () => import('@/views/aboutUs/aboutUs/usContent/usContentTeam.vue')
       },
       {
-        path:'news',
-        component:() => import('@/views/aboutUs/aboutUs/usContent/usContentNews.vue')
+        path: 'news',
+        component: () => import('@/views/aboutUs/aboutUs/usContent/usContentNews.vue')
       },
       {
-        path:'publications',
-        component:() => import('@/views/aboutUs/aboutUs/usContent/usContentPublications.vue')
+        path: 'publications',
+        component: () => import('@/views/aboutUs/aboutUs/usContent/usContentPublications.vue')
       },
       {
-        path:'material',
-        component:() => import('@/views/aboutUs/aboutUs/usContent/usContentMaterial.vue')
+        path: 'material',
+        component: () => import('@/views/aboutUs/aboutUs/usContent/usContentMaterial.vue')
       },
     ]
   },

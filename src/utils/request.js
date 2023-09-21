@@ -9,7 +9,7 @@ import { saveAs } from 'file-saver'
 
 let downloadLoadingInstance;
 // 是否显示重新登录
-export let isRelogin = { show: false };
+export let isRelogin = { show: true };
 
 axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8'
 // 创建axios实例
@@ -17,7 +17,7 @@ const service = axios.create({
   // axios中请求配置有baseURL选项，表示请求URL公共部分
   baseURL: process.env.VUE_APP_BASE_API,
   // 超时
-  timeout: 50000
+  timeout: 100000
 })
 
 // request拦截器

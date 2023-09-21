@@ -217,7 +217,7 @@ export default {
       this.$router.push("/datasearch");
     },
     toDataAlloyComposition() {
-      this.$router.push("/datasearch/alloycomposition");
+      this.$router.push("/alloycomposition");
     },
   },
   created() {

@@ -100,6 +100,25 @@ export default {
           url: "javascript:void(0)",
           target:false,
         },
+        {
+          name: "涂佳濠",
+          text: "华中农业大学人工智能与统计学习团队2023级研究生",
+          url: "http://aisle.hzau.edu.cn/info/1158/1769.htm",
+          target:true,
+        },
+        {
+          name: "吴蔚",
+          text: "华中农业大学人工智能与统计学习团队2023级研究生",
+          url: "http://aisle.hzau.edu.cn/info/1158/1762.htm",
+          target:true,
+        },
+        {
+          name: "桂永安",
+          text: "华中农业大学人工智能与统计学习团队2023级研究生",
+          url: "http://aisle.hzau.edu.cn/info/1158/1767.htm",
+          target:true,
+        },
+
       ],
     };
   },
@@ -190,7 +209,7 @@ export default {
   flex-wrap: wrap;
   margin: 30px auto;
   width: 1160px;
-  height: 300px;
+  height: 330px;
 }
 .us-team-members-item {
   width: 270px;

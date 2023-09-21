@@ -1,6 +1,7 @@
 <script>
 export default {
   created() {
+    console.log(this.$router)
     const { params, query } = this.$route
     const { path } = params
     this.$router.replace({ path: '/' + path, query })

@@ -6,6 +6,14 @@
       </div>
 
       <div class="list-item">
+        <a @click="toDatabase">材料数据</a>
+      </div>
+
+      <div class="list-item">
+        <a @click="toAlloyComposition">合金成分查询性能</a>
+      </div>
+
+      <div class="list-item">
         <a href="#" @click="toPredict">性能预测</a>
       </div>
 
@@ -87,6 +95,9 @@ export default {
     toIndex(){
       this.$router.push('/')
     },
+    toDatabase(){
+      this.$router.push('/datasearch')
+    },
     toPredict(){
       this.$router.push('/datapredict')
     },
@@ -95,6 +106,9 @@ export default {
     },
     toAboutUs(){
       this.$router.push('/aboutus')
+    },
+    toAlloyComposition(){
+      this.$router.push('/alloycomposition')
     }
   }
 }
@@ -110,7 +124,7 @@ export default {
   box-shadow: 0 1px 4px rgba(0,21,41,.08);
 }
 .datasearch-nav a:hover{
-  color: #152280;
+  color: #13218d;
 }
 .list{
   height: 60px;
@@ -122,10 +136,10 @@ export default {
 }
 .list .list-item a{
   display: block;
-  width: 100px;
+  width: 150px;
 }
 .list .list-item a:hover{
-  background-color: #dde5f52d;
+  background-color: #d4d9e22d;
 }
 .datasearch-nav {
   .right-menu {

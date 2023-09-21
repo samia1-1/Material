@@ -86,11 +86,12 @@ export default {
 <!--
   position: absolute;
   bottom: 0px; -->
-<style>
+<style scoped>
 .footer{
   height: 500px;
   background-color: #222;
   color: aliceblue;
+  width: 100%;
 }
 .func{
   height: 300px;
