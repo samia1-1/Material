@@ -88,7 +88,7 @@
 
 <script>
 import { listPost, getPost, delPost, addPost, updatePost } from "@/api/system/post";
-import { getListBrands,getListProcessingSystems,predictStretch  } from "@/api/database/dataStretch.js";
+import { getListBrands,predictStretch  } from "@/api/database/dataStretch.js";
 
 export default {
   name: "Post",
@@ -99,7 +99,7 @@ export default {
       brands: [/* 'K213','K214','K2136','K403','K405','K406','K406C','K409','K412','K414','K417','K417G','K417L','K418','K418B','K419','K419H','K420',
           'K423','K423A','K424','K435','K438','K438G','K441','K444','K446','K452','K465','K477','K480','K487','K4002','K4130','K4163','K4169','K4202',
           'K4208','K4222','K4242','K4537','K4648','K4708','K4951','K640','K640S','K644','K6509','K825' */],
-        ProcessingSystems:[/* '标准热处理','制度1','制度2','铸态' */],
+        ProcessingSystems:[ '标准热处理','铸态' ],
       // 遮罩层
       loading: true,
       //查看单条数据详情
@@ -179,7 +179,6 @@ export default {
   },
   created() {
     this.getBrands();
-    this.getProcessingSystems();
   },
   methods: {
     //判断目前是否有数据
@@ -201,15 +200,6 @@ export default {
       getListBrands().then(response => {
         this.brands = response.data;
         //console.log(this.brands)
-        this.loading = false;
-      });
-    },
-    /** 查询热处理制度列表 */
-    getProcessingSystems() {
-      this.loading = true;
-      getListProcessingSystems().then(response => {
-        this.ProcessingSystems = response.data;
-        //console.log(this.ProcessingSystems)
         this.loading = false;
       });
     },
@@ -304,7 +294,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .data-show{
   padding: 20px;
 }

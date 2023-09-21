@@ -1,6 +1,6 @@
 <template>
   <div class="data-predict">
-    <predict-nav></predict-nav>
+    <small-nav></small-nav>
     <div class="predict-main">
       <h2>拉伸性能数据预测</h2>
       <router-view></router-view>
@@ -9,10 +9,10 @@
 </template>
 
 <script>
+import SmallNav from '../../components/smallNav/smallNav.vue'
 import DataStretch from '../database/dataShow/dataStretch.vue'
-import predictNav from './component/predictNav'
 export default {
-  components: { predictNav, DataStretch },
+  components: {  DataStretch, SmallNav },
 
 }
 </script>
