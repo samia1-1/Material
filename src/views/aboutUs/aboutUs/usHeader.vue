@@ -1,6 +1,6 @@
 <template>
   <div id="us-header">
-    <us-nav></us-nav>
+    <header-nav></header-nav>
 
     <div class="header-intro-tit">
       <h1>关于我们</h1>
@@ -11,9 +11,9 @@
 </template>
 
 <script>
-import usNav from './usNav'
+import HeaderNav from '../../home/Home/headerNav.vue'
 export default {
-  components: { usNav },
+  components: { HeaderNav },
 
 }
 </script>

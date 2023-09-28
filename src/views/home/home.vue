@@ -6,7 +6,8 @@
       <div class="main-inline">
         <div class="main-inline-in">
 
-          <chemical></chemical>
+          <!-- <chemical></chemical> -->
+          <home-intro></home-intro>
           <data-tool></data-tool>
           <team></team>
 
@@ -23,22 +24,22 @@
 </template>
 
 <script scoped>
-import Chemical from "../database/Chemical";
 import DataTool from './Home/dataTool.vue';
 import homeFooter from "./Home/homeFooter";
 import HomeHeader from './Home/homeHeader.vue';
+import HomeIntro from './Home/homeIntro.vue';
 import team from './Home/team.vue';
 export default {
   components: {
     homeFooter,
     HomeHeader,
-    Chemical,
     team,
     DataTool,
+    HomeIntro,
   },
 };
 </script>
-<!--  -->
+
 <style scoped>
 .home-inline{
   position: relative;

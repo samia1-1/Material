@@ -3,7 +3,7 @@
     <header-nav></header-nav>
 
     <div class="header-intro-tit">
-      <h1>铸造高温合金性能查询预测</h1>
+      <h1>高温合金性能查询预测</h1>
     </div>
     <div class="header-intro-text">
       <div class="text1">节省时间和实验成本的消耗 , 加快高温合金从实验室研究到市场应用的转化进程</div>

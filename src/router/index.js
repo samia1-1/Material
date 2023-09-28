@@ -30,17 +30,17 @@ import Layout from '@/layout'
 
 // 公共路由
 export const constantRoutes = [
-  {
-    path: '/redirect',
-    component: Layout,
-    hidden: true,
-    children: [
-      {
-        path: '/redirect/:path(.*)',
-        component: () => import('@/views/redirect')
-      }
-    ]
-  },
+  // {
+  //   path: '/redirect',
+  //   // component: Layout,
+  //   // hidden: true,
+  //   children: [
+  //     {
+  //       path: '/redirect/:path(.*)',
+  //       component: () => import('@/views/redirect')
+  //     }
+  //   ]
+  // },
   {
     path: '/login',
     component: () => import('@/views/login'),
@@ -63,7 +63,6 @@ export const constantRoutes = [
   },
   {
     path: '',
-    redirect: 'index',
     component: () => import('@/views/index'),
     children: [{
       path: '',
@@ -96,12 +95,15 @@ export const constantRoutes = [
         component: () => import('@/views/database/dataShow/dataCreep.vue'),
         meta: { title: '蠕变', icon: 'creep', affix: true },
       },
+      {
+        path: 'chemical',
+        component: () => import('@/views/database/Chemical.vue'),
+      },
     ]
   },
   {
     path: '/alloycomposition',
     component: () => import('@/views/AlloyComposition/alloyComposition.vue'),
-    // meta: { title: '合金成分查询性能', icon: 'composition', affix: true },
     children:[
       {
         path:'',
@@ -120,8 +122,6 @@ export const constantRoutes = [
   {
     path: '/datapredict',
     component: () => import("@/views/datapredict/datapredict.vue"),
-    // component: Layout,
-    // meta: { title: '数据预测', icon: 'predict', affix: true, /* breadcrumb: false,  */},
     children: [
       {
         path: '',

@@ -1,5 +1,12 @@
 <template>
   <div class="header-nav">
+
+    <div class="header-nav-item">
+      <router-link to="/">
+        <img src="" alt="logo" class="logo">
+      </router-link>
+    </div>
+
     <div class="header-nav-item">
       <a href="#" @click="toDatabase">材料数据</a>
     </div>
@@ -21,7 +28,7 @@
       <a href="#" @click="toAboutUs">关于我们</a>
     </div>
 
-    <div class="right-menu">
+    <div class="right-menu" v-if="avatarState">
       <el-dropdown class="avatar-container right-menu-item hover-effect" trigger="click">
         <div class="avatar-wrapper">
           <img :src="avatar" class="user-avatar" @click="toUser">
@@ -36,7 +43,11 @@
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
-      </div>
+    </div>
+
+    <div class="please-login" v-else>
+      <router-link to="/user/profile">使用功能，请先登录哦~</router-link>
+    </div>
 
 
   </div>
@@ -48,34 +59,28 @@ import { mapGetters } from 'vuex'
 export default {
   computed: {
     ...mapGetters([
-      'sidebar',
       'avatar',
-      'device'
     ]),
-    setting: {
+    avatarState:{
       get() {
-        return this.$store.state.settings.showSettings
-      },
-      set(val) {
-        this.$store.dispatch('settings/changeSetting', {
-          key: 'showSettings',
-          value: val
-        })
-      }
-    },
-    topNav: {
-      get() {
-        return this.$store.state.settings.topNav
+        return this.$store.state.user.avatarState;
       }
     }
+    // setting: {
+    //   get() {
+    //     return this.$store.state.settings.showSettings
+    //   },
+    //   set(val) {
+    //     this.$store.dispatch('settings/changeSetting', {
+    //       key: 'showSettings',
+    //       value: val
+    //     })
+    //   }
+    // },
   },
   methods: {
-    toggleSideBar() {
-      this.$store.dispatch('app/toggleSideBar')
-    },
-
     async logout() {
-      this.$confirm('确定注销并退出系统吗？', '提示', {
+      this.$confirm('确定退出系统吗？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -102,7 +107,15 @@ export default {
     },
     toAlloyComposition(){
       this.$router.push('/alloycomposition')
+    },
+  },
+  mounted(){
+  },
+  data(){
+    return{
     }
+  },
+  watch:{
   }
 }
 </script>
@@ -120,6 +133,12 @@ export default {
   line-height: 60px;
   text-align: center;
   font-size: 18px;
+}
+.header-nav-item{
+  width: 160px;
+  height: 60px;
+  line-height: 60px;
+  text-align: center;
 }
 .dropdown-1{
   position: absolute;
@@ -193,5 +212,19 @@ top: 60px !important;
 left: 93% !important;
 transform-origin: center top;
 z-index: 2001;
+}
+.please-login a{
+  display: block;
+  height: 60px;
+  line-height: 60px;
+  padding-right: 20px;
+  position: absolute;
+  right: 0;
+  top: 0;
+  color: white;
+  font-size:16px;
+}
+.please-login a:hover{
+  color: rgb(255, 255, 72);
 }
 </style>

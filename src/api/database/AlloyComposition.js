@@ -17,3 +17,11 @@ export function getacStatic_ele(query) {
     params: query
   })
 }
+// 查询 建议范围
+export function getSelectLimit(query) {
+  return request({
+    url: 'material/point/select_limit',
+    method: 'GET',
+    params: query
+  })
+}

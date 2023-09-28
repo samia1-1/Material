@@ -2,188 +2,222 @@
   <div class="ac-hv">
     <div class="ac-choose">
       <el-form
-      :model="queryParams"
-      ref="queryForm"
-      size="small"
-      :inline="true"
-      v-show="showSearch"
-      label-width="100px"
-    >
-
-      <el-form-item
-        label="W/Z"
-        prop="wz"
+        :model="queryParams"
+        ref="queryForm"
+        size="small"
+        :inline="true"
+        v-show="showSearch"
+        label-width="100px"
       >
-        <el-select
-          v-model="queryParams.wz"
-          clearable
-          @keyup.enter.native="handleQuery"
-          placeholder="请选择"
+
+        <el-form-item
+          label="W/Z"
+          prop="wz"
         >
-          <el-option
-            v-for="item in choose1"
-            :key="item"
-            :label="item"
-            :value="item"
+          <el-select
+            v-model="queryParams.wz"
+            clearable
+            @keyup.enter.native="handleQuery"
+            placeholder="请选择"
           >
-          </el-option>
-        </el-select>
-      </el-form-item>
+            <el-option
+              v-for="item in choose1"
+              :key="item"
+              :label="item"
+              :value="item"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
 
-      <el-form-item
-        label="工艺"
-        prop="craft"
-      >
-        <el-select
-          v-model="queryParams.craft"
-          clearable
-          @keyup.enter.native="handleQuery"
-          placeholder="请选择工艺"
+        <el-form-item
+          label="工艺"
+          prop="craft"
         >
-          <el-option
-            v-for="item in crafts"
-            :key="item"
-            :label="item"
-            :value="item"
+          <el-select
+            v-model="queryParams.craft"
+            clearable
+            @keyup.enter.native="handleQuery"
+            placeholder="请选择工艺"
           >
-          </el-option>
-        </el-select>
-      </el-form-item><br>
+            <el-option
+              v-for="item in crafts"
+              :key="item"
+              :label="item"
+              :value="item"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item><br>
 
-      <el-form-item
-        label="Design"
-        prop="craft"
-      >
-        <wz-design
-          :wz="this.queryParams.wz"
-          ref="wzDesign"
-        ></wz-design>
-      </el-form-item><br>
+        <el-form-item
+          label="Design"
+          prop="craft"
+        >
+          <wz-design
+            :wz="this.queryParams.wz"
+            :Design="this.Design"
+            :deleteDesignItem="this.deleteDesignItem"
+            ref="wzDesign"
+          ></wz-design>
+        </el-form-item>
 
-      <el-form-item
-        label="Al"
-        prop="Al"
-      >
-        <el-input
-          v-model="queryParams.Al"
-          placeholder="请输入铝"
-          type="text" onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
-        ></el-input>
-      </el-form-item>
-      <el-form-item
-        label="Ti"
-        prop="Ti"
-      >
-        <el-input
-          v-model="queryParams.Ti"
-          placeholder="请输入钛"
-          type="text" onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
-        ></el-input>
-      </el-form-item>
-      <el-form-item
-        label="Cr"
-        prop="Cr"
-      >
-        <el-input
-          v-model="queryParams.Cr"
-          placeholder="请输入铬"
-          type="text" onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
-        ></el-input>
-      </el-form-item>
-      <el-form-item
-        label="Co"
-        prop="Co"
-      >
-        <el-input
-          v-model="queryParams.Co"
-          placeholder="请输入钴"
-          type="text" onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
-        ></el-input>
-      </el-form-item>
-      <el-form-item
-        label="Ni"
-        prop="Ni"
-      >
-        <el-input
-          v-model="queryParams.Ni"
-          placeholder="请输入镍"
-          type="text" onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
-        ></el-input>
-      </el-form-item>
-      <el-form-item
-        label="Nb"
-        prop="Nb"
-      >
-        <el-input
-          v-model="queryParams.Nb"
-          placeholder="请输入铌"
-          type="text" onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
-        ></el-input>
-      </el-form-item>
-      <el-form-item
-        label="Mo"
-        prop="Mo"
-      >
-        <el-input
-          v-model="queryParams.Mo"
-          placeholder="请输入钼"
-          type="text" onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
-        ></el-input>
-      </el-form-item>
-      <el-form-item
-        label="Hf"
-        prop="Hf"
-      >
-        <el-input
-          v-model="queryParams.Hf"
-          placeholder="请输入铪"
-          type="text" onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
-          :disabled="true"
-        ></el-input>
-      </el-form-item>
-      <el-form-item
-        label="Ta"
-        prop="Ta"
-      >
-        <el-input
-          v-model="queryParams.Ta"
-          placeholder="请输入钽"
-          type="text" onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
-        ></el-input>
-      </el-form-item>
-      <el-form-item
-        label="W"
-        prop="W"
-      >
-        <el-input
-          v-model="queryParams.W"
-          placeholder="请输入钨"
-          type="text" onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
-        ></el-input>
-      </el-form-item>
+        <div class="prompt-area">
 
-      <el-form-item>
-        <el-button
-          type="primary"
-          icon="el-icon-search"
-          size="mini"
-          @click="handleQuery"
-        >搜索</el-button>
-        <el-button
-          icon="el-icon-refresh"
-          size="mini"
-          @click="resetQuery"
-        >重置</el-button>
-      </el-form-item>
-    </el-form>
+          <div class="prompt-info-tit">建议值区间：</div>
+
+          <div class="show-item" v-if="promptList.length !== 0">
+            <div
+              class="prompt-item"
+              v-for="(item,index) in promptList"
+              :key="index"
+            >
+              <span class="prompt-item-name">{{item.name}}: </span>
+              <span class="prompt-item-num"> {{item.min}} ~ {{item.max}}</span>
+            </div>
+          </div>
+
+          <div class="prompt-info" v-else>
+            请先选择想要查询的金属区块
+          </div>
+
+        </div>
+
+        <br>
+
+        <el-form-item
+          label="Al"
+          prop="Al"
+        >
+          <el-input
+            v-model="queryParams.Al"
+            placeholder="请输入铝"
+            type="text"
+            onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
+          ></el-input>
+        </el-form-item>
+        <el-form-item
+          label="Ti"
+          prop="Ti"
+        >
+          <el-input
+            v-model="queryParams.Ti"
+            placeholder="请输入钛"
+            type="text"
+            onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
+          ></el-input>
+        </el-form-item>
+        <el-form-item
+          label="Cr"
+          prop="Cr"
+        >
+          <el-input
+            v-model="queryParams.Cr"
+            placeholder="请输入铬"
+            type="text"
+            onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
+          ></el-input>
+        </el-form-item>
+        <el-form-item
+          label="Co"
+          prop="Co"
+        >
+          <el-input
+            v-model="queryParams.Co"
+            placeholder="请输入钴"
+            type="text"
+            onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
+          ></el-input>
+        </el-form-item>
+        <el-form-item
+          label="Ni"
+          prop="Ni"
+        >
+          <el-input
+            v-model="queryParams.Ni"
+            placeholder="请输入镍"
+            type="text"
+            onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
+          ></el-input>
+        </el-form-item>
+        <el-form-item
+          label="Nb"
+          prop="Nb"
+        >
+          <el-input
+            v-model="queryParams.Nb"
+            placeholder="请输入铌"
+            type="text"
+            onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
+          ></el-input>
+        </el-form-item>
+        <el-form-item
+          label="Mo"
+          prop="Mo"
+        >
+          <el-input
+            v-model="queryParams.Mo"
+            placeholder="请输入钼"
+            type="text"
+            onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
+          ></el-input>
+        </el-form-item>
+        <el-form-item
+          label="Hf"
+          prop="Hf"
+        >
+          <el-input
+            v-model="queryParams.Hf"
+            placeholder="请输入铪"
+            type="text"
+            onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
+            :disabled="true"
+          ></el-input>
+        </el-form-item>
+        <el-form-item
+          label="Ta"
+          prop="Ta"
+        >
+          <el-input
+            v-model="queryParams.Ta"
+            placeholder="请输入钽"
+            type="text"
+            onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
+          ></el-input>
+        </el-form-item>
+        <el-form-item
+          label="W"
+          prop="W"
+        >
+          <el-input
+            v-model="queryParams.W"
+            placeholder="请输入钨"
+            type="text"
+            onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
+          ></el-input>
+        </el-form-item>
+
+        <el-form-item>
+          <el-button
+            type="primary"
+            icon="el-icon-search"
+            size="mini"
+            @click="handleQuery"
+          >搜索</el-button>
+          <!-- <el-button
+            icon="el-icon-refresh"
+            size="mini"
+            @click="resetQuery"
+          >重置</el-button> -->
+        </el-form-item>
+      </el-form>
     </div>
-
 
     <el-row
       :gutter="10"
       class="mb8"
     >
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button
           type="warning"
           plain
@@ -192,7 +226,7 @@
           @click="handleExport"
           v-hasPermi="['system:post:export']"
         >导出</el-button>
-      </el-col>
+      </el-col> -->
       <right-toolbar
         :showSearch.sync="showSearch"
         @queryTable="getList"
@@ -227,10 +261,9 @@
 </template>
 
 <script>
-import {
-  listPost,
-} from "@/api/system/post";
-import { getAlloyComposition } from "@/api/database/AlloyComposition.js";
+//handleExport
+import { listPost } from "@/api/system/post";
+import { getAlloyComposition,getSelectLimit } from "@/api/database/AlloyComposition.js";
 import WzDesign from "./Design/wzDesign.vue";
 export default {
   // name: "Post",
@@ -240,6 +273,7 @@ export default {
   },
   data() {
     return {
+      promptList: [],
       choose1: ["单晶", "粉末"],
       crafts: ["STD", "800", "900", "1000", "1100"],
       //嵌套表格的 Dialog
@@ -282,25 +316,63 @@ export default {
       form: {},
       // 表单校验
       rules: {},
+      Design:[],
     };
   },
-  created() {
+  mounted() {
+    this.arr = this.$refs.wzDesign.Design;
   },
-  methods: {
-    chooseCraft() {
-      if (this.queryForm.wz === undefined) {
-        console.log("yes");
-        this.$message({
-          message: "请先选择W/Z!",
-          type: "warning",
-        });
+  watch:{
+      Design:{
+        handler(oldValue,newValue){
+          if(newValue.length !== 0){
+            this.handlePromptInfo(newValue)
+          }
+        }
       }
+		},
+  methods: {
+    deleteDesignItem(){
+      this.Design = []
     },
-    // 取消按钮
-    cancel() {
-      this.open = false;
-      this.reset();
+    handlePromptInfo(value){
+      //请求预测范围数据
+      console.log(value)
+      let num = value[0].replace(/[^0-9]/gi, "");
+      if (this.queryParams.wz === "粉末") {
+        if (this.queryParams.craft === "STD") {
+          var str1 = "W" + "_" + this.queryParams.craft + "_" + num + "_ele";
+          var str2 =
+            "W" + "_" + this.queryParams.craft + "_" + num + "_hardness";
+        } else {
+          var str1 = "W" + this.queryParams.craft + "_" + num + "_ele";
+          var str2 = "W" + this.queryParams.craft + "_" + num + "_hardness";
+        }
+      } else if (this.queryParams.wz === "单晶") {
+        if (this.queryParams.craft === "STD") {
+          var str1 = "Z" + "_" + this.queryParams.craft + "_" + num + "_ele";
+          var str2 =
+            "Z" + "_" + this.queryParams.craft + "_" + num + "_hardness";
+        } else {
+          var str1 = "Z" + this.queryParams.craft + "_" + num + "_ele";
+          var str2 = "Z" + this.queryParams.craft + "_" + num + "_hardness";
+        }
+      }
+      getSelectLimit({
+        tablename: str1,
+      }).then(res => {
+        this.promptList = res.data;
+      })
     },
+    // chooseCraft() {
+    //   if (this.queryForm.wz === undefined) {
+    //     console.log("yes");
+    //     this.$message({
+    //       message: "请先选择W/Z!",
+    //       type: "warning",
+    //     });
+    //   }
+    // },
     // 表单重置
     reset() {
       this.form = {
@@ -316,26 +388,25 @@ export default {
     /** 搜索按钮操作 */
     handleQuery() {
       this.loading = true;
-      let arr = this.$refs.wzDesign.Design;
-      let num = "";
-      arr.forEach(element => {
-        num = element.replace(/[^0-9]/ig,"")
-      });
+      // this.Design = this.$refs.wzDesign.Design;
+      let num = value[0].replace(/[^0-9]/gi, "");
       if (this.queryParams.wz === "粉末") {
         if (this.queryParams.craft === "STD") {
           var str1 = "W" + "_" + this.queryParams.craft + "_" + num + "_ele";
-          var str2 = "W" + "_" + this.queryParams.craft + "_" + num +  "_hardness";
+          var str2 =
+            "W" + "_" + this.queryParams.craft + "_" + num + "_hardness";
         } else {
-          var str1 = "W" + this.queryParams.craft + "_" + num +  "_ele";
-          var str2 = "W" + this.queryParams.craft + "_" + num +  "_hardness";
+          var str1 = "W" + this.queryParams.craft + "_" + num + "_ele";
+          var str2 = "W" + this.queryParams.craft + "_" + num + "_hardness";
         }
-      }else if(this.queryParams.wz === "单晶"){
+      } else if (this.queryParams.wz === "单晶") {
         if (this.queryParams.craft === "STD") {
-          var str1 = "Z" + "_" + this.queryParams.craft + "_" + num +  "_ele";
-          var str2 = "Z" + "_" + this.queryParams.craft + "_" + num +  "_hardness";
+          var str1 = "Z" + "_" + this.queryParams.craft + "_" + num + "_ele";
+          var str2 =
+            "Z" + "_" + this.queryParams.craft + "_" + num + "_hardness";
         } else {
-          var str1 = "Z" + this.queryParams.craft + "_" + num +  "_ele";
-          var str2 = "Z" + this.queryParams.craft + "_" + num +  "_hardness";
+          var str1 = "Z" + this.queryParams.craft + "_" + num + "_ele";
+          var str2 = "Z" + this.queryParams.craft + "_" + num + "_hardness";
         }
       }
       getAlloyComposition({
@@ -352,14 +423,14 @@ export default {
         Ta: this.queryParams.Ta,
         W: this.queryParams.W,
       }).then((response) => {
-        if(response.msg === null){
+        if (response.msg === null) {
           this.$message({
             message: "Sorry，数据库没有查到该数据，请查询其他数据",
             type: "warning",
-          })
-          return ;
+          });
+          return;
         }
-        this.postList.push({hv:response.msg});
+        this.postList.push({ hv: response.msg });
         this.loading = false;
       });
     },
@@ -390,28 +461,63 @@ export default {
       this.oneDataDetail[0] = row;
       console.log("this.oneDataDetail", this.oneDataDetail);
     },
-    /** 导出按钮操作 */
-    handleExport() {
-      this.download(
-        "system/post/export",
-        {
-          ...this.queryParams,
-        },
-        `post_${new Date().getTime()}.xlsx`
-      );
-    },
   },
-}
+};
 </script>
 
-<style>
+<style scoped>
 .design1 .row {
   width: 500px;
   height: 50px;
   border-bottom: 0;
   cursor: pointer;
 }
-.ac-choose{
+.ac-choose {
   position: relative;
+}
+.prompt-area {
+  width: 500px;
+  height: 310px;
+  border: 3px grey dashed;
+  position: absolute;
+  top: 0px;
+  right: 40px;
+  border-radius: 10px;
+  box-shadow: 5px 5px 5px 5px rgb(227, 227, 227);
+}
+.prompt-info-tit{
+  height: 20px;
+  line-height: 20px;
+  font-size: 18px;
+  padding-left: 10px;
+  margin: 10px;
+}
+.prompt-info{
+  text-align: center;
+  height: 230px;
+  line-height: 230px;
+  font-size: 22px;
+  color: grey;
+}
+.show-item{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  width: 500px;
+  margin: 20px 0 0 0;
+}
+.prompt-item{
+  width: 145px;
+  height: 40px;
+  line-height: 40px;
+  border-bottom: 2px solid rgb(212, 212, 212);
+  margin: 10px 10px;
+  font-size: 16px;
+}
+.prompt-item-name{
+  color: grey;
+}
+.prompt-item-num{
+  color: rgb(114, 166, 255);
 }
 </style>

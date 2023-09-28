@@ -27,6 +27,10 @@
           index="1-4"
           @click="toDataStretch"
         >拉伸性能.精铸试棒</el-menu-item>
+        <el-menu-item
+          index="1-5"
+          @click="toChemical"
+        >热成分处理</el-menu-item>
       </el-submenu>
     </el-menu>
 
@@ -60,6 +64,8 @@ export default {
         this.defaultNum = "1-3"
       }else if(path === '/datasearch/stretch'){
         this.defaultNum = "1-4"
+      }else if(path === '/datasearch/chemical'){
+        this.defaultNum = "1-5"
       }
     },
     toDataCreep() {
@@ -74,6 +80,10 @@ export default {
     toDataStretch() {
       this.$router.push("/datasearch/stretch");
     },
+    toChemical(){
+      this.$router.push("/datasearch/chemical");
+    }
+
   },
 };
 </script>

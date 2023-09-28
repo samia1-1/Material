@@ -12,7 +12,7 @@ const name = process.env.VUE_APP_TITLE || 'Material' // 网页标题
 const port = process.env.port || process.env.npm_config_port || 8100 // 端口
 
 // vue.config.js 配置说明
-// 这里只列一部分，具体配置参考文档
+// 具体配置参考文档
 module.exports = {
   // 部署生产环境和开发环境下的URL。
   // 默认情况下，Vue CLI 会假设你的应用是被部署在一个域名的根路径上

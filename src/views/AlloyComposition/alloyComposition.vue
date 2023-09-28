@@ -2,9 +2,9 @@
   <div class="app-container">
     <small-nav></small-nav>
 
-<div class="ac-div">
+<!-- <div class="ac-div">
   <ac-select></ac-select>
-</div>
+</div> -->
 <div class="ac-show">
   <router-view></router-view>
 </div>

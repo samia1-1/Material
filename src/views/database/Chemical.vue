@@ -16,7 +16,7 @@
     </el-select>
 
     <div class="slider-demo-block">
-      <span class="temperature-title">温度/℃:</span>
+      <!-- <span class="temperature-title">温度/℃:</span> -->
       <el-slider
         v-model="temperature"
         :min="temperature_min"
@@ -240,17 +240,22 @@ export default {
 
 <style scoped>
 .chemical-element-list {
+  padding-left: 8%;
+  width: 1000px;
   background-image: linear-gradient(to bottom, #f6f8fa, #ffffff);
-  width: 1200px;
   position: relative;
-  height: 500px;
-  padding: 40px 100px;
-  box-sizing: border-box;
+}
+.el-select{
+  position: absolute;
+  top: 40px;
+  width: 250px;
+  display: block;
 }
 .slider-demo-block {
   position: absolute;
   top: 40px;
-  left: 340px;
+  left: 300px;
+  display: block;
 }
 .temperature-title {
   display: block;

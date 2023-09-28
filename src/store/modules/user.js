@@ -7,7 +7,8 @@ const user = {
     name: '',
     avatar: '',
     roles: [],
-    permissions: []
+    permissions: [],
+    avatarState:true,//判断头像是否显示
   },
 
   mutations: {
@@ -25,6 +26,9 @@ const user = {
     },
     SET_PERMISSIONS: (state, permissions) => {
       state.permissions = permissions
+    },
+    SET_AVATARSTATE(state,newValue){
+      state.avatarState = newValue
     }
   },
 
@@ -89,6 +93,11 @@ const user = {
         removeToken()
         resolve()
       })
+    },
+
+    //修改 是否显示个人头像
+    checkAvatarState({ commit },value){
+      commit('SET_AVATARSTATE',value)
     }
   }
 }

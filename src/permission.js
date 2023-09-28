@@ -8,7 +8,7 @@ import { isRelogin } from '@/utils/request'
 
 NProgress.configure({ showSpinner: false })
 
-const whiteList = ['/login', '/register','/']
+const whiteList = ['/login', '/register','/','/aboutus','/aboutus/news','/aboutus/publications','/aboutus/material']
 
 router.beforeEach((to, from, next) => {
   NProgress.start()
@@ -41,7 +41,7 @@ router.beforeEach((to, from, next) => {
     }
   } else {
     // 没有token
-    console.log("no",whiteList,to.path)
+    // console.log("no",whiteList,to.path)
     if (whiteList.indexOf(to.path) !== -1) {
       // 在免登录白名单，直接进入
       next()
