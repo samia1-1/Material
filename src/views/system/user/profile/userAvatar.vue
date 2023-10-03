@@ -3,7 +3,7 @@
     <div class="user-info-head" @click="editCropper()"><img v-bind:src="options.img" title="点击上传头像" class="img-circle img-lg" /></div>
     <el-dialog :title="title" :visible.sync="open" width="800px" append-to-body @opened="modalOpened"  @close="closeDialog">
       <el-row>
-        <el-col :xs="24" :md="12" :style="{height: '350px'}">
+        <el-col :xs="24" :md="12" :style="{height: '11vh'}">
           <vue-cropper
             ref="cropper"
             :img="options.img"
@@ -17,7 +17,7 @@
             v-if="visible"
           />
         </el-col>
-        <el-col :xs="24" :md="12" :style="{height: '350px'}">
+        <el-col :xs="24" :md="12" :style="{height: '11vh'}">
           <div class="avatar-upload-preview">
             <img :src="previews.url" :style="previews.img" />
           </div>
@@ -164,7 +164,16 @@ export default {
 .user-info-head {
   position: relative;
   display: inline-block;
-  height: 120px;
+  min-width: 120px;
+  min-height: 120px;
+  height: 11vh;
+  width: 11vh;
+}
+.user-info-head img{
+  height: 11vh;
+  width: 11vh;
+  min-width: 120px;
+  min-height: 120px;
 }
 
 .user-info-head:hover:after {
@@ -181,7 +190,14 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   cursor: pointer;
-  line-height: 110px;
+  height: 100%;
+  width: 100%;
+  min-width: 120px;
+  min-height: 120px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
   border-radius: 50%;
 }
 </style>

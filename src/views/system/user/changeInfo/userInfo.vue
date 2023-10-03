@@ -17,7 +17,6 @@
     </el-form-item>
     <el-form-item>
       <el-button type="primary" size="mini" @click="submit">保存</el-button>
-      <el-button type="danger" size="mini" @click="close">关闭</el-button>
     </el-form-item>
   </el-form>
 </template>
@@ -73,3 +72,5 @@ export default {
   }
 };
 </script>
+
+

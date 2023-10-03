@@ -9,7 +9,7 @@ import { saveAs } from 'file-saver'
 
 let downloadLoadingInstance;
 // 是否显示重新登录
-export let isRelogin = { show: true };
+export let isRelogin = { show: false };
 
 axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8'
 // 创建axios实例
@@ -71,7 +71,7 @@ service.interceptors.response.use(function(res) {
     const code = res.data.code || 200;
   if(code === 200){
     store.dispatch('checkAvatarState',true).then((res) => {})
-    // console.log("yes")
+    console.log("yes")
   }
 
     // 获取错误信息
@@ -84,14 +84,15 @@ service.interceptors.response.use(function(res) {
       store.dispatch('checkAvatarState',false).then((res) => {})
       if (!isRelogin.show) {
         isRelogin.show = true;
-        MessageBox.confirm('登录过期，您可以继续留在该页面，或者重新登录', '系统提示', { confirmButtonText: '重新登录', cancelButtonText: '取消', type: 'warning' }).then(() => {
-          isRelogin.show = false;
-          store.dispatch('LogOut').then(() => {
-            location.href = '/index';
-          })
-      }).catch(() => {
-        isRelogin.show = false;
-      });
+        store.dispatch('checkAvatarState',false).then((res) => {})
+      //   MessageBox.confirm('登录过期，您可以继续留在该页面，或者重新登录', '系统提示', { confirmButtonText: '重新登录', cancelButtonText: '取消', type: 'warning' }).then(() => {
+      //     isRelogin.show = false;
+      //     store.dispatch('LogOut').then(() => {
+      //       location.href = '/index';
+      //     })
+      // }).catch(() => {
+      //   isRelogin.show = false;
+      // });
     }
       store.dispatch('checkAvatarState',false).then((res) => {})
       // return Promise.reject('无效的会话，或者会话已过期，请重新登录。')

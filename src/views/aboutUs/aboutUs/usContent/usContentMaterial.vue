@@ -33,6 +33,7 @@ export default {};
 
 <style>
 .us-content-material {
+  min-height: 900px;
   padding: 50px 120px 0px;
 }
 .us-content-material img {
@@ -57,5 +58,12 @@ export default {};
   padding: 10px;
   color: rgb(72, 72, 72);
   box-shadow: 3px 3px 4px 2px rgba(18, 18, 18, 0.3);
+}
+.us-content-material h2{
+  font-size: 3vh;
+  margin-bottom: 20px;
+}
+.us-content-material ol{
+  font-size: 2vh;
 }
 </style>

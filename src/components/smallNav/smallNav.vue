@@ -27,7 +27,7 @@
 
     </div>
 
-    <div class="right-menu">
+    <div class="right-menu"  v-if="avatarState">
     <el-dropdown class="avatar-container right-menu-item hover-effect" trigger="click">
       <div class="avatar-wrapper">
         <img :src="avatar" class="user-avatar" @click="toUser">
@@ -44,6 +44,10 @@
     </el-dropdown>
     </div>
 
+    <div class="please-login" v-else>
+      <router-link to="/user/profile">使用功能，请先登录哦~</router-link>
+    </div>
+
   </div>
 </template>
 
@@ -52,24 +56,11 @@ import { mapGetters } from 'vuex'
 export default {
   computed: {
     ...mapGetters([
-      'sidebar',
       'avatar',
-      'device'
     ]),
-    setting: {
+    avatarState:{
       get() {
-        return this.$store.state.settings.showSettings
-      },
-      set(val) {
-        this.$store.dispatch('settings/changeSetting', {
-          key: 'showSettings',
-          value: val
-        })
-      }
-    },
-    topNav: {
-      get() {
-        return this.$store.state.settings.topNav
+        return this.$store.state.user.avatarState;
       }
     }
   },
@@ -120,11 +111,13 @@ export default {
   position: absolute;
   top: 0;
   height: 60px;
-  background-image: linear-gradient(to bottom,#f6f8fa,#ffffff);
+  background-color: rgb(255, 255, 255);
+  color: rgb(50, 50, 50);
   box-shadow: 0 1px 4px rgba(0,21,41,.08);
+  font-size: 18px;
 }
 .datasearch-nav a:hover{
-  color: #13218d;
+  color: #5a5a5a;
 }
 .list{
   height: 60px;
@@ -132,11 +125,13 @@ export default {
   text-align: center;
   display: flex;
   position: absolute;
-  left: 300px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 .list .list-item a{
   display: block;
-  width: 150px;
+  width: 170px;
 }
 .list .list-item a:hover{
   background-color: #d4d9e22d;
@@ -194,4 +189,26 @@ export default {
     }
   }
 }
+
+.el-dropdown-menu--medium{
+  position: absolute;
+  top: 60px !important;
+  left: 93vw !important;
+  transform-origin: center top;
+  z-index: 2001;
+  }
+  .please-login a{
+    display: block;
+    height: 60px;
+    line-height: 60px;
+    padding-right: 20px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    color: white;
+    font-size:16px;
+  }
+  .please-login a:hover{
+    color: rgb(255, 255, 72);
+  }
 </style>

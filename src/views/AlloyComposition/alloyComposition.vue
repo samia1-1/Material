@@ -1,42 +1,37 @@
 <template>
-  <div class="app-container">
+  <div class="alloy-composition-main">
     <small-nav></small-nav>
 
-<!-- <div class="ac-div">
+    <!-- <div class="ac-div">
   <ac-select></ac-select>
 </div> -->
-<div class="ac-show">
-  <router-view></router-view>
-</div>
+    <div class="ac-show">
+      <router-view></router-view>
+    </div>
 
   </div>
 </template>
 
 <script>
-import SmallNav from '../../components/smallNav/smallNav.vue';
-import AcSelect from './components/acSelect';
+import SmallNav from "../../components/smallNav/smallNav.vue";
+import AcSelect from "./components/acSelect";
 
 export default {
   components: { AcSelect, SmallNav },
-
 };
 </script>
 
 <style scoped>
-.app-container{
+.alloy-composition-main {
   position: relative;
+  width: 100%;
+  height: 100%;
 }
-
-.ac-div{
+.ac-show {
+  width: 1200px;
   position: absolute;
-  left: 0;
-  top: 60px;
-}
-.ac-show{
-  width: 80%-250px;
-  position: absolute;
-  left: 250px;
-  top: 60px;
-  padding: 5%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 </style>

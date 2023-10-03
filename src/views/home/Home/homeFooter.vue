@@ -155,7 +155,7 @@ ul{
   display: flex;
   justify-content : center;
   flex-wrap: wrap;
-  margin: 0 50px 0 50px;
+  margin: 0 5% 0;
 }
 .friend-link-item{
   margin: 0 10px;

@@ -61,7 +61,7 @@
     </el-form>
     <!--  底部  -->
     <div class="el-register-footer">
-      <span>Copyright © 2018-2023 ruoyi.vip All Rights Reserved.</span>
+      <span>Copyright ©2023 版权所有 @李伟夫 备案号 鄂ICP备2023013885号.</span>
     </div>
   </div>
 </template>
@@ -151,20 +151,22 @@ export default {
   justify-content: center;
   align-items: center;
   height: 100%;
-  background-image: url("../assets/images/login-background.jpg");
+  background-image: url("../assets/images/login.webp");
   background-size: cover;
 }
 .title {
   margin: 0px auto 30px auto;
   text-align: center;
   color: #707070;
+  font-size: 18px;
 }
 
 .register-form {
   border-radius: 6px;
   background: #ffffff;
-  width: 400px;
-  padding: 25px 25px 5px 25px;
+  box-shadow: 0 0 30px rgb(183, 195, 224);
+  width: 490px;
+  padding: 60px 60px 20px 60px;
   .el-input {
     height: 38px;
     input {
@@ -198,7 +200,7 @@ export default {
   bottom: 0;
   width: 100%;
   text-align: center;
-  color: #fff;
+  color: #000000;
   font-family: Arial;
   font-size: 12px;
   letter-spacing: 1px;

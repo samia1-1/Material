@@ -1,16 +1,16 @@
 <template>
   <div class="user">
-    <user-nav></user-nav>
+    <small-nav></small-nav>
     <div class="user-main">
-      <router-view></router-view>
+        <router-view></router-view>
     </div>
   </div>
 </template>
 
 <script>
-import userNav from './profile/userNav.vue'
+import SmallNav from '../../../components/smallNav/smallNav'
 export default {
-  components: { userNav },
+  components: {SmallNav  },
 
 }
 </script>
@@ -18,13 +18,14 @@ export default {
 <style scoped>
 .user{
   position: relative;
+  width: 100%;
+  height: 100%;
 }
 .user-main{
+  height: calc(100% - 60px);
+  width: 100%;
   position: absolute;
-  top: 80px;
-  width: 1200px;
-  background-image: linear-gradient(to bottom,#f6f8fa,#ffffff);
-  height: 700px;
-  left: 120px;
+  top: 60px;
+  background-color:#edeff9;
 }
 </style>

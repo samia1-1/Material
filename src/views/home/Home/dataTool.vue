@@ -260,10 +260,10 @@ export default {
   color: #555e66;
 }
 .tool-cont {
-  width: 1110px;
-  margin: 40px 30px 0;
+  width: 100%;
+  margin: 40px auto 0;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-evenly;
 }
 .tool-item {
   width: 200px;

@@ -34,9 +34,10 @@ export default {
 }
 .data-select-show{
   min-height: 600px;
+  max-width: 1100px;
   position: absolute;
-  right: 5%;
-  top: 100px;
+  left: 30%;
+  top: 110px;
   width: 65%;
   background-image: linear-gradient(to bottom,#ffffff,#dedede);
   border: 1px solid #eee;

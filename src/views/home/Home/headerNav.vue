@@ -8,24 +8,23 @@
     </div>
 
     <div class="header-nav-item">
-      <a href="#" @click="toDatabase">材料数据</a>
+      <router-link to="/datasearch">材料数据</router-link>
     </div>
 
     <div class="header-nav-item">
-      <a href="#" @click="toAlloyComposition">合金成分查询性能</a>
+      <router-link to="/alloycomposition">合金成分查询性能</router-link>
     </div>
 
     <div class="header-nav-item">
-      <a href="#" @click="toDatapredict">性能预测</a>
+      <router-link to="/datapredict">性能预测</router-link>
     </div>
 
     <div class="header-nav-item">
       <a href="http://124.221.104.7:5000" target="_blank">图像识别</a>
-      <!-- <a href="#" @click="toImageRecognition">图像识别</a> -->
     </div>
 
     <div class="header-nav-item">
-      <a href="#" @click="toAboutUs">关于我们</a>
+      <router-link to="/aboutus">关于我们</router-link>
     </div>
 
     <div class="right-menu" v-if="avatarState">
@@ -46,7 +45,7 @@
     </div>
 
     <div class="please-login" v-else>
-      <router-link to="/user/profile">使用功能，请先登录哦~</router-link>
+      <router-link to="/user/profile">使用功能，请先登录</router-link>
     </div>
 
 
@@ -55,6 +54,7 @@
 </template>
 
 <script>
+import {getListBrands} from "@/api/database/Chemical.js";
 import { mapGetters } from 'vuex'
 export default {
   computed: {
@@ -63,6 +63,7 @@ export default {
     ]),
     avatarState:{
       get() {
+        getListBrands().then((res) => {});
         return this.$store.state.user.avatarState;
       }
     }
@@ -90,33 +91,10 @@ export default {
         })
       }).catch(() => {});
     },
-    toDatabase(){
-      this.$router.push('/datasearch')
-    },
-    toDatapredict(){
-      this.$router.push('/datapredict')
-    },
-    toAboutUs(){
-      this.$router.push('/aboutus')
-    },
-    toImageRecognition(){
-      this.$router.push('/imagerecognition')
-    },
     toUser(){
       this.$router.push('/user/profile')
     },
-    toAlloyComposition(){
-      this.$router.push('/alloycomposition')
-    },
   },
-  mounted(){
-  },
-  data(){
-    return{
-    }
-  },
-  watch:{
-  }
 }
 </script>
 

@@ -41,11 +41,9 @@
 export default {
   created() {
     this.checkActive();
-    // console.log("created")
   },
   mounted() {
     this.checkActive();
-    // console.log("mounted")
   },
   data(){
     return{
@@ -90,15 +88,18 @@ export default {
 
 <style>
 .data-select {
-  width: 250px;
+  min-width: 250px;
+  width: 13vw;
   position: absolute;
-  left: 130px;
-  top: 100px;
-  border: 1px solid #8b8b8b;
-  border-radius: 10px;
+  left: 10vw;
+  top: 10vh;
+  border: 2px solid #b9b9b9;
   padding-bottom: 10px;
 }
 .data-select h3 {
   text-align: center;
+  font-size: 18px;
+  height: 50px;
+  line-height: 50px;
 }
 </style>

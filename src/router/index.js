@@ -71,9 +71,8 @@ export const constantRoutes = [
     ]
   },
   {
-    path: '/datasearch',
-    component: () => import('@/views/database/dataSearch.vue'),
-    meta: { title: '性能查询', icon: 'database', affix: true },
+    path: '/datasearch',//性能查询
+    component: () => import('@/views/database/index.vue'),
     children: [
       {
         path: 'stretch',
@@ -156,15 +155,28 @@ export const constantRoutes = [
   {
     path: '/user',
     component: () => import('@/views/system/user/user.vue'),
-    // hidden: true,
     redirect: 'profile',
     children: [
       {
         path: 'profile',
         component: () => import('@/views/system/user/profile/index'),
         name: 'Profile',
-        meta: { title: '个人中心', icon: 'user' }
-      }
+      },
+      {
+        path: 'changeinfo',
+        component: () => import('@/views/system/user/changeInfo/index'),
+        name: 'changeInfo',
+        children:[
+          {
+            path:'',
+            component:() => import('@/views/system/user/changeInfo/changeProfile'),
+          },
+          {
+            path:'changeac',
+            component:() => import('@/views/system/user/changeInfo/changeAccount'),
+          },
+        ]
+      },
     ]
   }
 ]

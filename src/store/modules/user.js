@@ -9,6 +9,7 @@ const user = {
     roles: [],
     permissions: [],
     avatarState:true,//判断头像是否显示
+    userInfo:{},
   },
 
   mutations: {
@@ -29,6 +30,9 @@ const user = {
     },
     SET_AVATARSTATE(state,newValue){
       state.avatarState = newValue
+    },
+    SET_USERINFO(state,newValue){
+      state.userInfo = newValue
     }
   },
 
@@ -64,6 +68,7 @@ const user = {
           }
           commit('SET_NAME', user.userName)
           commit('SET_AVATAR', avatar)
+          commit('SET_USERINFO',user)
           resolve(res)
         }).catch(error => {
           reject(error)
