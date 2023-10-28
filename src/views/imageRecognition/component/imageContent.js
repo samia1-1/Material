@@ -10,7 +10,7 @@ var show_selectedImage=function () {
 
     var selected_files = document.getElementById("select_files").files;
     for (var file of selected_files) {
-      console.log("asdasdasadas" + file.webkitRelativePath);
+      // console.log("asdasdasadas" + file.webkitRelativePath);
       /// read file content.
       var reader = new FileReader();
       reader.readAsDataURL(file);
@@ -30,6 +30,7 @@ var show_selectedImage=function () {
       };
     }
   }
+
 
 var op = function() {
     const canvas = document.getElementById("image_canvas");
@@ -53,11 +54,12 @@ var op = function() {
     const canvasOutHeight = canvasOut.height;
     ctxOut.fillText("待提交预测", canvasOutWidth / 2, canvasOutHeight / 2);
 
-    // document.getElementById("myform").addEventListener("submit", function (e) {
-    //   e.preventDefault(); // 阻止表单默认的提交行为
-    //   var selected_files = document.getElementById("select_files").files[0];
-    //   processImage(selected_files);
-    // });
+    document.getElementById("myform").addEventListener("submit", function (e) {
+      e.preventDefault(); // 阻止表单默认的提交行为
+      var selected_files = document.getElementById("select_files").files[0];
+      // processImage(selected_files);
+      process_image(selected_files);
+    });
   }
 
 export {

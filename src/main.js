@@ -65,6 +65,8 @@ Vue.component('ImagePreview', ImagePreview)
 Vue.use(directive)
 Vue.use(plugins)
 Vue.use(VueMeta)
+
+
 DictData.install()
 
 /**
@@ -82,10 +84,11 @@ Vue.use(Element, {
 
 Vue.config.productionTip = false
 
-new Vue({
+const aoo = new Vue({
   el: '#app',
   router,
   store,
   render: h => h(App)
 })
+
 

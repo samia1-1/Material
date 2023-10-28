@@ -47,7 +47,7 @@
           </el-menu>
         </el-col>
       </div>
-      <div class="right-info-show">
+      <div class="right-data-show">
         <router-view></router-view>
       </div>
     </div>
@@ -65,25 +65,25 @@ export default {
   mounted() {
     this.checkActive();
   },
-  data(){
-    return{
-      defaultNum:"1-1",
-    }
+  data() {
+    return {
+      defaultNum: "1-1",
+    };
   },
   methods: {
     checkActive() {
       let path = this.$router.history.current.path;
-      console.log(path)
-      if(path === '/datesearch'){
-        this.defaultNum = "1-1"
-      }else if(path === '/datasearch/extreme'){
-        this.defaultNum = "1-2"
-      }else if(path === '/datasearch/propertie'){
-        this.defaultNum = "1-3"
-      }else if(path === '/datasearch/stretch'){
-        this.defaultNum = "1-4"
-      }else if(path === '/datasearch/chemical'){
-        this.defaultNum = "1-5"
+      // console.log(path)
+      if (path === "/datesearch") {
+        this.defaultNum = "1-1";
+      } else if (path === "/datasearch/extreme") {
+        this.defaultNum = "1-2";
+      } else if (path === "/datasearch/propertie") {
+        this.defaultNum = "1-3";
+      } else if (path === "/datasearch/stretch") {
+        this.defaultNum = "1-4";
+      } else if (path === "/datasearch/chemical") {
+        this.defaultNum = "1-5";
       }
     },
     toDataCreep() {
@@ -98,9 +98,9 @@ export default {
     toDataStretch() {
       this.$router.push("/datasearch/stretch");
     },
-    toChemical(){
+    toChemical() {
       this.$router.push("/datasearch/chemical");
-    }
+    },
   },
 };
 </script>
@@ -108,17 +108,18 @@ export default {
 <style scoped>
 .data-serach {
   width: 100%;
-  height: 100%;
+  min-height: 100%;
+  height: auto;
   position: relative;
   background-color: #edeff9;
 }
-.back-profile {
+.data-serach .back-profile {
   position: absolute;
   top: calc(5vh + 60px);
   left: 50%;
   transform: translateX(-50%);
   margin: 0 auto;
-  width: 1200px;
+  width: 1400px;
   font-size: 16px;
   height: 50px;
   line-height: 50px;
@@ -126,8 +127,8 @@ export default {
   padding-left: 22px;
   color: rgb(68, 149, 255);
 }
-.function-tit {
-  font-size: 3vh;
+.data-serach .back-profile .function-tit {
+  font-size: 24px;
   position: absolute;
   top: 0;
   left: 50%;
@@ -135,25 +136,30 @@ export default {
   color: black;
   text-align: center;
 }
+
 .data-select-show {
   position: absolute;
   top: calc(5vh + 150px);
   left: 50%;
   transform: translateX(-50%);
-  width: 1200px;
+  width: 1400px;
 }
 .left-sidernav {
   width: 230px;
-  height: 626px;
+  height: 70vh;
   position: absolute;
   background-color: #fff;
 }
-.right-info-show {
+.right-data-show {
   width: calc(100% - 254px);
-  height: 626px;
+  height: 70vh;
+  overflow: scroll;
   background-color: #fff;
   position: absolute;
   right: 0;
-  padding: 5vh;
+  padding: 3vh;
+}
+.right-data-show::-webkit-scrollbar {
+  display: none;
 }
 </style>

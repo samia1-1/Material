@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container home">
+  <div class="app-container">
     <router-view></router-view>
   </div>
 </template>
@@ -28,6 +28,8 @@ export default {
 <style scoped lang="scss">
 .app-container{
   padding: 0;
+  width: 100%;
+  height: 100%;
 }
 .home {
   blockquote {

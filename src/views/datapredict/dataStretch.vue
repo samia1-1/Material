@@ -39,7 +39,7 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button
           type="warning"
           plain
@@ -49,17 +49,20 @@
           v-hasPermi="['system:post:export']"
         >导出</el-button>
       </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
+      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar> -->
     </el-row>
 
     <el-table v-loading="loading" :data="postList" @selection-change="handleSelectionChange" >
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="牌号" align="center" prop="trademark" />
       <el-table-column label="热处理制度" align="center" prop="heatTreatmentSystem" />
-      <el-table-column label="温度" align="center" prop="temperature">
-      </el-table-column>
+      <el-table-column label="温度" align="center" prop="temperature"></el-table-column>
+      <el-table-column label="屈服强度" align="center" property="yieldStrength" />
+      <el-table-column label="抗拉强度" align="center" property="tensileStrength" />
+      <el-table-column label="延伸率" align="center" property="elongation" />
+      <el-table-column label="断面收缩率" align="center" property="sectionShrinkage" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
+        <!-- <template slot-scope="scope">
           <el-button
             size="mini"
             type="text"
@@ -79,7 +82,7 @@
               <el-table-column label="断面收缩率" align="center" property="sectionShrinkage" />
             </el-table>
           </el-dialog>
-        </template>
+        </template> -->
       </el-table-column>
     </el-table>
 
@@ -218,17 +221,17 @@ export default {
       this.reset();
     },
     // 表单重置
-    reset() {
-      this.form = {
-        postId: undefined,
-        postCode: undefined,
-        postName: undefined,
-        postSort: 0,
-        status: "0",
-        remark: undefined
-      };
-      this.resetForm("form");
-    },
+    // reset() {
+    //   this.form = {
+    //     postId: undefined,
+    //     postCode: undefined,
+    //     postName: undefined,
+    //     postSort: 0,
+    //     status: "0",
+    //     remark: undefined
+    //   };
+    //   this.resetForm("form");
+    // },
     /** 搜索按钮操作 */
     handleQuery() {
       this.loading = true;
@@ -248,8 +251,22 @@ export default {
     },
     /** 重置按钮操作 */
     resetQuery() {
-      this.resetForm("queryForm");
-      this.handleQuery();
+      this.queryParams = {
+        trademark: undefined,
+        treatmentSystem: undefined,
+        temperature: undefined,
+        algorithms: undefined,
+      }
+      this.postList = [{
+          temperature:undefined,
+          algorithms:undefined,
+          yieldStrength:undefined,
+          tensileStrength:undefined,
+          elongation:undefined,
+          sectionShrinkage:undefined,
+        }]
+      // this.resetForm("queryForm");
+      // this.handleQuery();
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
@@ -295,9 +312,6 @@ export default {
 </script>
 
 <style scoped>
-.data-show{
-  padding: 20px;
-}
 .el-input--small .el-input__inner{
   width: 180px;
 }

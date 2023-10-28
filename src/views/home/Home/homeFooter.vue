@@ -7,7 +7,7 @@
         <ul>
           <li><a href="#" @click="toDatabase">数据查询</a></li>
           <li><a href="#" @click="toDatapredict">拉伸性能预测</a></li>
-          <li><a href="http://124.221.104.7:5000" target="_blank">金属损伤图像识别</a></li>
+          <li><a @click="toImageRecognition" >金属损伤图像识别</a></li>
         </ul>
       </div>
       <div class="func-span func-2">

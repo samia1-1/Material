@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div class="data-propertie">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="90px">
       <el-form-item label="牌号" prop="trademark">
         <el-select v-model="queryParams.trademark" clearable @keyup.enter.native="handleQuery" placeholder="请选择牌号">
@@ -18,24 +18,24 @@
         </el-select>
       </el-form-item>
       <el-form-item label="最低温度" prop="temperature_min">
-        <el-input v-model="queryParams.temperature_min" placeholder="请输入最低温度（摄氏度）"></el-input>
+        <el-input v-model="queryParams.temperature_min" :placeholder="'输入高于' + this.temMin +'摄氏度'"></el-input>
       </el-form-item>
       <el-form-item label="最高温度" prop="temperature_max">
-        <el-input v-model="queryParams.temperature_max" placeholder="请输入最高温度（摄氏度）"></el-input>
+        <el-input v-model="queryParams.temperature_max" :placeholder="'输入低于' + this.temMax +'摄氏度'"></el-input>
       </el-form-item>
       <el-form-item label="最低应力" prop="stress_min">
-        <el-input v-model="queryParams.stress_min" placeholder="请输入最低应力"></el-input>
+        <el-input v-model="queryParams.stress_min" :placeholder="'输入应力高于' + this.stressMin"></el-input>
       </el-form-item>
       <el-form-item label="最高应力" prop="stress_max">
-        <el-input v-model="queryParams.stress_max" placeholder="请输入最高应力"></el-input>
+        <el-input v-model="queryParams.stress_max" :placeholder="'输入应力低于' + this.stressMax"></el-input>
       </el-form-item>
 
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <!-- <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button> -->
+        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
       </el-form-item>
 
-      <el-form-item>
+      <!-- <el-form-item>
         <el-button
           type="warning"
           plain
@@ -44,7 +44,7 @@
           @click="handleExport"
           v-hasPermi="['system:post:export']"
         >导出</el-button>
-      </el-form-item>
+      </el-form-item> -->
     </el-form>
 
     <!-- <el-row :gutter="10" class="mb8">
@@ -100,17 +100,17 @@
       <el-table-column label="热处理制度" align="center" prop="heatTreatmentSystem" />
       <el-table-column label="温度" align="center" prop="temperature"/>
       <el-table-column label="应力" align="center" prop="stress"/>
-      <!-- <el-table-column label="τ/h_min" align="center" prop="h_min"/>
-      <el-table-column label="τ/h_max" align="center" prop="h_max"/>
-      <el-table-column label="延伸率" align="center" prop="elongation"/>
-      <el-table-column label="断面收缩率" align="center" prop="sectionShrinkage"/>
-      <el-table-column label="创建时间" align="center" prop="createTime" width="180"> -->
+      <el-table-column label="τ/h_min" align="center" prop="τ_min" />
+      <el-table-column label="τ/h_max" align="center" prop="τ_max" />
+      <el-table-column label="延伸率" align="center" prop="elongation" />
+      <el-table-column label="断面收缩率" align="center" prop="sectionShrinkage" />
+      <!-- <el-table-column label="创建时间" align="center" prop="createTime" width="180">  -->
         <!-- <template slot-scope="scope">
           <span>{{ parseTime(scope.row.createTime) }}</span>
         </template>
       </el-table-column> -->
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
+        <!-- <template slot-scope="scope">
 
           <el-button
             size="mini"
@@ -131,7 +131,7 @@
               <el-table-column label="延伸率" align="center" prop="elongation" />
               <el-table-column label="断面收缩率" align="center" prop="sectionShrinkage" />
             </el-table>
-          </el-dialog>
+          </el-dialog> -->
 <!--
           <el-button
             size="mini"
@@ -147,7 +147,7 @@
             @click="handleDelete(scope.row)"
             v-hasPermi="['system:post:remove']"
           >删除</el-button> -->
-        </template>
+        <!-- </template> -->
       </el-table-column>
     </el-table>
 
@@ -160,7 +160,7 @@
     />
 
     <!-- 添加或修改岗位对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
+    <!-- <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="牌号" prop="brand">
           <el-select v-model="queryParams.brand" clearable @keyup.enter.native="handleQuery" placeholder="请选择牌号">
@@ -202,13 +202,13 @@
         <el-button type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
       </div>
-    </el-dialog>
+    </el-dialog> -->
   </div>
 </template>
 
 <script>
 import { listPost, getPost, delPost, addPost, updatePost } from "@/api/system/post";
-import { getListBrands,getListProcessingSystems,searchPropertie} from '@/api/database/dataPropertie.js'
+import { getListBrands,getListProcessingSystems,searchPropertie,getTemMax,getTemMin,getStressMax,getStressMin} from '@/api/database/dataPropertie.js'
 
 export default {
   name: "Post",
@@ -217,6 +217,10 @@ export default {
     return {
       brands:[],
       ProcessingSystems:[],
+      temMax: undefined,
+      temMin: undefined,
+      stressMax: undefined,
+      stressMin: undefined,
       // 遮罩层
       loading: true,
       // 选中数组
@@ -274,6 +278,18 @@ export default {
   created() {
     this.getBrands();
     this.getProcessingSystems();
+    getTemMax().then(res => {
+      this.temMax = res.data
+    })
+    getTemMin().then(res => {
+      this.temMin = res.data
+    })
+    getStressMax().then(res => {
+      this.stressMax = res.data
+    })
+    getStressMin().then(res => {
+      this.stressMin = res.data
+    })
   },
   methods: {
     /** 查询牌号列表 */
@@ -309,30 +325,40 @@ export default {
       this.reset();
     },
     // 表单重置
-    reset() {
-      this.form = {
-        postId: undefined,
-        postCode: undefined,
-        postName: undefined,
-        postSort: 0,
-        status: "0",
-        remark: undefined
-      };
-      this.resetForm("form");
-    },
+    // reset() {
+    //   this.form = {
+    //     postId: undefined,
+    //     postCode: undefined,
+    //     postName: undefined,
+    //     postSort: 0,
+    //     status: "0",
+    //     remark: undefined
+    //   };
+    //   this.resetForm("form");
+    // },
     /** 搜索按钮操作 */
     handleQuery() {
       this.loading = true;
       searchPropertie(this.queryParams).then(response => {
         this.postList = response.data;
+        console.log(this.postList)
         //this.total = response.total;
         this.loading = false;
       });
     },
     /** 重置按钮操作 */
     resetQuery() {
-      this.resetForm("queryForm");
-      this.handleQuery();
+      this.queryParams = {
+        trademark: undefined,
+        treatmentSystem: undefined,
+        temperature_min: undefined,
+        temperature_max: undefined,
+        stress_min:undefined,
+        stress_max:undefined,
+      }
+      this.postList = []
+      // this.resetForm("queryForm");
+      // this.handleQuery();
     },
     // 多选框选中数据
     handleSelectionChange(selection) {

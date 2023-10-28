@@ -27,8 +27,7 @@ body{
   padding: 0;
   margin: 0;
 }
-#app .theme-picker {
-  display: none;
-  overflow: hidden;
+#app{
+  height: 100% !important;
 }
 </style>

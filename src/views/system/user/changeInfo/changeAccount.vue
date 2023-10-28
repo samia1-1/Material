@@ -22,5 +22,7 @@ export default {
 </script>
 
 <style>
-
+.change-account{
+  padding: 5vh;
+}
 </style>

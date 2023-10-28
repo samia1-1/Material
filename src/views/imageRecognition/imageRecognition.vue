@@ -1,6 +1,6 @@
 <template>
   <div class="image-recognition">
-    <image-nav></image-nav>
+    <small-nav></small-nav>
     <div class="content">
       <image-content></image-content>
     </div>
@@ -9,22 +9,23 @@
 </template>
 
 <script>
+import SmallNav from '../../components/smallNav/smallNav.vue'
 import ImageContent from './component/imageContent.vue'
-import imageNav from './component/imageNav'
 export default {
-  components: { imageNav, ImageContent },
+  components: { ImageContent, SmallNav },
 
 }
 </script>
-
+  <!--
+  background-color: #edeff9;-->
 <style scoped>
-body{
-  display: block;
+.image-recognition{
+  width: 100%;
+  position: absolute;
+  top: 0;
 }
 .content{
   width: 1200px;
-  background-image: linear-gradient(to bottom,#f6f8fa,#ffffff);
-  height: 700px;
   margin: 80px auto;
 }
 </style>

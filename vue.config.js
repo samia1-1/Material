@@ -39,11 +39,11 @@ module.exports = {
           ['^' + process.env.VUE_APP_BASE_API]: ''
         }
       },
-      '/image': {
-        target: `http://124.221.104.7:5000`,
+      ['/files']: {
+        target: `http://124.221.104.7:5555`,
         changeOrigin: true,
         pathRewrite: {
-          ['^/image']: ''
+          ['^/files']: ''
         }
       },
     },

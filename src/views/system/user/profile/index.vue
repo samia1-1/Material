@@ -42,15 +42,7 @@
 
             <div v-else></div>
           </el-tab-pane>
-          <el-tab-pane
-            label="专栏"
-            name="second"
-          >
-            <div v-if="listdata === 0">
-              <el-empty description="无创建的专栏" />
-            </div>
-            <div v-else>专栏</div>
-          </el-tab-pane>
+
           <el-tab-pane
             label="收藏"
             name="third"
@@ -60,24 +52,7 @@
             </div>
             <div v-else>收藏</div>
           </el-tab-pane>
-          <el-tab-pane
-            label="关注"
-            name="fourth"
-          >
-            <div v-if="listdata === 0">
-              <el-empty description="暂无关注" />
-            </div>
-            <div v-else>关注</div>
-          </el-tab-pane>
-          <el-tab-pane
-            label="获赞"
-            name="fifth"
-          >
-            <div v-if="listdata === 0">
-              <el-empty description="暂无获赞" />
-            </div>
-            <div v-else>获赞</div>
-          </el-tab-pane>
+
         </el-tabs>
 
       </div>
@@ -198,11 +173,10 @@ export default {
 
 .user-show {
   margin-top: 5vh;
-  min-height: 38vh;
+  min-height: 40vh;
   width: 70vw;
   margin: 0 auto;
   background-color: #fff;
-  border-radius: 7px;
   position: relative;
 }
 .detail-list {
@@ -219,5 +193,8 @@ export default {
 }
 .el-tabs__item {
   font-size: 2vh !important;
+}
+#tab-first{
+  margin-left: 20px;
 }
 </style>

@@ -38,7 +38,6 @@ export default {
 .header-intro-tit{
   position: absolute;
   top: 18%;
-  width: 1200px;
   left: 30%;
   font-size: 35px;
   line-height: 35px;

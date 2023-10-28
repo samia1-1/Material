@@ -8,10 +8,7 @@
     <div class="tool-cont" id="itemList">
 
       <div class="tool-item">
-        <a
-          href="#"
-          @click="toDataExtreme"
-        >
+        <router-link to="/datasearch/extreme">
           <svg
             t="1682842736116"
             class="icon"
@@ -29,14 +26,11 @@
             ></path>
           </svg>
           <p>持久极限</p>
-        </a>
+        </router-link>
       </div>
 
       <div class="tool-item">
-        <a
-          href="#"
-          @click="toDataStretch"
-        >
+        <router-link to="/datasearch/stretch">
           <svg
             t="1682842597615"
             class="icon"
@@ -70,14 +64,11 @@
             ></path>
           </svg>
           <p>拉伸性能精铸试棒</p>
-        </a>
+        </router-link>
       </div>
 
       <div class="tool-item">
-        <a
-          href="#"
-          @click="toDataPropertie"
-        >
+        <router-link to="/datasearch/propertie">
           <svg
             t="1682842799714"
             class="icon"
@@ -95,14 +86,11 @@
             ></path>
           </svg>
           <p>持久性能</p>
-        </a>
+        </router-link>
       </div>
 
       <div class="tool-item">
-        <a
-          href="#"
-          @click="toDataAlloyComposition"
-        >
+        <router-link to="/alloycomposition">
           <svg
             t="1689472248132"
             class="icon"
@@ -126,14 +114,11 @@
             ></path>
           </svg>
           <p>合金成分查询</p>
-        </a>
+        </router-link>
       </div>
 
       <div class="tool-item">
-        <a
-          href="#"
-          @click="toDataCreep"
-        >
+        <router-link to="/datasearch">
           <svg
             t="1682842920371"
             class="icon"
@@ -152,7 +137,7 @@
             ></path>
           </svg>
           <p>蠕变</p>
-        </a>
+        </router-link>
       </div>
 
       <!-- <div class="tool-item">
@@ -204,21 +189,6 @@ export default {
     };
   },
   methods: {
-    toDataStretch() {
-      this.$router.push("/datasearch/stretch");
-    },
-    toDataExtreme() {
-      this.$router.push("/datasearch/extreme");
-    },
-    toDataPropertie() {
-      this.$router.push("/datasearch/propertie");
-    },
-    toDataCreep() {
-      this.$router.push("/datasearch");
-    },
-    toDataAlloyComposition() {
-      this.$router.push("/alloycomposition");
-    },
   },
   created() {
 

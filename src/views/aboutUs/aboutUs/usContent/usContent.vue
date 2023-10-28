@@ -12,7 +12,6 @@ import usContentHeader from './usContentHeader.vue'
 export default {
   components: { usContentHeader },
   created(){
-    console.log(this.$router.history.current.path)
   }
 }
 </script>

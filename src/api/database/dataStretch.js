@@ -23,14 +23,6 @@ export function searchStretch(query) {
   })
 }
 
-// 查询 拉伸性能.精铸试棒 数据详细
-export function getStretch(postId) {
-  return request({
-    url: '/system/post/' + postId,
-    method: 'get'
-  })
-}
-
 // 预测 拉伸性能.精铸试棒 数据
 export function predictStretch(query) {
   return request({
@@ -40,19 +32,35 @@ export function predictStretch(query) {
   })
 }
 
-// 修改 拉伸性能.精铸试棒 数据
-export function updateStretch(data) {
+// 修改 拉伸性能 最大温度
+export function getTemMax() {
   return request({
-    url: '/system/post',
-    method: 'put',
-    data: data
+    url: 'material/tensile_properties/select_temperature_max',
+    method: 'GET',
+  })
+}
+// 修改 拉伸性能 最小温度
+export function getTemMin() {
+  return request({
+    url: 'material/tensile_properties/select_temperature_min',
+    method: 'GET',
   })
 }
 
-// 删除 拉伸性能.精铸试棒 数据
-export function delStretch(postId) {
-  return request({
-    url: '/system/post/' + postId,
-    method: 'delete'
-  })
-}
+// // 修改 拉伸性能.精铸试棒 数据
+// export function updateStretch(data) {
+//   return request({
+//     url: '/system/post',
+//     method: 'put',
+//     data: data
+//   })
+// }
+
+
+// // 删除 拉伸性能.精铸试棒 数据
+// export function delStretch(postId) {
+//   return request({
+//     url: '/system/post/' + postId,
+//     method: 'delete'
+//   })
+// }

@@ -21,5 +21,7 @@ export default {
 </script>
 
 <style>
-
+.change-profile{
+  padding: 5vh;
+}
 </style>

@@ -5,29 +5,19 @@
       border="1"
     >
       <tr>
-        <td
-          style="width:20%"
-        >
+        <td style="width:20%">
           <alloy-span nameShow="Co"></alloy-span>
         </td>
-        <td
-          style="width:20%"
-        >
+        <td style="width:20%">
           <alloy-span nameShow="W"></alloy-span>
         </td>
-        <td
-          style="width:20%"
-        >
+        <td style="width:20%">
           <alloy-span nameShow="Mo"></alloy-span>
         </td>
-        <td
-          style="width:20%"
-        >
+        <td style="width:20%">
           <alloy-span nameShow="Co"></alloy-span>
         </td>
-        <td
-          style="width:20%"
-        >
+        <td style="width:20%">
           <alloy-span nameShow="Cr"></alloy-span>
         </td>
       </tr>
@@ -40,29 +30,19 @@
         </td>
       </tr>
       <tr>
-        <td
-          style="width:20%"
-        >
+        <td style="width:20%">
           <alloy-span nameShow="Co"></alloy-span>
         </td>
-        <td
-          style="width:20%"
-        >
+        <td style="width:20%">
           <alloy-span nameShow="Al"></alloy-span>
         </td>
-        <td
-          style="width:20%"
-        >
+        <td style="width:20%">
           <alloy-span nameShow="Ti"></alloy-span>
         </td>
-        <td
-          style="width:20%"
-        >
+        <td style="width:20%">
           <alloy-span nameShow="Co"></alloy-span>
         </td>
-        <td
-          style="width:20%"
-        >
+        <td style="width:20%">
           <alloy-span nameShow="Ta"></alloy-span>
         </td>
       </tr>
@@ -75,37 +55,31 @@
         </td>
       </tr>
       <tr>
-        <td
-          style="width:20%"
-        >
+        <td style="width:20%">
           <alloy-span nameShow="Ti"></alloy-span>
         </td>
-        <td
-          style="width:20%"
-        >
+        <td style="width:20%">
           <alloy-span nameShow="W"></alloy-span>
         </td>
-        <td
-          style="width:20%"
-        >
+        <td style="width:20%">
           <alloy-span nameShow="Al"></alloy-span>
         </td>
-        <td
-          style="width:20%"
-        >
+        <td style="width:20%">
           <alloy-span nameShow="Mo"></alloy-span>
         </td>
-        <td
-          style="width:20%"
-        >
+        <td style="width:20%">
           <alloy-span nameShow="Ti"></alloy-span>
         </td>
       </tr>
     </table>
-    <div
-      class="wshow"
-    >
-      <span v-for="(item,index) in points" class="pointer" :class="item" :key="index" @click="clickPoint(item)"></span>
+    <div class="wshow">
+      <span
+        v-for="(item,index) in points"
+        class="pointer"
+        :class="item"
+        :key="index"
+        @click="clickPoint(item)"
+      ></span>
     </div>
 
   </div>
@@ -117,42 +91,66 @@ export default {
   components: {
     AlloySpan,
   },
-  props: ["wz","Design","deleteDesignItem"],
+  props: ["wz", "Design", "deleteDesignItem", "addDesignItem"],
   data() {
     return {
-      stateNow: 0,
-      statePoint:{
-        statew123: false,
-        statew134: false,
-        statew125: false,
-        statew126: false,
-        statew136: false,
-        statew142: false,
-        statew147: false,
-        statew164: false,
-        statew167: false,
-        statew172: false,
-        statew173: false,
+      statePoint: {
+        state123: false,
+        state134: false,
+        state125: false,
+        state126: false,
+        state136: false,
+        state142: false,
+        state147: false,
+        state164: false,
+        state167: false,
+        state172: false,
+        state173: false,
       },
-      points:['w123','w134','w125','w126','w136','w142','w147','w164','w167','w172','w173']
+      points: [
+        "state123",
+        "state134",
+        "state125",
+        "state126",
+        "state136",
+        "state142",
+        "state147",
+        "state164",
+        "state167",
+        "state172",
+        "state173",
+      ],
     };
   },
-  watch: {
-  },
+  watch: {},
   methods: {
-    clickPoint(value){
-      let name = "state" + value
-      this.statePoint[name] = !this.statePoint[name]
-      if(this.statePoint[name] === true){
-        this.deleteDesignItem()
-        this.Design.push(name)
-        document.getElementsByClassName(value)[0].style = "background-color: hsl(55, 100%, 50%)!important;"
-      }else{
-        this.Design.pop(name)
-        document.getElementsByClassName(value)[0].style = "background-color: rgba(255, 255, 255, 0.1);"
+    clickPoint(value) {
+      let name = value,
+        flag = false;
+      if (this.statePoint[name] === true) {
+        flag = true;
+      }
+      for (let item in this.statePoint) {
+        this.statePoint[item] = false;
+      }
+      if (name !== "" && flag) {
+        this.statePoint[name] = false;
+      } else {
+        this.statePoint[name] = true;
+      }
+      this.deleteDesignItem();
+      for (let item in this.statePoint) {
+        if(!this.points.includes(item)) return;
+        if (this.statePoint[item] === true && this.points.includes(item)) {
+          this.addDesignItem(item);
+          document.getElementsByClassName(item)[0].style =
+            "background-color: hsl(55, 100%, 50%);";
+        } else {
+          document.getElementsByClassName(item)[0].style =
+            "background-color: rgba(255, 255, 255, 0.1);";
+        }
       }
     },
-
   },
 };
 </script>
@@ -177,76 +175,71 @@ export default {
 .row4 {
   background-color: rgb(153, 169, 218);
 }
-.w123 {
+.state123 {
   position: absolute;
   top: 45px;
   left: 95px;
 }
-.w134 {
+.state134 {
   position: absolute;
   top: 45px;
   left: 195px;
 }
-.w125 {
+.state125 {
   position: absolute;
   top: 45px;
   left: 395px;
 }
-.w126 {
+.state126 {
   position: absolute;
   top: 95px;
   left: 95px;
 }
-.w136 {
+.state136 {
   position: absolute;
   top: 195px;
   left: 195px;
 }
-.w142 {
+.state142 {
   position: absolute;
   top: 45px;
   left: 295px;
 }
-.w147 {
+.state147 {
   position: absolute;
   top: 195px;
   left: 395px;
 }
-.w164 {
+.state164 {
   position: absolute;
   top: 195px;
   left: 295px;
 }
-.w167 {
+.state167 {
   position: absolute;
   top: 95px;
   left: 195px;
 }
-.w172 {
+.state172 {
   position: absolute;
   top: 95px;
   left: 295px;
 }
-.w173 {
+.state173 {
   position: absolute;
   top: 195px;
   left: 95px;
-}
-.z123 {
-  position: absolute;
-  top: 0px;
-  left: 97px;
 }
 
-.pointer{
+.pointer {
   display: block;
   width: 10px;
   height: 10px;
   background-color: rgba(255, 255, 255, 0.1);
   cursor: pointer;
 }
-span.pointer:hover{
+span.pointer:hover {
   display: block;
-  background-color: hsl(55, 100%, 50%)!important;
+  background-color: hsl(55, 100%, 50%) !important;
 }
 </style>

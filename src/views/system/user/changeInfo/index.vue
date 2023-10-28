@@ -11,24 +11,31 @@
       <div class="left-sidernav">
         <el-col>
           <el-menu
-            default-active="1"
+            :default-active="activeNum"
             class="el-menu-vertical-demo"
           >
-            <el-menu-item index="1" @click="toChangeProfile">
+            <el-menu-item
+              index="1"
+              @click="toChangeProfile"
+            >
               <i class="el-icon-user-solid"></i>
               <span slot="title">个人资料</span>
             </el-menu-item>
 
             <el-menu-item
-              index="2"  @click="toChangeAccount"
+              index="2"
+              @click="toChangeAccount"
             >
               <i class="el-icon-document"></i>
               <span slot="title">账号设置</span>
             </el-menu-item>
 
-            <el-menu-item index="3">
+            <el-menu-item
+              index="3"
+              @click="toManageUpload"
+            >
               <i class="el-icon-setting"></i>
-              <span slot="title">显示设置</span>
+              <span slot="title">上传管理</span>
             </el-menu-item>
           </el-menu>
         </el-col>
@@ -43,17 +50,37 @@
 
 <script>
 export default {
-  methods:{
-    toChangeProfile(){
-      this.$router.push('/user/changeinfo')
+  data(){
+    return{
+      activeNum:"1",
+    }
+  },
+  methods: {
+    toChangeProfile() {
+      this.$router.push("/user/changeinfo");
     },
-    toChangeAccount(){
-      this.$router.push('/user/changeinfo/changeac')
+    toChangeAccount() {
+      this.$router.push("/user/changeinfo/changeac");
     },
-    toChangeProfile(){
-      this.$router.push('/user/changeinfo')
+    toManageUpload() {
+      this.$router.push("/user/changeinfo/manage_upload");
     },
-  }
+    checkActive() {
+      let path = this.$router.history.current.path;
+      // console.log(path)
+      // console.log(this.$route)
+      if (path === "/user/changeinfo") {
+        this.activeNum = "1";
+      } else if (path === "/user/changeinfo/changeac") {
+        this.activeNum = "2";
+      } else if (path === "/user/changeinfo/manage_upload") {
+        this.activeNum = "3";
+      }
+    },
+  },
+  created() {
+    this.checkActive();
+  },
 };
 </script>
 
@@ -88,6 +115,5 @@ export default {
   background-color: #fff;
   position: absolute;
   right: 0;
-  padding: 5vh;
 }
 </style>

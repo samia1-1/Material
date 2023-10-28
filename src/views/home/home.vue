@@ -3,11 +3,14 @@
     <home-header></home-header>
 
     <div class="home-main">
+      <div class="home-button-list"><home-button></home-button></div>
+
       <div class="main-inline">
         <div class="main-inline-in">
 
           <!-- <chemical></chemical> -->
           <home-intro></home-intro>
+          <!-- <open-function></open-function> -->
           <data-tool></data-tool>
           <team></team>
 
@@ -28,7 +31,9 @@ import DataTool from './Home/dataTool.vue';
 import homeFooter from "./Home/homeFooter";
 import HomeHeader from './Home/homeHeader.vue';
 import HomeIntro from './Home/homeIntro.vue';
+import OpenFunction from './Home/OpenFunction/openFunction.vue';
 import team from './Home/team.vue';
+import HomeButton from '@/components/HomeButton/index.vue'
 export default {
   components: {
     homeFooter,
@@ -36,6 +41,8 @@ export default {
     team,
     DataTool,
     HomeIntro,
+    OpenFunction,
+    HomeButton,
   },
 };
 </script>
@@ -43,13 +50,13 @@ export default {
 <style scoped>
 .home-inline{
   position: relative;
-  height: 1970px;
   width: 100%;
+  height: auto;
 }
 .home-main{
   width: 100%;
-  position: absolute;
-  top: 340px;
+  margin: -160px 0 80px 0 ;
+  position: relative;
 }
 .home-main .main-inline{
   margin: 20px auto;
@@ -67,9 +74,9 @@ export default {
     border-radius: 3px;
     overflow: hidden;
 }
-
-.home-footer{
-  position: absolute;
-  bottom: 0;
+.home-button-list{
+  position: fixed;
+  top:50% ;
+  right: 10px;
 }
 </style>

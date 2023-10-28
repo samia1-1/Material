@@ -20,11 +20,16 @@
     </div>
 
     <div class="header-nav-item">
-      <a href="http://124.221.104.7:5000" target="_blank">图像识别</a>
+      <!-- <a href="http://124.221.104.7:5000" target="_blank">图像识别</a> -->
+      <router-link to="/imagerecognition" target="_blank">图像识别</router-link>
     </div>
 
     <div class="header-nav-item">
       <router-link to="/aboutus">关于我们</router-link>
+    </div>
+
+    <div class="header-nav-item">
+      <router-link to="/open">共享空间</router-link>
     </div>
 
     <div class="right-menu" v-if="avatarState">

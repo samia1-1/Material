@@ -96,22 +96,26 @@ export const constantRoutes = [
       },
       {
         path: 'chemical',
-        component: () => import('@/views/database/Chemical.vue'),
+        component: () => import('@/views/database/dataShow/Chemical.vue'),
       },
     ]
   },
   {
     path: '/alloycomposition',
-    component: () => import('@/views/AlloyComposition/alloyComposition.vue'),
-    children:[
+    component: () => import('@/views/AlloyComposition/index.vue'),
+    children: [
       {
-        path:'',
-        component:()=> import('@/views/AlloyComposition/acHv.vue'),
+        path: '',
+        component: () => import('@/views/AlloyComposition/acHv.vue'),
       },
       {
-        path:'static_ele',
-        component:()=> import('@/views/AlloyComposition/static_ele.vue'),
-      }
+        path: 'piclist',
+        component: () => import('@/views/AlloyComposition/PicList/picList.vue'),
+      },
+      // {
+      //   path: 'static_ele',
+      //   component: () => import('@/views/AlloyComposition/static_ele.vue'),
+      // }
     ]
   },
   {
@@ -120,12 +124,11 @@ export const constantRoutes = [
   },
   {
     path: '/datapredict',
-    component: () => import("@/views/datapredict/datapredict.vue"),
+    component: () => import("@/views/datapredict/index.vue"),
     children: [
       {
         path: '',
         component: () => import('@/views/datapredict/dataStretch.vue'),
-        meta: { title: '拉伸性能.精铸试棒', icon: 'stretch', affix: true },
       },
     ]
   },
@@ -140,7 +143,13 @@ export const constantRoutes = [
       },
       {
         path: 'news',
-        component: () => import('@/views/aboutUs/aboutUs/usContent/usContentNews.vue')
+        component: () => import('@/views/aboutUs/aboutUs/usContent/usContentNews.vue'),
+        children:[
+          {
+            path:'',
+            component: () => import('@/views/aboutUs/aboutUs/usContent/News/index.vue'),
+          },
+        ]
       },
       {
         path: 'publications',
@@ -152,6 +161,32 @@ export const constantRoutes = [
       },
     ]
   },
+  {
+    path:'/open',
+    component:() => import('@/views/open/open.vue'),
+    children: [
+      {
+        path:'',
+        component:() => import("@/views/open/openIndex/index.vue")
+      },
+      {
+        path:'database',
+        component:() => import("@/views/open/openDatabase/index.vue")
+      },
+      {
+        path:'discussion',
+        component:() => import("@/views/open/openDiscussion/index.vue")
+      },
+      {
+        path:'upload_data',
+        component:() => import("@/views/open/uploadData/index.vue")
+      },
+    ]
+  },
+  // {
+  //   path:'/detail',
+  //   component: () => import('@/views/aboutUs/aboutUs/usContent/News/newDetail.vue'),
+  // },
   {
     path: '/user',
     component: () => import('@/views/system/user/user.vue'),
@@ -166,14 +201,18 @@ export const constantRoutes = [
         path: 'changeinfo',
         component: () => import('@/views/system/user/changeInfo/index'),
         name: 'changeInfo',
-        children:[
+        children: [
           {
-            path:'',
-            component:() => import('@/views/system/user/changeInfo/changeProfile'),
+            path: '',
+            component: () => import('@/views/system/user/changeInfo/changeProfile'),
           },
           {
-            path:'changeac',
-            component:() => import('@/views/system/user/changeInfo/changeAccount'),
+            path: 'changeac',
+            component: () => import('@/views/system/user/changeInfo/changeAccount'),
+          },
+          {
+            path: 'manage_upload',
+            component: () => import('@/views/system/user/changeInfo/manageUpload'),
           },
         ]
       },

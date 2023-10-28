@@ -17,7 +17,8 @@ const service = axios.create({
   // axios中请求配置有baseURL选项，表示请求URL公共部分
   baseURL: process.env.VUE_APP_BASE_API,
   // 超时
-  timeout: 100000
+  // timeout: 100000
+  timeout: 200000
 })
 
 // request拦截器
@@ -71,7 +72,6 @@ service.interceptors.response.use(function(res) {
     const code = res.data.code || 200;
   if(code === 200){
     store.dispatch('checkAvatarState',true).then((res) => {})
-    console.log("yes")
   }
 
     // 获取错误信息
@@ -85,7 +85,7 @@ service.interceptors.response.use(function(res) {
       if (!isRelogin.show) {
         isRelogin.show = true;
         store.dispatch('checkAvatarState',false).then((res) => {})
-      //   MessageBox.confirm('登录过期，您可以继续留在该页面，或者重新登录', '系统提示', { confirmButtonText: '重新登录', cancelButtonText: '取消', type: 'warning' }).then(() => {
+      //   MessageBox.confirm('登录过期，您可以继续留在该页面，或者重新登录', '系统提示', { confirmButtonText: '重新登录', cancelButtonText: '留在该页面', type: 'warning' }).then(() => {
       //     isRelogin.show = false;
       //     store.dispatch('LogOut').then(() => {
       //       location.href = '/index';
@@ -94,9 +94,8 @@ service.interceptors.response.use(function(res) {
       //   isRelogin.show = false;
       // });
     }
-      store.dispatch('checkAvatarState',false).then((res) => {})
       // return Promise.reject('无效的会话，或者会话已过期，请重新登录。')
-      // return Promise.reject('登录过期，请重新登录。')
+      return Promise.reject('登录过期，请重新登录。')
     } else if (code === 500) {
       Message({ message: msg, type: 'error' })
       return Promise.reject(new Error(msg))

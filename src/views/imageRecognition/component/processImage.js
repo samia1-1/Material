@@ -10,13 +10,14 @@ var process_image  = function(files) {
   formData.append('input_image', files);
   console.log(files)
   console.log(formData);
-  fetch('http://124.221.104.7:5000/predict', {
+  fetch('/image_recognition/updateAvatarUrl', {
       method: 'POST',
       body: files
   })
       .then(response => response.json())
       .then(data => {
         const img = new Image();
+        console.log(data)
         img.src = "data:image/jepg;base64," + data.image_path;
         img.onload = function(){
               var canvas = document.getElementById("image_canvas_out");
@@ -29,7 +30,6 @@ var process_image  = function(files) {
               cxt.drawImage(img, x, y, scaledWidth, scaledHeight);
           }
     });
-
 
 }
 export default process_image;

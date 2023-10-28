@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div class="data-stretch">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="90px">
       <el-form-item label="牌号" prop="trademark">
         <el-select v-model="queryParams.trademark" clearable @keyup.enter.native="handleQuery" placeholder="请选择牌号">
@@ -18,17 +18,17 @@
         </el-select>
       </el-form-item>
       <el-form-item label="最低温度" prop="temperature_min">
-        <el-input v-model="queryParams.temperature_min" placeholder="请输入最低温度（摄氏度）"></el-input>
+        <el-input v-model="queryParams.temperature_min" :placeholder="'输入高于' + this.temMin +'摄氏度'"></el-input>
       </el-form-item>
       <el-form-item label="最高温度" prop="temperature_max">
-        <el-input v-model="queryParams.temperature_max" placeholder="请输入最高温度（摄氏度）"></el-input>
+        <el-input v-model="queryParams.temperature_max" :placeholder="'输入低于' + this.temMax +'摄氏度'"></el-input>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <!-- <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button> -->
+        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
       </el-form-item>
 
-      <el-form-item>
+      <!-- <el-form-item>
         <el-button
           type="warning"
           plain
@@ -37,7 +37,7 @@
           @click="handleExport"
           v-hasPermi="['system:post:export']"
         >导出</el-button>
-      </el-form-item>
+      </el-form-item> -->
     </el-form>
 
     <!-- <el-row :gutter="10" class="mb8">
@@ -93,17 +93,17 @@
       <el-table-column label="热处理制度" align="center" prop="heatTreatmentSystem" />
       <el-table-column label="温度" align="center" prop="temperature">
       </el-table-column>
-      <!-- <el-table-column label="屈服强度 /MPa" align="center" prop="offsetStress" />
+      <el-table-column label="屈服强度 /MPa" align="center" prop="yieldStrength" />
       <el-table-column label="抗拉强度 /MPa" align="center" prop="tensileStrength" />
       <el-table-column label="延伸率" align="center" prop="elongation" />
-      <el-table-column label="断面收缩率" align="center" prop="sectionShrinkage" /> -->
+      <el-table-column label="断面收缩率" align="center" prop="sectionShrinkage" />
       <!-- <el-table-column label="创建时间" align="center" prop="createTime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.createTime) }}</span>
         </template>
       </el-table-column> -->
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
+        <!-- <template slot-scope="scope">
           <el-button
             size="mini"
             type="text"
@@ -112,7 +112,7 @@
             v-hasPermi="['system:post:remove']"
           >查看详情</el-button>
 
-          <el-dialog title="查看数据详情" :visible.sync="dialogTableVisible" v-if="dialogTableVisible">
+          <el-dialog  center title="查看数据详情" :visible.sync="dialogTableVisible" v-if="dialogTableVisible">
             <el-table :data="oneDataDetail" label-width="110px">
               <el-table-column label="牌号" width="150" align="center" property="trademark"></el-table-column>
               <el-table-column label="热处理制度" align="center" property="heatTreatmentSystem" />
@@ -138,7 +138,7 @@
             @click="handleDelete(scope.row)"
             v-hasPermi="['system:post:remove']"
           >删除</el-button>
-        </template>
+        </template> -->
       </el-table-column>
     </el-table>
 
@@ -151,7 +151,7 @@
     />
 
     <!-- 添加或修改 拉伸性能.精铸试棒 数据的对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" label-width="100px" append-to-body>
+    <!-- <el-dialog :title="title" :visible.sync="open" width="500px" label-width="100px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="牌号" prop="brand">
           <el-select v-model="form.brand" clearable @keyup.enter.native="handleQuery" placeholder="请选择牌号">
@@ -190,13 +190,13 @@
         <el-button type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
       </div>
-    </el-dialog>
+    </el-dialog> -->
   </div>
 </template>
 
 <script>
 import { listPost, getPost, delPost, addPost, updatePost } from "@/api/system/post";
-import { getListBrands,getListProcessingSystems,searchStretch,predictStretch } from "@/api/database/dataStretch.js";
+import { getListBrands,getListProcessingSystems,searchStretch,getTemMax,getTemMin } from "@/api/database/dataStretch.js";
 
 export default {
   name: "Post",
@@ -207,6 +207,8 @@ export default {
           'K423','K423A','K424','K435','K438','K438G','K441','K444','K446','K452','K465','K477','K480','K487','K4002','K4130','K4163','K4169','K4202',
           'K4208','K4222','K4242','K4537','K4648','K4708','K4951','K640','K640S','K644','K6509','K825' */],
         ProcessingSystems:[/* '标准热处理','制度1','制度2','铸态' */],
+        temMin:undefined,
+        temMax:undefined,
       // 遮罩层
       loading: true,
       //查看单条数据详情
@@ -274,6 +276,12 @@ export default {
   created() {
     this.getBrands();
     this.getProcessingSystems();
+    getTemMax().then(res => {
+      this.temMax = res.data
+    })
+    getTemMin().then(res => {
+      this.temMin = res.data
+    })
   },
   methods: {
     /** 查询牌号列表 */
@@ -290,7 +298,7 @@ export default {
       this.loading = true;
       getListProcessingSystems().then(response => {
         this.ProcessingSystems = response.data;
-        //console.log(this.ProcessingSystems)
+        // console.log(this.ProcessingSystems)
         this.loading = false;
       });
     },
@@ -305,22 +313,22 @@ export default {
       });
     },
     // 取消按钮
-    cancel() {
-      this.open = false;
-      this.reset();
-    },
+    // cancel() {
+    //   this.open = false;
+    //   this.reset();
+    // },
     // 表单重置
-    reset() {
-      this.form = {
-        postId: undefined,
-        postCode: undefined,
-        postName: undefined,
-        postSort: 0,
-        status: "0",
-        remark: undefined
-      };
-      this.resetForm("form");
-    },
+    // reset() {
+    //   this.form = {
+    //     postId: undefined,
+    //     postCode: undefined,
+    //     postName: undefined,
+    //     postSort: 0,
+    //     status: "0",
+    //     remark: undefined
+    //   };
+    //   this.resetForm("form");
+    // },
     /** 搜索按钮操作 */
     handleQuery() {
       //this.queryParams.pageNum = 1;
@@ -334,8 +342,15 @@ export default {
     },
     /** 重置按钮操作 */
     resetQuery() {
-      this.resetForm("queryForm");
-      this.handleQuery();
+      this.queryParams = {
+        trademark: undefined,
+        treatmentSystem: undefined,
+        temperature_min: undefined,
+        temperature_max: undefined,
+      }
+      this.postList = []
+      // this.resetForm("queryForm");
+      // this.handleQuery();
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
@@ -407,9 +422,6 @@ export default {
 </script>
 
 <style scoped>
-.app-container{
-  padding:20px;
-}
 .el-input--small .el-input__inner{
   padding-right: 20px;
 }
