@@ -29,7 +29,7 @@
     </div>
 
     <div class="header-nav-item">
-      <router-link to="/open">共享空间</router-link>
+      <router-link to="/open">开放空间</router-link>
     </div>
 
     <div class="right-menu" v-if="avatarState">

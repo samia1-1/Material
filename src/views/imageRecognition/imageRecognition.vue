@@ -25,7 +25,7 @@ export default {
   top: 0;
 }
 .content{
-  width: 1200px;
+  width: 1300px;
   margin: 80px auto;
 }
 </style>

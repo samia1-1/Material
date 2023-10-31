@@ -12,50 +12,10 @@
         <el-menu-item index="2" @click="toDatabase">材料数据</el-menu-item>
         <el-menu-item index="3" @click="toAlloyComposition">合金成分查询性能</el-menu-item>
         <el-menu-item index="4" @click="toPredict">性能预测</el-menu-item>
-        <el-menu-item >
-          <router-link
-          class="image-recognition"
-          to="/imagerecognition"
-          target="_blank"
-        >图像识别</router-link></el-menu-item>
-        <el-menu-item @click="toAboutUs">关于我们</el-menu-item>
+        <el-menu-item index="5" @click="toImageRecognition">图像识别</el-menu-item>
       </el-menu>
 
-      <!-- <div class="list-item">
-        <a
-          href="#"
-          @click="toIndex"
-        >首页</a>
-      </div>
 
-      <div class="list-item">
-        <a @click="toDatabase">材料数据</a>
-      </div>
-
-      <div class="list-item">
-        <a @click="toAlloyComposition">合金成分查询性能</a>
-      </div>
-
-      <div class="list-item">
-        <a
-          href="#"
-          @click="toPredict"
-        >性能预测</a>
-      </div>
-
-      <div class="list-item">
-        <a
-          href="http://124.221.104.7:5000"
-          target="_blank"
-        >图像识别</a>
-      </div>
-
-      <div class="list-item">
-        <a
-          href="#"
-          @click="toAboutUs"
-        >关于我们</a>
-      </div> -->
 
     </div>
 
@@ -124,6 +84,8 @@ export default {
       this.activeIndex = "2"
     }else if(path.includes("/datapredict")){
       this.activeIndex = "4"
+    }else if(path.includes("/imagerecognition")){
+      this.activeIndex = "5"
     }
   },
   methods: {
@@ -157,7 +119,7 @@ export default {
       this.$router.push("/datapredict");
     },
     toImageRecognition() {
-      this.$router.push("http://124.221.104.7:5000");
+      this.$router.push("/imagerecognition");
     },
     toAboutUs() {
       this.$router.push("/aboutus");
