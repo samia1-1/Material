@@ -99,8 +99,6 @@
           <el-input
             v-model="queryParams.Al"
             placeholder="请输入铝"
-            type="number"
-            step="0.01"
             onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
           ></el-input>
         </el-form-item>
@@ -111,8 +109,6 @@
           <el-input
             v-model="queryParams.Ti"
             placeholder="请输入钛"
-            type="number"
-            step="0.01"
             onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
           ></el-input>
         </el-form-item>
@@ -123,8 +119,6 @@
           <el-input
             v-model="queryParams.Cr"
             placeholder="请输入铬"
-            type="number"
-            step="0.01"
             onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
           ></el-input>
         </el-form-item>
@@ -135,8 +129,6 @@
           <el-input
             v-model="queryParams.Co"
             placeholder="请输入钴"
-            type="number"
-            step="0.01"
             onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
           ></el-input>
         </el-form-item>
@@ -147,8 +139,6 @@
           <el-input
             v-model="queryParams.Ni"
             placeholder="请输入镍"
-            type="number"
-            step="0.01"
             onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
           ></el-input>
         </el-form-item>
@@ -159,8 +149,6 @@
           <el-input
             v-model="queryParams.Nb"
             placeholder="请输入铌"
-            type="number"
-            step="0.01"
             onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
           ></el-input>
         </el-form-item>
@@ -171,8 +159,6 @@
           <el-input
             v-model="queryParams.Mo"
             placeholder="请输入钼"
-            type="number"
-            step="0.01"
             onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
           ></el-input>
         </el-form-item>
@@ -183,8 +169,6 @@
           <el-input
             v-model="queryParams.Hf"
             placeholder="请输入铪"
-            type="number"
-            step="0.01"
             onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
             :disabled="true"
           ></el-input>
@@ -196,8 +180,6 @@
           <el-input
             v-model="queryParams.Ta"
             placeholder="请输入钽"
-            type="number"
-            step="0.01"
             onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
           ></el-input>
         </el-form-item>
@@ -208,8 +190,6 @@
           <el-input
             v-model="queryParams.W"
             placeholder="请输入钨"
-            type="number"
-            step="0.01"
             onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
           ></el-input>
         </el-form-item>
@@ -284,10 +264,11 @@ import { listPost } from "@/api/system/post";
 import {
   getAlloyComposition,
   getSelectLimit,
+  getImage_url,
 } from "@/api/database/AlloyComposition.js";
 import WzDesign from "./Design/wzDesign.vue";
+
 export default {
-  // name: "Post",
   dicts: ["sys_normal_disable"],
   components: {
     WzDesign,
@@ -434,9 +415,12 @@ export default {
           });
         })
         .catch((error) => {
-          console.log(error);
+          this.$message({
+            message: error,
+            type: "error",
+          });
         });
-      //弹出图片窗口
+      // 弹出图片窗口
       // const newPage = window.open("/#/alloycomposition/piclist", "_blank");
       // const data = {
       //   wz: this.queryParams.wz,
@@ -447,7 +431,6 @@ export default {
       // window.setTimeout(function(){
       //   newPage.postMessage(data, "http://localhost:8100/#/alloycomposition/piclist");
       // },1000)
-
     },
     // chooseCraft() {
     //   if (this.queryForm.wz === undefined) {
@@ -462,8 +445,6 @@ export default {
     /** 搜索按钮操作 */
     handleQuery() {
       this.loading = true;
-      // console.log(this.Design)
-      // this.Design = this.$refs.wzDesign.Design;
       let num = this.Design.replace(/[^0-9]/gi, "");
       if (this.queryParams.wz === "粉末") {
         if (this.queryParams.craft === "STD") {
@@ -499,16 +480,37 @@ export default {
         W: this.queryParams.W,
       })
         .then((response) => {
-          if (response.msg === null) {
+          if (response.msg === "抱歉,未查询到相关维氏硬度信息;") {
             this.$message({
               message: "Sorry，数据库没有查到该数据，请查询其他数据",
               type: "warning",
             });
-            this.loading = false;
-            return;
+          } else {
+            this.postList.push({ hv: response.msg });
           }
-          this.postList.push({ hv: response.msg });
           this.loading = false;
+          getImage_url(
+            {
+              table_name1: str1,
+              table_name2: str2,
+              Al: this.queryParams.Al,
+              Ti: this.queryParams.Ti,
+              Cr: this.queryParams.Cr,
+              Co: this.queryParams.Co,
+              Ni: this.queryParams.Ni,
+              Nb: this.queryParams.Nb,
+              Mo: this.queryParams.Mo,
+              Hf: this.queryParams.Hf,
+              Ta: this.queryParams.Ta,
+              W: this.queryParams.W,
+            },
+            { HD_SE: "SE" }
+          )
+            .then((res) => {
+              //弹出图片详情窗口
+              this.openWiindowImage(res.data.url);
+            })
+            .catch((err) => console.log(err));
         })
         .catch((error) => {
           console.log(error);
@@ -534,7 +536,6 @@ export default {
         wz: undefined,
         craft: undefined,
       };
-      // console.log(this.queryParams)
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
@@ -554,9 +555,20 @@ export default {
     /* 查看详情按钮操作 */
     handleSearch(row) {
       this.dialogTableVisible = true;
-      // console.log("row:",row)
       this.oneDataDetail[0] = row;
       console.log("this.oneDataDetail", this.oneDataDetail);
+    },
+    /* 弹出图片详情窗口 */
+    openWiindowImage(url) {
+      const newPage = window.open("/#/alloycomposition/pic_detail", "_blank");
+      const data = { img_src: url };
+      // 使用postMessage方法向新窗口发送数据
+      window.setTimeout(function () {
+        newPage.postMessage(
+          data,
+          "http://localhost:8100/#/alloycomposition/pic_detail"
+        );
+      }, 1000);
     },
   },
 };

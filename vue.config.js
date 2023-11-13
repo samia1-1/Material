@@ -46,6 +46,13 @@ module.exports = {
           ['^/files']: ''
         }
       },
+      ['/images']: {
+        target: `http://124.221.104.7:8888/images`,
+        changeOrigin: true,
+        pathRewrite: {
+          ['^/images']: ''
+        }
+      },
     },
     disableHostCheck: true
   },

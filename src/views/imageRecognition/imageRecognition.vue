@@ -24,8 +24,4 @@ export default {
   position: absolute;
   top: 0;
 }
-.content{
-  width: 1300px;
-  margin: 80px auto;
-}
 </style>

@@ -173,7 +173,7 @@ export default {
 
 .user-show {
   margin-top: 5vh;
-  min-height: 40vh;
+  min-height: 50vh;
   width: 70vw;
   margin: 0 auto;
   background-color: #fff;
@@ -185,16 +185,5 @@ export default {
 .demo-tabs {
   height: 10vh;
 }
-.el-tabs__header {
-  height: 10vh;
-}
-.el-tabs__nav {
-  font-size: 2vh;
-}
-.el-tabs__item {
-  font-size: 2vh !important;
-}
-#tab-first{
-  margin-left: 20px;
-}
+
 </style>

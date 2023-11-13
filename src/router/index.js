@@ -112,6 +112,10 @@ export const constantRoutes = [
         path: 'piclist',
         component: () => import('@/views/AlloyComposition/PicList/picList.vue'),
       },
+      {
+        path: 'pic_detail',
+        component: () => import('@/views/AlloyComposition/picDetail.vue'),
+      },
       // {
       //   path: 'static_ele',
       //   component: () => import('@/views/AlloyComposition/static_ele.vue'),

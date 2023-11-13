@@ -25,3 +25,14 @@ export function getSelectLimit(query) {
     params: query
   })
 }
+// 查询 图片url
+export function getImage_url(data, draft = false) {
+  return request({
+    url: 'material/point/select_image',
+    method: 'POST',
+    data,
+    params: {
+      ...draft
+    }
+  })
+}
