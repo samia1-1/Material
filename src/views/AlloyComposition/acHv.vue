@@ -267,6 +267,7 @@ import {
   getImage_url,
 } from "@/api/database/AlloyComposition.js";
 import WzDesign from "./Design/wzDesign.vue";
+import Tiff from "tiff.js";
 
 export default {
   dicts: ["sys_normal_disable"],
@@ -319,6 +320,8 @@ export default {
       // 表单校验
       rules: {},
       Design: "",
+      check_url: "",
+      paramsBody: {},
     };
   },
   mounted() {
@@ -420,28 +423,7 @@ export default {
             type: "error",
           });
         });
-      // 弹出图片窗口
-      // const newPage = window.open("/#/alloycomposition/piclist", "_blank");
-      // const data = {
-      //   wz: this.queryParams.wz,
-      //   craft: this.queryParams.craft,
-      //   design: num,
-      // };
-      // // 使用postMessage方法向新窗口发送数据
-      // window.setTimeout(function(){
-      //   newPage.postMessage(data, "http://localhost:8100/#/alloycomposition/piclist");
-      // },1000)
     },
-    // chooseCraft() {
-    //   if (this.queryForm.wz === undefined) {
-    //     console.log("yes");
-    //     this.$message({
-    //       message: "请先选择W/Z!",
-    //       type: "warning",
-    //     });
-    //   }
-    // },
-
     /** 搜索按钮操作 */
     handleQuery() {
       this.loading = true;
@@ -465,7 +447,7 @@ export default {
           var str2 = "Z" + this.queryParams.craft + "_" + num + "_hardness";
         }
       }
-      getAlloyComposition({
+      this.paramsBody = {
         table_name1: str1,
         table_name2: str2,
         Al: this.queryParams.Al,
@@ -478,35 +460,23 @@ export default {
         Hf: this.queryParams.Hf,
         Ta: this.queryParams.Ta,
         W: this.queryParams.W,
-      })
+      };
+      sessionStorage.setItem("paramBody", JSON.stringify(this.paramsBody));
+      getAlloyComposition({ ...this.paramsBody })
         .then((response) => {
           if (response.msg === "抱歉,未查询到相关维氏硬度信息;") {
             this.$message({
-              message: "Sorry，数据库没有查到该数据，请查询其他数据",
+              message: "Sorry，数据库没有查到相关维氏硬度信息，请查询其他数据",
               type: "warning",
             });
           } else {
             this.postList.push({ hv: response.msg });
           }
           this.loading = false;
-          getImage_url(
-            {
-              table_name1: str1,
-              table_name2: str2,
-              Al: this.queryParams.Al,
-              Ti: this.queryParams.Ti,
-              Cr: this.queryParams.Cr,
-              Co: this.queryParams.Co,
-              Ni: this.queryParams.Ni,
-              Nb: this.queryParams.Nb,
-              Mo: this.queryParams.Mo,
-              Hf: this.queryParams.Hf,
-              Ta: this.queryParams.Ta,
-              W: this.queryParams.W,
-            },
-            { HD_SE: "SE" }
-          )
+
+          getImage_url({ ...this.paramsBody}, { HD_SE: "SE" })
             .then((res) => {
+              sessionStorage.setItem("url", res.data.url);
               //弹出图片详情窗口
               this.openWiindowImage(res.data.url);
             })
@@ -556,19 +526,34 @@ export default {
     handleSearch(row) {
       this.dialogTableVisible = true;
       this.oneDataDetail[0] = row;
-      console.log("this.oneDataDetail", this.oneDataDetail);
     },
     /* 弹出图片详情窗口 */
     openWiindowImage(url) {
+      //检验图片是否存在
+      if (!this.getTiffDataUrlHandler(url)) return;
       const newPage = window.open("/#/alloycomposition/pic_detail", "_blank");
-      const data = { img_src: url };
-      // 使用postMessage方法向新窗口发送数据
-      window.setTimeout(function () {
-        newPage.postMessage(
-          data,
-          "http://localhost:8100/#/alloycomposition/pic_detail"
-        );
-      }, 1000);
+    },
+    async getTiffDataUrlHandler(url) {
+      const xhr = new XMLHttpRequest();
+      xhr.responseType = "arraybuffer";
+      xhr.open("GET", url);
+      let tthis = this;
+      xhr.onload = () => {
+        const tiff = new Tiff({ buffer: xhr.response });
+        const canvas = tiff.toCanvas();
+        tthis.check_url = canvas.toDataURL();
+      };
+      xhr.send();
+      if ((await this.check_url) === null) {
+        this.$message({
+          message: "未找到图片，请更改选项！",
+          type: "warning",
+        });
+        return false;
+      } else {
+        sessionStorage.setItem("url", url);
+        return true;
+      }
     },
   },
 };

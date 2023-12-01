@@ -1,5 +1,6 @@
 import * as echarts from "echarts";
 export function echartsRendering(chartContainter, data, minMeasure, titleName,colorNum) {
+  console.log(data)
   data = data.sort((a, b) => a - b)
 
   let statistics = {};

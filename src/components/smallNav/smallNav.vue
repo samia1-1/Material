@@ -49,12 +49,12 @@
       </el-dropdown>
     </div>
 
-    <div
+    <!-- <div
       class="please-login"
       v-else
     >
       <router-link to="/user/profile">使用功能，请先登录哦~</router-link>
-    </div>
+    </div> -->
 
   </div>
 </template>
@@ -101,7 +101,7 @@ export default {
       })
         .then(() => {
           this.$store.dispatch("LogOut").then(() => {
-            location.href = "/index";
+            location.href = "/";
           });
         })
         .catch(() => {});

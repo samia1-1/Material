@@ -118,7 +118,9 @@ import Loading from "@/components/Loading/index.vue";
 import ImageSelection from "./imageSelection";
 import * as echarts from "echarts";
 import Tiff from "tiff.js";
+import axios from 'axios'
 import { echartsRendering } from "./echarts.js";
+import { getToken } from '@/utils/auth'
 export default {
   components: { Loading, ImageSelection },
   data() {
@@ -162,6 +164,7 @@ export default {
       ],
       isShowImg: false,
       image_src: "",
+      form_data: undefined,
       isShowData: false,
       showData: null,
       isLoading: false,
@@ -177,7 +180,7 @@ export default {
       Elongation: [],
       hasPerimeter: false,
       Perimeter: [],
-      base64Data:"",
+      base64Data: "",
     };
   },
   methods: {
@@ -207,106 +210,33 @@ export default {
       const localUrl = URL.createObjectURL(get_image_url);
       this.image_src = localUrl;
       this.isShowStatistic = false;
+
+      //存储将要传递给后端的图片数据
+      this.form_data = get_image_url;
+      // console.log(this.form_data)
     },
-    //图像识别并且查询统计数据
+    //点击图像识别并且查询统计数据
     getStatistic() {
       let get_image_url = document.getElementById("select_files").files[0];
       //判断输入是否为空
       if (!get_image_url) {
-        this.$message({
-          message: "请正确上传数据",
-          type: "warning",
-        });
+        if (sessionStorage.getItem("url") !== null) {
+          this.clickStatistic(this.image_src);
+        } else {
+          this.$message({
+            message: "请先上传图片",
+            type: "warning",
+          });
+        }
         return;
       }
       const reader = new FileReader();
+      let tthis = this;
       reader.onload = function (event) {
-        this.base64Data = event.target.result;
-      }
+        tthis.base64Data = event.target.result;
+        tthis.clickStatistic(tthis.base64Data);
+      };
       reader.readAsDataURL(get_image_url);
-      this.clickStatistic(this.base64Data)
-      // this.clickStatistic();
-      // reader.onload = function (event) {
-      //   const base64Data = event.target.result;
-      //   // 将base64Data发送给后端
-      //   getImageRecognition({ base64: base64Data })
-      //     // .then((response) => response.json())
-      //     .then((data) => {
-      //       console.log(data);
-      //       tthis.isShowImg = true;
-      //       tthis.isLoading = false;
-      //       tthis.image_src = "data:image/png;base64," + data.base64;
-      //       tthis.image_src = tthis.image_src.replace(/[\r\n]/g, "");
-      //       tthis.isShowStatistic = true;
-      //       tthis.statisticData = (data.are_sum_bfb * 100).toFixed(2);
-
-      //       let colorNum = 0;
-      //       if (data.Area) {
-      //         tthis.hasArea = true;
-      //         tthis.Area = JSON.parse(data.Area);
-      //         echartsRendering(
-      //           tthis.$refs.areaChart,
-      //           tthis.Area,
-      //           100,
-      //           "Area",
-      //           colorNum++
-      //         );
-      //       }
-
-      //       if (data.Boxivity) {
-      //         tthis.hasBoxivity = true;
-      //         tthis.Boxivity = JSON.parse(data.Boxivity);
-      //         echartsRendering(
-      //           tthis.$refs.boxivityChart,
-      //           tthis.Boxivity,
-      //           1000,
-      //           "Boxivity",
-      //           colorNum++
-      //         );
-      //       }
-
-      //       if (data.Circular_Equiv_Diameter) {
-      //         tthis.hasCircular_Equiv_Diameter = true;
-      //         tthis.Circular_Equiv_Diameter = JSON.parse(
-      //           data.Circular_Equiv_Diameter
-      //         );
-      //         echartsRendering(
-      //           tthis.$refs.Circular_Equiv_DiameterChart,
-      //           tthis.Boxivity,
-      //           1000,
-      //           "Circular Equiv Diameter",
-      //           colorNum++
-      //         );
-      //       }
-      //       if (data.Elongation) {
-      //         tthis.hasElongation = true;
-      //         tthis.Elongation = JSON.parse(data.Elongation);
-      //         echartsRendering(
-      //           tthis.$refs.ElongationChart,
-      //           tthis.Elongation,
-      //           0.1,
-      //           "Elongation",
-      //           colorNum++
-      //         );
-      //       }
-      //       if (data.Perimeter) {
-      //         tthis.hasPerimeter = true;
-      //         tthis.Perimeter = JSON.parse(data.Perimeter);
-      //         echartsRendering(
-      //           tthis.$refs.PerimeterChart,
-      //           tthis.Perimeter,
-      //           100,
-      //           "Perimeter",
-      //           colorNum++
-      //         );
-      //       }
-      //     })
-      //     .catch((err) => {
-      //       console.log(err);
-      //       tthis.isLoading = false;
-      //     });
-      // };
-      // reader.readAsDataURL(get_image_url);
     },
     //查询统计数据
     clickStatistic(base64Data) {
@@ -319,106 +249,155 @@ export default {
       this.hasElongation = false;
       this.hasPerimeter = false;
 
-      // const reader = new FileReader();
-      const tthis = this;
-      // reader.onload = function (event) {
-        // const base64Data = event.target.result;
-        // 将base64Data发送给后端
-        getImageRecognition({ base64: base64Data })
-          .then((data) => {
-            console.log(data);
-            tthis.isShowImg = true;
-            tthis.isLoading = false;
-            tthis.image_src = "data:image/png;base64," + data.base64;
-            tthis.image_src = tthis.image_src.replace(/[\r\n]/g, "");
-            tthis.isShowStatistic = true;
-            tthis.statisticData = (data.are_sum_bfb * 100).toFixed(2);
+      // 将base64Data发送给后端
+      // getImageRecognition({ base64: base64Data })
+      let formdata = new FormData();
+      formdata.append("image", this.form_data);
+      const config = {
+        headers: {
+          "content-type": "multipart/form-data", // 设置请求头部
+          'Authorization':'Bearer ' + getToken()
+        },
+      };
+      axios.post("http://124.221.104.7:8100/image_recognition/updateAvatarUrl", formdata, config)
+        .then((data) => {
+          data = data.data;
+          if (data.base64 === "预测出错：(str(e)") {
+            this.$message({
+              message: "预测出错,请上传重试",
+              type: "error",
+            });
+            this.isLoading = false;
+            this.isShowImg = false;
+            this.image_src = "";
+            return;
+          }
+          this.isShowImg = true;
+          this.isLoading = false;
+          this.image_src = "data:image/png;base64," + data.base64;
+          this.image_src = this.image_src.replace(/[\r\n]/g, "");
+          this.isShowStatistic = true;
+          this.statisticData = (data.are_sum_bfb * 100).toFixed(2);
 
-            let colorNum = 0;
-            if (data.Area) {
-              tthis.hasArea = true;
-              tthis.Area = JSON.parse(data.Area);
-              echartsRendering(
-                tthis.$refs.areaChart,
-                tthis.Area,
-                100,
-                "Area",
-                colorNum++
-              );
-            }
-
-            if (data.Boxivity) {
-              tthis.hasBoxivity = true;
-              tthis.Boxivity = JSON.parse(data.Boxivity);
-              echartsRendering(
-                tthis.$refs.boxivityChart,
-                tthis.Boxivity,
-                1000,
-                "Boxivity",
-                colorNum++
-              );
-            }
-
-            if (data.Circular_Equiv_Diameter) {
-              tthis.hasCircular_Equiv_Diameter = true;
-              tthis.Circular_Equiv_Diameter = JSON.parse(
-                data.Circular_Equiv_Diameter
-              );
-              echartsRendering(
-                tthis.$refs.Circular_Equiv_DiameterChart,
-                tthis.Boxivity,
-                1000,
-                "Circular Equiv Diameter",
-                colorNum++
-              );
-            }
-            if (data.Elongation) {
-              tthis.hasElongation = true;
-              tthis.Elongation = JSON.parse(data.Elongation);
-              echartsRendering(
-                tthis.$refs.ElongationChart,
-                tthis.Elongation,
-                0.1,
-                "Elongation",
-                colorNum++
-              );
-            }
-            if (data.Perimeter) {
-              tthis.hasPerimeter = true;
-              tthis.Perimeter = JSON.parse(data.Perimeter);
-              echartsRendering(
-                tthis.$refs.PerimeterChart,
-                tthis.Perimeter,
-                100,
-                "Perimeter",
-                colorNum++
-              );
-            }
-          })
-          .catch((err) => {
-            console.log(err);
-            tthis.isLoading = false;
+          this.playEcharts(data);
+        })
+        .catch((error) => {
+          this.$message({
+            message: "出现未知错误，请刷新后重试11111",
+            type: "error",
           });
-      // };
-      // reader.readAsDataURL(get_image_url);
+          this.isLoading = false;
+        });
+      // getImageRecognition(formdata)
+      //   .then((data) => {
+      //     if (data.base64 === "预测出错：(str(e)") {
+      //       this.$message({
+      //         message: "预测出错,请上传重试",
+      //         type: "error",
+      //       });
+      //       this.isLoading = false;
+      //       this.isShowImg = false;
+      //       this.image_src = "";
+      //       return;
+      //     }
+      //     this.isShowImg = true;
+      //     this.isLoading = false;
+      //     this.image_src = "data:image/png;base64," + data.base64;
+      //     this.image_src = this.image_src.replace(/[\r\n]/g, "");
+      //     this.isShowStatistic = true;
+      //     this.statisticData = (data.are_sum_bfb * 100).toFixed(2);
+
+      //     this.playEcharts(data);
+      //   })
+      //   .catch((err) => {
+      //     this.$message({
+      //       message: "出现未知错误，请刷新后重试",
+      //       type: "error",
+      //     });
+      //     this.isLoading = false;
+      //   });
     },
     //将tiff图片转换为png的base64编码
     async getTiffDataUrlHandler(url) {
       const xhr = new XMLHttpRequest();
       xhr.responseType = "arraybuffer";
-      xhr.open("GET", "images/123/HD/0950_0950.tif");
+      xhr.open("GET", url);
+      let tthis = this;
       xhr.onload = () => {
         const tiff = new Tiff({ buffer: xhr.response });
         const canvas = tiff.toCanvas();
-        this.image_src = canvas.toDataURL();
-        this.isShowImg = true;
+        tthis.image_src = canvas.toDataURL();
+        tthis.isShowImg = true;
       };
       xhr.send();
+      return this.image_src;
+    },
+    playEcharts(data) {
+      let colorNum = 0;
+      if (data.Area) {
+        this.hasArea = true;
+        this.Area = JSON.parse(data.Area);
+        echartsRendering(
+          this.$refs.areaChart,
+          this.Area,
+          100,
+          "Area",
+          colorNum++
+        );
+      }
+
+      if (data.Boxivity) {
+        this.hasBoxivity = true;
+        this.Boxivity = JSON.parse(data.Boxivity);
+        echartsRendering(
+          this.$refs.boxivityChart,
+          this.Boxivity,
+          1000,
+          "Boxivity",
+          colorNum++
+        );
+      }
+
+      if (data.Circular_Equiv_Diameter) {
+        this.hasCircular_Equiv_Diameter = true;
+        this.Circular_Equiv_Diameter = JSON.parse(data.Circular_Equiv_Diameter);
+        echartsRendering(
+          this.$refs.Circular_Equiv_DiameterChart,
+          this.Circular_Equiv_Diameter,
+          100,
+          "Circular Equiv Diameter",
+          colorNum++
+        );
+      }
+      if (data.Elongation) {
+        this.hasElongation = true;
+        this.Elongation = JSON.parse(data.Elongation);
+        echartsRendering(
+          this.$refs.ElongationChart,
+          this.Elongation,
+          0.1,
+          "Elongation",
+          colorNum++
+        );
+      }
+      if (data.Perimeter) {
+        this.hasPerimeter = true;
+        this.Perimeter = JSON.parse(data.Perimeter);
+        echartsRendering(
+          this.$refs.PerimeterChart,
+          this.Perimeter,
+          100,
+          "Perimeter",
+          colorNum++
+        );
+      }
     },
   },
   mounted() {
     if (sessionStorage.getItem("url") !== null) {
-      this.base64Data = this.getTiffDataUrlHandler(sessionStorage.getItem("url"));
+      this.base64Data = this.getTiffDataUrlHandler(
+        sessionStorage.getItem("url")
+      );
     }
   },
   watch: {
@@ -450,7 +429,7 @@ export default {
 }
 
 .right-statistic {
-  width: 53vw;
+  width: 52vw;
   height: 60vh;
 }
 .chartContainer {

@@ -1,10 +1,14 @@
 <template>
   <div class="header-nav">
 
-    <div class="header-nav-item">
+    <!-- <div class="header-nav-item">
       <router-link to="/">
         <img src="" alt="logo" class="logo">
       </router-link>
+    </div> -->
+
+    <div class="header-nav-item">
+      <router-link to="/">首页</router-link>
     </div>
 
     <div class="header-nav-item">
@@ -28,9 +32,9 @@
       <router-link to="/aboutus">关于我们</router-link>
     </div>
 
-    <div class="header-nav-item">
+    <!-- <div class="header-nav-item">
       <router-link to="/open">开放空间</router-link>
-    </div>
+    </div> -->
 
     <div class="right-menu" v-if="avatarState">
       <el-dropdown class="avatar-container right-menu-item hover-effect" trigger="click">
@@ -49,9 +53,9 @@
       </el-dropdown>
     </div>
 
-    <div class="please-login" v-else>
+    <!-- <div class="please-login" v-else>
       <router-link to="/user/profile">使用功能，请先登录</router-link>
-    </div>
+    </div> -->
 
 
   </div>
@@ -92,7 +96,7 @@ export default {
         type: 'warning'
       }).then(() => {
         this.$store.dispatch('LogOut').then(() => {
-          location.href = '/index';
+          location.href = '/';
         })
       }).catch(() => {});
     },

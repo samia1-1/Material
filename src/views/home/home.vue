@@ -8,7 +8,6 @@
       <div class="main-inline">
         <div class="main-inline-in">
 
-          <!-- <chemical></chemical> -->
           <home-intro></home-intro>
           <!-- <open-function></open-function> -->
           <data-tool></data-tool>

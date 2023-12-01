@@ -12,7 +12,7 @@ export default {
 
 <style lang="scss" scoped>
 $color-background: #eaecfa;
-$color-loader: #4b4a4a;
+$color-loader: #ffffff;
 
 body {
   background: $color-background;

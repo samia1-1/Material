@@ -1,16 +1,29 @@
 <template>
-  <div class="picDetail">
+  <div class="picDetail" >
+    <div class="change-input">
+      <el-select
+        v-model="picOption"
+        placeholder="请选择图片类型"
+      >
+        <el-option
+          v-for="item in picOptions"
+          :key="item"
+          :label="item"
+          :value="item"
+        >
+        </el-option>
+      </el-select>
+    </div>
     <div
       class="img-containter"
       @click="toImageRecognition"
-      v-loading="loading"
-      element-loading-background="rgba(0, 0, 0, 0.8)"
+      v-loading="loading" element-loading-background="rgba(0, 0, 0, 0.2)"
     >
       <img
         v-show="img_src"
         class="img-detail"
         :src="img_src"
-        alt=""
+        alt="查询结果"
         ref="tiff_img"
       >
     </div>
@@ -19,37 +32,36 @@
 
 <script>
 import Tiff from "tiff.js";
+import debounce from "../../utils/debounce/debounce";
+import { getImage_url } from "@/api/database/AlloyComposition.js";
 export default {
   data() {
     return {
       img_src: "",
-      loading:true,
+      loading: true,
+      picOptions: ["SE", "HD"],
+      picOption: "SE",
+      paramsBody: {},
     };
   },
-  mounted() {
-    if(sessionStorage.getItem("url") !== null){
-      this.getTiffDataUrlHandler(sessionStorage.getItem("url"))
+  created() {
+    if (sessionStorage.getItem("url") !== null) {
+      this.getTiffDataUrlHandler(sessionStorage.getItem("url"));
+      this.paramsBody = JSON.parse(sessionStorage.getItem("paramBody"));
+    }else {
+      debounce(
+        () => {
+          this.$message({
+            message: "传入图片为空，请稍后重试",
+            type: "error",
+          });
+          this.$router.push("/");
+          console.log("nullya");
+        },
+        500,
+        true
+      );
     }
-    // 在新窗口中监听message事件;
-    window.addEventListener("message", (event) => {
-      //检验是否信任消息来源
-      if (event.origin !== "http://localhost:8100") {
-        this.$message({
-          message: "警告！该消息源不可信任！",
-          type: "error",
-        });
-        this.$router.push('/')
-        return;
-      }
-      // event.data包含接收到的数据
-      const receivedData = event.data;
-      console.log(receivedData.img_src)
-      // 处理接收到的数据
-      if (receivedData.img_src) {
-        this.getTiffDataUrlHandler(receivedData.img_src);
-        sessionStorage.setItem("url", receivedData.img_src);
-      }
-    });
   },
   methods: {
     toImageRecognition() {
@@ -58,14 +70,28 @@ export default {
     async getTiffDataUrlHandler(url) {
       const xhr = new XMLHttpRequest();
       xhr.responseType = "arraybuffer";
-      xhr.open("GET", "images/123/HD/0950_0950.tif");
+      xhr.open("GET", url);
       xhr.onload = () => {
         const tiff = new Tiff({ buffer: xhr.response });
         const canvas = tiff.toCanvas();
         this.img_src = canvas.toDataURL();
       };
-      xhr.send();
+      await xhr.send();
       this.loading = false;
+    },
+  },
+  watch: {
+    picOption: {
+      handler(newValue) {
+        this.loading = true;
+        getImage_url({ ...this.paramsBody }, { HD_SE: newValue })
+          .then((res) => {
+            sessionStorage.setItem("url", res.data.url);
+            this.getTiffDataUrlHandler(res.data.url);
+          })
+          .catch((err) => console.log(err));
+
+      },
     },
   },
 };
@@ -83,6 +109,10 @@ export default {
 }
 .img-detail:hover {
   cursor: pointer;
+}
+.change-input input {
+  width: 11vw;
+  height: 3vh;
 }
 </style>
 

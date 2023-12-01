@@ -38,27 +38,27 @@ service.interceptors.request.use(config => {
     config.url = url;
   }
   if (!isRepeatSubmit && (config.method === 'post' || config.method === 'put')) {
-    const requestObj = {
-      url: config.url,
-      data: typeof config.data === 'object' ? JSON.stringify(config.data) : config.data,
-      time: new Date().getTime()
-    }
-    const sessionObj = cache.session.getJSON('sessionObj')
-    if (sessionObj === undefined || sessionObj === null || sessionObj === '') {
-      cache.session.setJSON('sessionObj', requestObj)
-    } else {
-      const s_url = sessionObj.url;                  // 请求地址
-      const s_data = sessionObj.data;                // 请求数据
-      const s_time = sessionObj.time;                // 请求时间
-      const interval = 1000;                         // 间隔时间(ms)，小于此时间视为重复提交
-      if (s_data === requestObj.data && requestObj.time - s_time < interval && s_url === requestObj.url) {
-        const message = '数据正在处理，请勿重复提交';
-        console.warn(`[${s_url}]: ` + message)
-        return Promise.reject(new Error(message))
-      } else {
-        cache.session.setJSON('sessionObj', requestObj)
-      }
-    }
+    // const requestObj = {
+    //   url: config.url,
+    //   data: typeof config.data === 'object' ? JSON.stringify(config.data) : config.data,
+    //   time: new Date().getTime()
+    // }
+    // const sessionObj = cache.session.getJSON('sessionObj')
+    // if (sessionObj === undefined || sessionObj === null || sessionObj === '') {
+    //   cache.session.setJSON('sessionObj', requestObj)
+    // } else {
+    //   const s_url = sessionObj.url;                  // 请求地址
+    //   const s_data = sessionObj.data;                // 请求数据
+    //   const s_time = sessionObj.time;                // 请求时间
+    //   const interval = 1000;                         // 间隔时间(ms)，小于此时间视为重复提交
+    //   if (s_data === requestObj.data && requestObj.time - s_time < interval && s_url === requestObj.url) {
+    //     const message = '数据正在处理，请勿重复提交';
+    //     console.warn(`[${s_url}]: ` + message)
+    //     return Promise.reject(new Error(message))
+    //   } else {
+    //     cache.session.setJSON('sessionObj', requestObj)
+    //   }
+    // }
   }
   return config
 }, error => {
@@ -82,20 +82,19 @@ service.interceptors.response.use(function(res) {
     }
     if (code === 401) {
       store.dispatch('checkAvatarState',false).then((res) => {})
-      if (!isRelogin.show) {
-        isRelogin.show = true;
-        store.dispatch('checkAvatarState',false).then((res) => {})
-      //   MessageBox.confirm('登录过期，您可以继续留在该页面，或者重新登录', '系统提示', { confirmButtonText: '重新登录', cancelButtonText: '留在该页面', type: 'warning' }).then(() => {
-      //     isRelogin.show = false;
-      //     store.dispatch('LogOut').then(() => {
-      //       location.href = '/index';
-      //     })
-      // }).catch(() => {
-      //   isRelogin.show = false;
-      // });
-    }
-      // return Promise.reject('无效的会话，或者会话已过期，请重新登录。')
-      return Promise.reject('登录过期，请重新登录。')
+    //   if (!isRelogin.show) {
+    //     isRelogin.show = true;
+    //     store.dispatch('checkAvatarState',false).then((res) => {})
+    //     MessageBox.confirm('检测到您正处于未登录状态，您可以继续留在该页面，或者选择登录', '系统提示', { confirmButtonText: '重新登录', cancelButtonText: '留在该页面', type: 'warning' }).then(() => {
+    //       isRelogin.show = false;
+    //       store.dispatch('LogOut').then(() => {
+    //         location.href = '/index';
+    //       })
+    //   }).catch(() => {
+    //     isRelogin.show = false;
+    //   });
+    // }
+      return //Promise.reject('登录过期，请重新登录。')
     } else if (code === 500) {
       Message({ message: msg, type: 'error' })
       return Promise.reject(new Error(msg))
