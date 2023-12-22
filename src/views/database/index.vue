@@ -3,13 +3,7 @@
 
     <small-nav></small-nav>
 
-    <div class="back-profile">
-      <router-link to="/">
-        <i class="el-icon-arrow-left"></i>
-        返回首页
-      </router-link>
-      <div class="function-tit">材料数据</div>
-    </div>
+    <back-profile title="材料数据"></back-profile>
 
     <div class="data-select-show">
       <div class="left-sidernav">
@@ -57,8 +51,9 @@
 
 <script>
 import smallNav from "../../components/smallNav/smallNav";
+import BackProfile from '../../components/BackProfile/index.vue'
 export default {
-  components: { smallNav },
+  components: { smallNav,BackProfile },
   created() {
     this.checkActive();
   },
@@ -113,36 +108,12 @@ export default {
   position: relative;
   background-color: #edeff9;
 }
-.data-serach .back-profile {
-  position: absolute;
-  top: calc(5vh + 60px);
-  left: 50%;
-  transform: translateX(-50%);
-  margin: 0 auto;
-  width: 1400px;
-  font-size: 16px;
-  height: 50px;
-  line-height: 50px;
-  background-color: #fff;
-  padding-left: 22px;
-  color: rgb(68, 149, 255);
-}
-.data-serach .back-profile .function-tit {
-  font-size: 24px;
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  color: black;
-  text-align: center;
-}
-
 .data-select-show {
   position: absolute;
   top: calc(5vh + 150px);
   left: 50%;
   transform: translateX(-50%);
-  width: 1400px;
+  width: 70vw;
 }
 .left-sidernav {
   width: 230px;

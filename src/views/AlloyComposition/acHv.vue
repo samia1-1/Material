@@ -7,7 +7,7 @@
         size="small"
         :inline="true"
         v-show="showSearch"
-        label-width="100px"
+        label-width="4vw"
       >
 
         <el-form-item
@@ -331,7 +331,6 @@ export default {
     Design: {
       handler(newValue) {
         if (newValue !== "") {
-          // console.log(newValue[0])
           this.handlePromptInfo(newValue);
         }
       },
@@ -560,54 +559,54 @@ export default {
 </script>
 
 <style scoped>
-.design1 .row {
+/*.design1 .row {
   width: 500px;
   height: 50px;
   border-bottom: 0;
   cursor: pointer;
-}
+}*/
 .ac-choose {
   position: relative;
 }
 .prompt-area {
   padding: 5px;
-  width: 550px;
-  height: 300px;
+  width: 30vw;
+  height: 29vh;
   border: 3px grey dashed;
   position: absolute;
   top: 0px;
-  right: 40px;
+  right: 1vw;
   border-radius: 10px;
   box-shadow: 5px 5px 5px 5px rgb(227, 227, 227);
 }
 .prompt-info-tit {
-  height: 20px;
-  line-height: 20px;
-  font-size: 18px;
-  padding-left: 10px;
-  margin: 10px;
+  height: 2vh;
+  line-height: 2vh;
+  font-size: 2vh;
+  padding-left: 1vw;
+  margin: 1vh;
 }
 .prompt-info {
   text-align: center;
-  height: 220px;
-  line-height: 230px;
-  font-size: 22px;
+  height: 24vh;
+  line-height: 24vh;
+  font-size: 2.2vh;
   color: grey;
 }
 .show-item {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-start;
-  width: 540px;
-  margin: 10px 0 0 0;
+  justify-content: space-evenly;
+  width: 30vw;
+  margin: 1vw 0 0 0;
 }
 .prompt-item {
-  width: 150px;
-  height: 40px;
+  width: 8vw;
+  height: 3.8vh;
   line-height: 40px;
   border-bottom: 2px solid rgb(212, 212, 212);
   margin: 10px 10px;
-  font-size: 16px;
+  font-size: 1.5vh;
 }
 .prompt-item-name {
   color: grey;

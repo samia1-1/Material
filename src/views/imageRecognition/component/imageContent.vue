@@ -42,7 +42,7 @@
         >
           <el-empty
             description="暂无统计数据"
-            :image-size="300"
+            :imageSize="400"
           >
             <el-button
               type="primary"
@@ -118,9 +118,9 @@ import Loading from "@/components/Loading/index.vue";
 import ImageSelection from "./imageSelection";
 import * as echarts from "echarts";
 import Tiff from "tiff.js";
-import axios from 'axios'
+import axios from "axios";
 import { echartsRendering } from "./echarts.js";
-import { getToken } from '@/utils/auth'
+import { getToken } from "@/utils/auth";
 export default {
   components: { Loading, ImageSelection },
   data() {
@@ -180,7 +180,7 @@ export default {
       Elongation: [],
       hasPerimeter: false,
       Perimeter: [],
-      base64Data: "",
+      transPic: undefined,
     };
   },
   methods: {
@@ -198,6 +198,7 @@ export default {
     //上传照片
     showSelectedImage() {
       let get_image_url = document.getElementById("select_files").files[0];
+      // console.log(get_image_url)
       //判断输入是否为空
       if (!get_image_url) {
         this.$message({
@@ -207,39 +208,34 @@ export default {
         return;
       }
       this.isShowImg = true;
+      //清除过去图片
+      sessionStorage.removeItem("url");
       const localUrl = URL.createObjectURL(get_image_url);
       this.image_src = localUrl;
       this.isShowStatistic = false;
 
       //存储将要传递给后端的图片数据
       this.form_data = get_image_url;
-      // console.log(this.form_data)
     },
     //点击图像识别并且查询统计数据
     getStatistic() {
-      let get_image_url = document.getElementById("select_files").files[0];
       //判断输入是否为空
-      if (!get_image_url) {
+      if (!this.form_data) {
         if (sessionStorage.getItem("url") !== null) {
-          this.clickStatistic(this.image_src);
+          this.clickStatistic(true);
+          return ;
         } else {
           this.$message({
             message: "请先上传图片",
             type: "warning",
           });
+          return;
         }
-        return;
       }
-      const reader = new FileReader();
-      let tthis = this;
-      reader.onload = function (event) {
-        tthis.base64Data = event.target.result;
-        tthis.clickStatistic(tthis.base64Data);
-      };
-      reader.readAsDataURL(get_image_url);
+      this.clickStatistic(false);
     },
     //查询统计数据
-    clickStatistic(base64Data) {
+    clickStatistic(transPic) {
       this.isShowStatistic = false;
       this.isLoading = true;
 
@@ -249,73 +245,94 @@ export default {
       this.hasElongation = false;
       this.hasPerimeter = false;
 
-      // 将base64Data发送给后端
-      // getImageRecognition({ base64: base64Data })
-      let formdata = new FormData();
-      formdata.append("image", this.form_data);
-      const config = {
-        headers: {
-          "content-type": "multipart/form-data", // 设置请求头部
-          'Authorization':'Bearer ' + getToken()
-        },
-      };
-      axios.post("http://124.221.104.7:8100/image_recognition/updateAvatarUrl", formdata, config)
-        .then((data) => {
-          data = data.data;
-          if (data.base64 === "预测出错：(str(e)") {
+
+      if (transPic === true) {
+        let formdata = new FormData();
+        let tiff_url = sessionStorage.getItem("url")
+        let regex = /\/images\/(\d+)\/(\w+)\/(.+)/;
+        tiff_url = tiff_url.replace(regex, '\$1\\\$2\\\$3');
+        formdata.append("image", tiff_url);
+        const config = {
+          headers: {
+            "content-type": "multipart/form-data", // 设置请求头部
+            Authorization: "Bearer " + getToken(),
+          },
+        };
+        axios.post("http://124.221.104.7:8100/image_recognition/updateAvatarUrl2",formdata,config)
+          .then(async(data) => {
+            data = await data.data;
+            console.log(data)
+            if (data.base64 === "预测出错：(str(e)" || data.code !== 200) {
+              this.$message({
+                message: "出错了,请上传重试",
+                type: "error",
+              });
+              sessionStorage.removeItem("url");
+              this.image_src = "";
+              this.isLoading = false;
+              this.isShowImg = false;
+              return;
+            }
+            this.isShowImg = true;
+            this.isLoading = false;
+            this.image_src = "data:image/png;base64," + data.base64;
+            this.image_src = this.image_src.replace(/[\r\n]/g, "");
+            this.isShowStatistic = true;
+            this.statisticData = (data.are_sum_bfb * 100).toFixed(2);
+            this.playEcharts(data);
+          })
+          .catch((error) => {
             this.$message({
-              message: "预测出错,请上传重试",
+              message: "出现未知错误，请刷新后重试",
               type: "error",
             });
             this.isLoading = false;
-            this.isShowImg = false;
-            this.image_src = "";
-            return;
-          }
-          this.isShowImg = true;
-          this.isLoading = false;
-          this.image_src = "data:image/png;base64," + data.base64;
-          this.image_src = this.image_src.replace(/[\r\n]/g, "");
-          this.isShowStatistic = true;
-          this.statisticData = (data.are_sum_bfb * 100).toFixed(2);
-
-          this.playEcharts(data);
-        })
-        .catch((error) => {
-          this.$message({
-            message: "出现未知错误，请刷新后重试11111",
-            type: "error",
           });
-          this.isLoading = false;
-        });
-      // getImageRecognition(formdata)
-      //   .then((data) => {
-      //     if (data.base64 === "预测出错：(str(e)") {
-      //       this.$message({
-      //         message: "预测出错,请上传重试",
-      //         type: "error",
-      //       });
-      //       this.isLoading = false;
-      //       this.isShowImg = false;
-      //       this.image_src = "";
-      //       return;
-      //     }
-      //     this.isShowImg = true;
-      //     this.isLoading = false;
-      //     this.image_src = "data:image/png;base64," + data.base64;
-      //     this.image_src = this.image_src.replace(/[\r\n]/g, "");
-      //     this.isShowStatistic = true;
-      //     this.statisticData = (data.are_sum_bfb * 100).toFixed(2);
+      } else {
+        let formdata = new FormData();
+        formdata.append("image", this.form_data);
+        const config = {
+          headers: {
+            "content-type": "multipart/form-data", // 设置请求头部
+            Authorization: "Bearer " + getToken(),
+          },
+        };
+        axios
+          .post(
+            "http://124.221.104.7:8100/image_recognition/updateAvatarUrl",
+            formdata,
+            config
+          )
+          .then((data) => {
+            sessionStorage.removeItem("url");
+            data = data.data;
+            if (data.base64 === "预测出错：(str(e)") {
+              this.$message({
+                message: "预测出错,请上传重试",
+                type: "error",
+              });
+              this.isLoading = false;
+              this.isShowImg = false;
+              this.image_src = "";
+              return;
+            }
+            this.isShowImg = true;
+            this.isLoading = false;
+            this.image_src = "data:image/png;base64," + data.base64;
+            this.image_src = this.image_src.replace(/[\r\n]/g, "");
+            this.isShowStatistic = true;
+            this.statisticData = (data.are_sum_bfb * 100).toFixed(2);
 
-      //     this.playEcharts(data);
-      //   })
-      //   .catch((err) => {
-      //     this.$message({
-      //       message: "出现未知错误，请刷新后重试",
-      //       type: "error",
-      //     });
-      //     this.isLoading = false;
-      //   });
+            this.playEcharts(data);
+          })
+          .catch((error) => {
+            this.$message({
+              message: "出现未知错误，请刷新后重试",
+              type: "error",
+            });
+            this.isLoading = false;
+          });
+      }
     },
     //将tiff图片转换为png的base64编码
     async getTiffDataUrlHandler(url) {
@@ -325,6 +342,7 @@ export default {
       let tthis = this;
       xhr.onload = () => {
         const tiff = new Tiff({ buffer: xhr.response });
+        this.transPic = tiff;
         const canvas = tiff.toCanvas();
         tthis.image_src = canvas.toDataURL();
         tthis.isShowImg = true;
@@ -332,6 +350,7 @@ export default {
       xhr.send();
       return this.image_src;
     },
+    //绘制图表
     playEcharts(data) {
       let colorNum = 0;
       if (data.Area) {
@@ -395,9 +414,7 @@ export default {
   },
   mounted() {
     if (sessionStorage.getItem("url") !== null) {
-      this.base64Data = this.getTiffDataUrlHandler(
-        sessionStorage.getItem("url")
-      );
+      this.getTiffDataUrlHandler(sessionStorage.getItem("url"));
     }
   },
   watch: {
@@ -526,5 +543,8 @@ export default {
 .show-img-item img {
   width: 250px;
   height: 250px;
+}
+.el-empty__image {
+  width: 50vh;
 }
 </style>

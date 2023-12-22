@@ -37,8 +37,8 @@ export default {
 }
 .header-intro-tit{
   position: absolute;
-  top: 18%;
-  left: 30%;
+  top: 5vh;
+  left: 25vw;
   font-size: 35px;
   line-height: 35px;
   font-weight: 800;
@@ -46,12 +46,12 @@ export default {
 .header-intro-text{
   height: 70px;
   position: absolute;
-  left: 30%;
-  top: 190px;
+  left: 25vw;
+  top: 18vh;
 }
 .text1,.text2{
-  height: 35px;
-  line-height: 35px;
+  height: 40px;
+  line-height: 40px;
   font-size: 20px;
 }
 </style>

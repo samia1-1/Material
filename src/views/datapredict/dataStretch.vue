@@ -1,6 +1,6 @@
 <template>
   <div class="data-show">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="90px">
+    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="5vw">
       <el-form-item label="牌号" prop="trademark">
         <el-select v-model="queryParams.trademark" clearable @keyup.enter.native="handleQuery" placeholder="请选择牌号">
           <el-option

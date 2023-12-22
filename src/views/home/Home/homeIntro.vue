@@ -47,14 +47,14 @@ export default {};
 
 <style scoped>
 .home-intro {
-  width: 1200px;
+  width: 100%
 }
 .part {
   background-image: linear-gradient(to bottom, #f6f8fa, #ffffff);
   height: 420px;
 }
 .tit {
-  width: 960px;
+  width: 55vw;
   height: 60px;
   margin: 0 auto;
   font-size: 24px;

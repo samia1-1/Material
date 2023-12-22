@@ -30,7 +30,7 @@ module.exports = {
   devServer: {
     host: 'localhost',
     port: port,
-    open: true,
+    // open: true,
     proxy: {
       [process.env.VUE_APP_BASE_API]: {
         target: `http://124.221.104.7:8100`,
@@ -47,7 +47,7 @@ module.exports = {
         }
       },
       ['/images']: {
-        target: `http://124.221.104.7:8888/images`,
+        target: `http://124.221.104.7:8888`,
         changeOrigin: true,
         pathRewrite: {
           ['^/images']: ''

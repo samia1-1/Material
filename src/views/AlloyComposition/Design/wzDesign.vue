@@ -160,11 +160,11 @@ export default {
   position: relative;
 }
 .design table {
-  width: 500px;
-  height: 250px;
+  width: 30vw;/*500px*/
+  height: 25vh;/*250px*/
 }
 .design td {
-  font-size: 17px;
+  font-size: 2vh;
   text-align: center;
 }
 .design td:hover {
@@ -177,64 +177,64 @@ export default {
 }
 .state123 {
   position: absolute;
-  top: 45px;
-  left: 95px;
+  top: 4.5vh;
+  left: 5.5vw;
 }
 .state134 {
   position: absolute;
-  top: 45px;
-  left: 195px;
+  top: 4.5vh;
+  left: 11.5vw;
 }
 .state125 {
   position: absolute;
-  top: 45px;
-  left: 395px;
+  top: 4.5vh;
+  left: 23.5vw;
 }
 .state126 {
   position: absolute;
-  top: 95px;
-  left: 95px;
+  top: 9.5vh;
+  left: 5.5vw;
 }
 .state136 {
   position: absolute;
-  top: 195px;
-  left: 195px;
+  top: 19.5vh;
+  left: 11.5vw;
 }
 .state142 {
   position: absolute;
-  top: 45px;
-  left: 295px;
+  top: 4.5vh;
+  left: 17.5vw;
 }
 .state147 {
   position: absolute;
-  top: 195px;
-  left: 395px;
+  top: 19.5vh;
+  left: 23.5vw;
 }
 .state164 {
   position: absolute;
-  top: 195px;
-  left: 295px;
+  top: 19.5vh;
+  left: 17.5vw;
 }
 .state167 {
   position: absolute;
-  top: 95px;
-  left: 195px;
+  top: 9.5vh;
+  left: 11.5vw;
 }
 .state172 {
   position: absolute;
-  top: 95px;
-  left: 295px;
+  top: 9.5vh;
+  left: 17.5vw;
 }
 .state173 {
   position: absolute;
-  top: 195px;
-  left: 95px;
+  top: 19.5vh;
+  left: 5.5vw;
 }
 
 .pointer {
   display: block;
-  width: 10px;
-  height: 10px;
+  width: 1vw;
+  height: 1vh;
   background-color: rgba(255, 255, 255, 0.1);
   cursor: pointer;
 }

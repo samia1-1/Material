@@ -34,10 +34,11 @@ export default {};
 <style>
 .us-content-material {
   min-height: 900px;
-  padding: 50px 120px 0px;
+  padding: 20px 120px 0px;
 }
 .us-content-material img {
-  width: 500px;
+  width: 400px;
+  margin-left: 50px;
 }
 .us-content-material .intro {
   position: relative;
@@ -51,19 +52,19 @@ export default {};
   padding-top: 10%;
 }
 .us-content-material .intro h1{
-  font-size: 40px;
+  font-size: 30px;
   height: 80px;
   line-height: 60px;
   text-align: center;
   padding: 10px;
-  color: rgb(72, 72, 72);
+  color: rgb(19, 15, 15);
   box-shadow: 3px 3px 4px 2px rgba(18, 18, 18, 0.3);
 }
 .us-content-material h2{
-  font-size: 3vh;
+  font-size: 20px;
   margin-bottom: 20px;
 }
 .us-content-material ol{
-  font-size: 2vh;
+  font-size: 17px;
 }
 </style>

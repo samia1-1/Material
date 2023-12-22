@@ -38,8 +38,9 @@ import VueMeta from 'vue-meta'
 // 字典数据组件
 import DictData from '@/components/DictData'
 
-//自适应屏幕
-import './utils/flexible'
+
+// 动态计算rem
+import '@/utils/rem.js'
 
 // 全局方法挂载
 Vue.prototype.getDicts = getDicts

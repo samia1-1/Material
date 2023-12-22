@@ -26,6 +26,7 @@ export default {
 body{
   padding: 0;
   margin: 0;
+  font-size: 14px;
 }
 #app{
   height: 100% !important;
