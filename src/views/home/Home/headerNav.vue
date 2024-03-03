@@ -32,9 +32,9 @@
       <router-link to="/aboutus">关于我们</router-link>
     </div>
 
-    <!-- <div class="header-nav-item">
-      <router-link to="/open">开放空间</router-link>
-    </div> -->
+    <div class="header-nav-item">
+      <router-link to="/open">上传数据</router-link>
+    </div>
 
     <div class="right-menu" v-if="avatarState">
       <el-dropdown class="avatar-container right-menu-item hover-effect" trigger="click">

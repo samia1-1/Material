@@ -1,5 +1,5 @@
 <template>
-  <div class="picDetail" >
+  <div class="picDetail">
     <div class="change-input">
       <el-select
         v-model="picOption"
@@ -17,7 +17,8 @@
     <div
       class="img-containter"
       @click="toImageRecognition"
-      v-loading="loading" element-loading-background="rgba(0, 0, 0, 0.2)"
+      v-loading="loading"
+      element-loading-background="rgba(0, 0, 0, 0.2)"
     >
       <img
         v-show="img_src"
@@ -32,7 +33,6 @@
 
 <script>
 import Tiff from "tiff.js";
-import debounce from "../../utils/debounce/debounce";
 import { getImage_url } from "@/api/database/AlloyComposition.js";
 export default {
   data() {
@@ -48,36 +48,31 @@ export default {
     if (sessionStorage.getItem("url") !== null) {
       this.getTiffDataUrlHandler(sessionStorage.getItem("url"));
       this.paramsBody = JSON.parse(sessionStorage.getItem("paramBody"));
-    }else {
-      debounce(
-        () => {
-          this.$message({
-            message: "传入图片为空，请稍后重试",
-            type: "error",
-          });
-          this.$router.push("/");
-          console.log("nullya");
-        },
-        500,
-        true
-      );
+    } else {
+      this.$message({
+        message: "传入图片为空，请稍后重试",
+        type: "error",
+      });
+      this.$router.push("/");
+      console.log("nullya");
     }
   },
   methods: {
     toImageRecognition() {
       this.$router.push("/imagerecognition");
     },
-    async getTiffDataUrlHandler(url) {
+    getTiffDataUrlHandler(url) {
       const xhr = new XMLHttpRequest();
       xhr.responseType = "arraybuffer";
-      xhr.open("GET", url);
+      xhr.open("GET", url,true);
       xhr.onload = () => {
         const tiff = new Tiff({ buffer: xhr.response });
         const canvas = tiff.toCanvas();
-        this.img_src = canvas.toDataURL();
+        this.img_src =  canvas.toDataURL();
+        this.loading = false;
       };
-      await xhr.send();
-      this.loading = false;
+      xhr.send();
+
     },
   },
   watch: {
@@ -90,7 +85,6 @@ export default {
             this.getTiffDataUrlHandler(res.data.url);
           })
           .catch((err) => console.log(err));
-
       },
     },
   },

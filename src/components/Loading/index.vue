@@ -11,8 +11,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$color-background: #eaecfa;
-$color-loader: #ffffff;
+$color-background: #999ba7;
+$color-loader: #8a8282;
 
 body {
   background: $color-background;

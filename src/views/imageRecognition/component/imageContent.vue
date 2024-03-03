@@ -116,7 +116,6 @@
 import { getImageRecognition } from "@/api/imageRecognition/imageRecognition.js";
 import Loading from "@/components/Loading/index.vue";
 import ImageSelection from "./imageSelection";
-import * as echarts from "echarts";
 import Tiff from "tiff.js";
 import axios from "axios";
 import { echartsRendering } from "./echarts.js";
@@ -335,7 +334,7 @@ export default {
       }
     },
     //将tiff图片转换为png的base64编码
-    async getTiffDataUrlHandler(url) {
+    getTiffDataUrlHandler(url) {
       const xhr = new XMLHttpRequest();
       xhr.responseType = "arraybuffer";
       xhr.open("GET", url);
@@ -345,6 +344,7 @@ export default {
         this.transPic = tiff;
         const canvas = tiff.toCanvas();
         tthis.image_src = canvas.toDataURL();
+        tthis.isLoading = false;
         tthis.isShowImg = true;
       };
       xhr.send();
@@ -412,9 +412,11 @@ export default {
       }
     },
   },
-  mounted() {
-    if (sessionStorage.getItem("url") !== null) {
-      this.getTiffDataUrlHandler(sessionStorage.getItem("url"));
+  created() {
+    let tempUrl = sessionStorage.getItem("url")
+    if (tempUrl !== null) {
+      this.isLoading = true;
+      this.getTiffDataUrlHandler(tempUrl);
     }
   },
   watch: {

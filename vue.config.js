@@ -11,12 +11,11 @@ const name = process.env.VUE_APP_TITLE || 'Material' // 网页标题
 
 const port = process.env.port || process.env.npm_config_port || 8100 // 端口
 
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
 // vue.config.js 配置说明
 // 具体配置参考文档
 module.exports = {
-  // 部署生产环境和开发环境下的URL。
-  // 默认情况下，Vue CLI 会假设你的应用是被部署在一个域名的根路径上
-  // 例如 https://www.ruoyi.vip/。如果应用被部署在一个子路径上，你就需要用这个选项指定这个子路径。例如，如果你的应用被部署在 https://www.ruoyi.vip/admin/，则设置 baseUrl 为 /admin/。
   publicPath: process.env.NODE_ENV === "production" ? "/" : "/",
   // 在npm run build 或 yarn build 时 ，生成文件的目录名称（要和baseUrl的生产环境路径一致）（默认dist）
   outputDir: 'dist',
@@ -77,7 +76,8 @@ module.exports = {
         filename: '[path].gz[query]',   // 压缩后的文件名
         algorithm: 'gzip',              // 使用gzip压缩
         minRatio: 0.8                   // 压缩率小于1才会压缩
-      })
+      }),
+      new BundleAnalyzerPlugin(),
     ],
   },
   chainWebpack(config) {
@@ -108,7 +108,7 @@ module.exports = {
             .plugin('ScriptExtHtmlWebpackPlugin')
             .after('html')
             .use('script-ext-html-webpack-plugin', [{
-            // `runtime` must same as runtimeChunk name. default is `runtime`
+              // `runtime` must same as runtimeChunk name. default is `runtime`
               inline: /runtime\..*\.js$/
             }])
             .end()
@@ -127,6 +127,11 @@ module.exports = {
                   priority: 20, // the weight needs to be larger than libs and app or it will be packaged into libs or app
                   test: /[\\/]node_modules[\\/]_?element-ui(.*)/ // in order to adapt to cnpm
                 },
+                echarts: {
+                  name: 'chunk-echarts', // split echarts into a single package
+                  priority: 20, // the weight needs to be larger than libs and app or it will be packaged into libs or app
+                  test: /[\\/]node_modules[\\/]_?echarts(.*)/ // in order to adapt to cnpm
+              },
                 commons: {
                   name: 'chunk-commons',
                   test: resolve('src/components'), // can customize your rules
@@ -138,8 +143,8 @@ module.exports = {
             })
           config.optimization.runtimeChunk('single'),
           {
-             from: path.resolve(__dirname, './public/robots.txt'), //防爬虫文件
-             to: './' //到根目录下
+            from: path.resolve(__dirname, './public/robots.txt'), //防爬虫文件
+            to: './' //到根目录下
           }
         }
       )

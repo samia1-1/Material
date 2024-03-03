@@ -11,7 +11,7 @@ const user = {
     avatarState:true,//判断头像是否显示
     userInfo:{},
   },
-
+  
   mutations: {
     SET_TOKEN: (state, token) => {
       state.token = token

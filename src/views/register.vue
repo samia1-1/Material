@@ -90,7 +90,7 @@ export default {
       },
       registerRules: {
         username: [
-          { required: true, trigger: "blur", message: "请输入您的账号" },
+          { required: true, trigger: "blur", message: "请输入您的用户名" },
           { min: 2, max: 20, message: '用户账号长度必须介于 2 和 20 之间', trigger: 'blur' }
         ],
         password: [
