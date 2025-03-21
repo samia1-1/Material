@@ -257,7 +257,7 @@ export default {
             Authorization: "Bearer " + getToken(),
           },
         };
-        axios.post("http://124.221.104.7:8100/image_recognition/updateAvatarUrl2",formdata,config)
+        axios.post("http://146.56.214.208:8100/image_recognition/updateAvatarUrl2",formdata,config)
           .then(async(data) => {
             data = await data.data;
             console.log(data)
@@ -298,7 +298,7 @@ export default {
         };
         axios
           .post(
-            "http://124.221.104.7:8100/image_recognition/updateAvatarUrl",
+            "http://146.56.214.208:8100/image_recognition/updateAvatarUrl",
             formdata,
             config
           )
