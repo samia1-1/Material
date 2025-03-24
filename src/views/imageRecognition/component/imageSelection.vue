@@ -2,30 +2,25 @@
   <div class="image-selection">
     <el-col>
       <div class="title">选项菜单</div>
-      <el-menu
-        default-active="1"
-        class="el-menu-vertical-demo"
-        @open="handleOpen"
-        @close="handleClose"
-      >
+      <el-menu default-active="1" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
         <!-- <el-submenu index="1">
           <template slot="title">
             <i class="el-icon-location"></i>
             <span>导航一</span>
           </template>
-          <el-menu-item-group>
-            <template slot="title">分组一</template>
-            <el-menu-item index="1-1">选项1</el-menu-item>
-            <el-menu-item index="1-2">选项2</el-menu-item>
-          </el-menu-item-group>
-          <el-menu-item-group title="分组2">
-            <el-menu-item index="1-3">选项3</el-menu-item>
-          </el-menu-item-group>
-          <el-submenu index="1-4">
-            <template slot="title">选项4</template>
-            <el-menu-item index="1-4-1">选项1</el-menu-item>
-          </el-submenu>
-        </el-submenu> -->
+<el-menu-item-group>
+  <template slot="title">分组一</template>
+  <el-menu-item index="1-1">选项1</el-menu-item>
+  <el-menu-item index="1-2">选项2</el-menu-item>
+</el-menu-item-group>
+<el-menu-item-group title="分组2">
+  <el-menu-item index="1-3">选项3</el-menu-item>
+</el-menu-item-group>
+<el-submenu index="1-4">
+  <template slot="title">选项4</template>
+  <el-menu-item index="1-4-1">选项1</el-menu-item>
+</el-submenu>
+</el-submenu> -->
         <el-menu-item index="1">
           <i class="el-icon-menu"></i>
           <span slot="title">图像选择</span>
@@ -56,15 +51,28 @@ export default {
 };
 </script>
 
-<style scopped>
+<style scoped>
 .image-selection {
   width: 15vw;
   background-color: #f3f3f3cc;
 }
-.title{
+
+.title {
   text-align: center;
   height: 50px;
   line-height: 50px;
-  font-size: 18px;
+  font-size: 30px;
+}
+
+.el-icon-menu {
+  font-size: 24px;
+  /* 调整图标大小 */
+}
+
+.el-menu-item span {
+  font-size: 20px;
+  /* 调整文字大小 */
+  margin-left: 12px;
+  /* 调整文字与图标的距离 */
 }
 </style>
