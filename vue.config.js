@@ -32,21 +32,24 @@ module.exports = {
     // open: true,
     proxy: {
       [process.env.VUE_APP_BASE_API]: {
-        target: `http://124.221.104.7:8100`,
+        // target: `http://124.221.104.7:8100`,
+        target: `http://146.56.214.208:8100`,
         changeOrigin: true,
         pathRewrite: {
           ['^' + process.env.VUE_APP_BASE_API]: ''
         }
       },
       ['/files']: {
-        target: `http://124.221.104.7:5555`,
+        // target: `http://124.221.104.7:5555`,
+        target: `http://146.56.214.208:8100`,
         changeOrigin: true,
         pathRewrite: {
           ['^/files']: ''
         }
       },
       ['/images']: {
-        target: `http://124.221.104.7:8888`,
+        // target: `http://124.221.104.7:8888`,
+        target: `http://146.56.214.208:8100`,
         changeOrigin: true,
         pathRewrite: {
           ['^/images']: ''
