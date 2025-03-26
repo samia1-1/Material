@@ -176,7 +176,8 @@ export default {
   border-radius: 6px;
   background: #ffffff;
   box-shadow: 0 0 30px rgb(183, 195, 224);
-  width: 490px;
+  width: 30vw;
+  height:50vh;
   padding: 60px 60px 20px 60px;
   .el-input {
     height: 38px;
@@ -196,7 +197,7 @@ export default {
   color: #bfbfbf;
 }
 .login-code {
-  width: 33%;
+  width: 35%;
   height: 38px;
   float: right;
   img {

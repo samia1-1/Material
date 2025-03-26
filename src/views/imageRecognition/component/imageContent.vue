@@ -4,9 +4,10 @@
       <div class="left-selection">
         <image-selection></image-selection>
       </div>
-      <div class="center-pic" :class="{ 'dragging': isDragging }" @click="handleCenterPicClick">
-        <div class="image-container" ref="imageContainer" @wheel="handleWheel" @mousedown="startDrag"
-          @mousemove="onDrag" @mouseup="endDrag" @mouseleave="endDrag">
+      <div class="center-pic" :class="{ 'dragging': isDragging, 'has-image': !!image_src }" @click="handleCenterPicClick">
+        <div class="image-container" ref="imageContainer" @wheel="handleWheel" @touchstart.passive="startTouch"
+          @touchmove.passive="onTouch" @touchend.passive="endTouch" @mousedown="startDrag" @mousemove="onDrag"
+          @mouseup="endDrag" @mouseleave="endDrag">
           <img :src="image_src" v-if="image_src" class="showed-image" :style="imageTransformStyle">
           <div v-if="!isLoading && !image_src" class="pic-text">
             <span>点击上传一个小于10 MB的PNG或JPG图像来使用</span>
@@ -51,15 +52,17 @@
 </template>
 
 <script>
-import { getImageRecognition } from "@/api/imageRecognition/imageRecognition.js";
 import Loading from "@/components/Loading/index.vue";
 import ImageSelection from "./imageSelection";
 import Tiff from "tiff.js";
 import axios from "axios";
-import { getToken } from "@/utils/auth";
+import { imageMixin, apiMixin, interactionMixin } from "./mixins";
 
 export default {
+  name: "ImageContent",
   components: { Loading, ImageSelection },
+  mixins: [imageMixin, apiMixin, interactionMixin],
+
   data() {
     return {
       imgList: [
@@ -106,6 +109,7 @@ export default {
       isShowStatistic: false,
       statisticData: null,
       originalImageSrc: "",
+      apiReturnedUrl: "",
 
       // 数据字段
       dataFields: [
@@ -138,10 +142,22 @@ export default {
         lastTranslateX: 0,
         lastTranslateY: 0,
         distance: 0,
-        threshold: 5
+        threshold: 10,
+        dragStartTime: 0,
+        dragEndTime: 0
       },
+
+      // 触摸状态
+      touchState: {
+        isTouching: false,
+        startX: 0,
+        startY: 0,
+        startDistance: 0,
+        lastScale: 1
+      }
     };
   },
+
   computed: {
     // 计算图片的变换样式
     imageTransformStyle() {
@@ -161,7 +177,7 @@ export default {
     // 操作按钮配置
     operationButtons() {
       return [
-        { label: 'Upload', handler: this.imgUpload },
+        { label: 'Reset', handler: this.resetImage },
         { label: 'Zoom In', handler: this.handleZoomIn },
         { label: 'Zoom Out', handler: this.handleZoomOut },
         { label: 'Segmentation', handler: this.handleSegmentation },
@@ -170,361 +186,349 @@ export default {
       ];
     }
   },
-  methods: {
-    // 处理中心图片区域点击事件
-    handleCenterPicClick(event) {
-      if (this.dragState.wasDragged) return;
-      this.imgUpload();
-    },
 
-    // 上传图片
-    imgUpload() {
-      document.getElementById("select_files").click();
-    },
-
-    // 切换示例图片
-    getImgChange(item) {
-      item.showUrl = item.showUrl === item.imgUrl ? item.img_edUrl : item.imgUrl;
-    },
-
-    // 显示选中的图片
-    showSelectedImage() {
-      const fileInput = document.getElementById("select_files");
-      const file = fileInput.files[0];
-
-      if (!file) {
-        this.showMessage("请正确上传数据", "warning");
-        return;
-      }
-
-      this.originalImageSrc = this.image_src;
-      sessionStorage.removeItem("url");
-      this.image_src = URL.createObjectURL(file);
-      this.form_data = file;
-      this.resetDataFields();
-      this.resetImageTransform();
-    },
-
-    // 获取统计数据
-    getStatistic() {
-      if (!this.form_data) {
-        if (sessionStorage.getItem("url") !== null) {
-          this.clickStatistic(true);
-          return;
-        }
-        this.showMessage("请先上传图片", "warning");
-        return;
-      }
-      this.clickStatistic(false);
-    },
-
-    // 处理统计请求
-    clickStatistic(transPic) {
-      this.isLoading = true;
-      this.originalImageSrc = this.image_src;
-
-      // 配置请求头
-      const config = {
-        headers: {
-          "content-type": "multipart/form-data",
-          Authorization: "Bearer " + getToken(),
-        },
-      };
-
-      // 处理错误
-      const handleError = (error) => {
-        console.error("请求出错:", error);
-        this.showMessage("网络请求失败，已恢复原始图片", "error");
-        this.image_src = this.originalImageSrc;
-        this.isLoading = false;
-      };
-
-      if (transPic) {
-        let tiff_url = sessionStorage.getItem("url");
-        if (!tiff_url) {
-          this.showMessage("没有找到图片数据，请重新上传", "warning");
-          this.isLoading = false;
-          return;
-        }
-
-        let regex = /\/images\/(\d+)\/(\w+)\/(.+)/;
-        tiff_url = tiff_url.replace(regex, '\$1\\\$2\\\$3');
-
-        let formdata = new FormData();
-        formdata.append("image", tiff_url);
-
-        axios.post("http://146.56.214.208:8100/image_recognition/updateAvatarUrl2", formdata, config)
-          .then(response => this.processResponse(response.data))
-          .catch(handleError);
-      } else {
-        if (!this.form_data) {
-          this.showMessage("没有找到图片数据，请重新上传", "warning");
-          this.isLoading = false;
-          return;
-        }
-
-        let formdata = new FormData();
-        formdata.append("image", this.form_data);
-
-        axios.post("http://146.56.214.208:8100/image_recognition/updateAvatarUrl", formdata, config)
-          .then(response => {
-            this.processResponse(response.data);
-            sessionStorage.removeItem("url");
-          })
-          .catch(handleError);
-      }
-    },
-
-    // 将tiff图片转换为png的base64编码
-    getTiffDataUrlHandler(url) {
-      this.originalImageSrc = this.image_src;
-
-      const xhr = new XMLHttpRequest();
-      xhr.responseType = "arraybuffer";
-      xhr.open("GET", url);
-
-      xhr.onload = () => {
-        try {
-          const tiff = new Tiff({ buffer: xhr.response });
-          const canvas = tiff.toCanvas();
-
-          this.$nextTick(() => {
-            this.image_src = canvas.toDataURL();
-            this.isLoading = false;
-          });
-        } catch (error) {
-          console.error("处理TIFF图片时出错:", error);
-          this.showMessage("处理图片出错，请重试", "error");
-          this.isLoading = false;
-        }
-      };
-
-      xhr.onerror = () => {
-        this.showMessage("加载图片失败，请重试", "error");
-        this.isLoading = false;
-      };
-
-      xhr.send();
-    },
-
-    // 处理API响应
-    processResponse(data) {
-      if (!data || data.base64 === "预测出错：(str(e)" || data.code === 500) {
-        this.showMessage("处理图片出错，请重试", "error");
-        this.isLoading = false;
-        return;
-      }
-
-      try {
-        const base64Data = data.base64.replace(/[\r\n]/g, "");
-        const newImageSrc = "data:image/png;base64," + base64Data;
-
-        this.$nextTick(() => {
-          this.image_src = newImageSrc;
-          this.isShowStatistic = true;
-          this.statisticData = (data.are_sum_bfb * 100).toFixed(2);
-          this.updateDataFields(data);
-          this.isLoading = false;
-        });
-      } catch (error) {
-        console.error("处理响应数据时出错:", error);
-        this.showMessage("处理数据时出错，已恢复原始图片", "error");
-        this.image_src = this.originalImageSrc;
-        this.isLoading = false;
-      }
-    },
-
-    // 更新数据字段
-    updateDataFields(data) {
-      const fields = [
-        { key: 'coordinates', index: 0, format: v => v },
-        { key: 'are_sum_bfb', index: 1, format: v => (v * 100).toFixed(2) + '%' },
-        { key: 'circularity', index: 2, format: v => v },
-        { key: 'minimumccd', index: 3, format: v => v },
-        { key: 'maximumicd', index: 4, format: v => v },
-        { key: 'equalAreaCircleDiam', index: 5, format: v => v },
-        { key: 'mbrWidth', index: 6, format: v => v },
-        { key: 'mbrHeight', index: 7, format: v => v },
-        { key: 'category', index: 8, format: v => v },
-      ];
-
-      fields.forEach(field => {
-        if (data[field.key] !== undefined) {
-          this.dataFields[field.index].value = field.format(data[field.key]);
-        }
-      });
-    },
-
-    // 重置数据字段
-    resetDataFields() {
-      this.dataFields.forEach(field => {
-        field.value = '';
-      });
-      this.isShowStatistic = false;
-    },
-
-    // 重置图片变换
-    resetImageTransform() {
-      this.imageTransform = {
-        ...this.imageTransform,
-        scale: 1,
-        translateX: 0,
-        translateY: 0
-      };
-
-      this.dragState = {
-        ...this.dragState,
-        isDragging: false,
-        wasDragged: false,
-        lastTranslateX: 0,
-        lastTranslateY: 0,
-        distance: 0
-      };
-    },
-
-    // 放大图片
-    handleZoomIn() {
-      if (!this.image_src) {
-        this.showMessage("请先上传图片", "warning");
-        return;
-      }
-
-      const { scale, maxScale } = this.imageTransform;
-      this.imageTransform.scale = Math.min(maxScale, scale + 0.2);
-    },
-
-    // 缩小图片
-    handleZoomOut() {
-      if (!this.image_src) {
-        this.showMessage("请先上传图片", "warning");
-        return;
-      }
-
-      const { scale, minScale } = this.imageTransform;
-      this.imageTransform.scale = Math.max(minScale, scale - 0.2);
-    },
-
-    // 图像分割
-    handleSegmentation() {
-      if (!this.image_src) {
-        this.showMessage("请先上传图片", "warning");
-        return;
-      }
-      this.showMessage("正在执行图像分割", "info");
-    },
-
-    // 图像降维
-    handleReduction() {
-      if (!this.image_src) {
-        this.showMessage("请先上传图片", "warning");
-        return;
-      }
-      this.showMessage("正在执行降维处理", "info");
-    },
-
-    // 显示处理结果
-    handleDisplay() {
-      if (!this.image_src) {
-        this.showMessage("请先上传图片", "warning");
-        return;
-      }
-      this.getStatistic();
-    },
-
-    // 显示消息
-    showMessage(message, type = "info") {
-      this.$message({
-        message,
-        type
-      });
-    },
-
-    // 处理鼠标滚轮事件
-    handleWheel(event) {
-      if (!this.image_src) return;
-      event.preventDefault();
-
-      const { scale, minScale, maxScale } = this.imageTransform;
-      const { translateX, translateY } = this.imageTransform;
-
-      // 计算新的缩放比例
-      const delta = event.deltaY > 0 ? -0.1 : 0.1;
-      const newScale = Math.max(minScale, Math.min(maxScale, scale + delta));
-
-      // 计算鼠标在图片上的相对位置
-      const rect = this.$refs.imageContainer.getBoundingClientRect();
-      const mouseX = event.clientX - rect.left;
-      const mouseY = event.clientY - rect.top;
-
-      // 计算新的平移位置，保持鼠标指向的图片点不变
-      const scaleRatio = newScale / scale;
-      const newTranslateX = mouseX - (mouseX - translateX) * scaleRatio;
-      const newTranslateY = mouseY - (mouseY - translateY) * scaleRatio;
-
-      // 更新状态
-      this.imageTransform = {
-        ...this.imageTransform,
-        scale: newScale,
-        translateX: newTranslateX,
-        translateY: newTranslateY
-      };
-    },
-
-    // 开始拖动
-    startDrag(event) {
-      if (!this.image_src) return;
-
-      this.dragState = {
-        ...this.dragState,
-        isDragging: true,
-        wasDragged: false,
-        distance: 0,
-        startX: event.clientX,
-        startY: event.clientY,
-        lastTranslateX: this.imageTransform.translateX,
-        lastTranslateY: this.imageTransform.translateY
-      };
-
-      event.preventDefault();
-    },
-
-    // 拖动中
-    onDrag(event) {
-      if (!this.dragState.isDragging) return;
-
-      const { startX, startY, lastTranslateX, lastTranslateY, threshold } = this.dragState;
-
-      // 计算拖动距离
-      const dx = event.clientX - startX;
-      const dy = event.clientY - startY;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-
-      // 更新拖动状态
-      this.dragState.distance = distance;
-      this.dragState.wasDragged = distance > threshold;
-
-      // 更新图片位置
-      this.imageTransform.translateX = event.clientX - startX + lastTranslateX;
-      this.imageTransform.translateY = event.clientY - startY + lastTranslateY;
-
-      event.preventDefault();
-    },
-
-    // 结束拖动
-    endDrag() {
-      this.dragState.isDragging = false;
-
-      // 添加延时，确保点击事件能正确判断
-      setTimeout(() => {
-        this.dragState.wasDragged = false;
-      }, 50);
-    }
-  },
   created() {
+    // 在组件创建时从会话存储恢复API返回的URL
+    this.apiReturnedUrl = sessionStorage.getItem("apiUrl") || "";
+
     const tempUrl = sessionStorage.getItem("url");
     if (tempUrl !== null) {
       this.isLoading = true;
+      // 获取TIFF图片并转换
       this.getTiffDataUrlHandler(tempUrl);
+
+      // 直接处理保存的图片，无需确认对话框
+      this.clickStatistic(true);
+    }
+  },
+
+  methods: {
+    // 覆盖handleCenterPicClick方法，确保只触发一次文件选择
+    handleCenterPicClick(event) {
+      // 如果正在加载或者拖拽了图片，不触发上传
+      if (this.isLoading || this.dragState.wasDragged) {
+        this.dragState.wasDragged = false;
+        return;
+      }
+
+      // 检查是否已经有图片，如果有，可能需要确认是否替换
+      if (this.image_src) {
+        this.$confirm('您确定要上传新图片替换当前图片吗?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          // 用户确认后，点击隐藏的文件输入框
+          document.getElementById('select_files').click();
+        }).catch(() => {
+          // 用户取消操作，不执行任何动作
+        });
+      } else {
+        // 没有图片时直接点击文件输入框
+        document.getElementById('select_files').click();
+      }
+    },
+
+    // 修改showSelectedImage方法，确保它不会重复触发api调用或弹窗
+    showSelectedImage() {
+      const fileInput = document.getElementById('select_files');
+      if (fileInput.files && fileInput.files[0]) {
+        this.isLoading = true;
+
+        const file = fileInput.files[0];
+        // 检查文件类型和大小
+        if (!['image/jpeg', 'image/png', 'image/tiff'].includes(file.type)) {
+          this.$message.error('请上传JPG、PNG或TIFF格式的图片');
+          this.isLoading = false;
+          fileInput.value = ''; // 清空文件输入框
+          return;
+        }
+
+        if (file.size > 10 * 1024 * 1024) { // 10MB
+          this.$message.error('图片大小不能超过10MB');
+          this.isLoading = false;
+          fileInput.value = ''; // 清空文件输入框
+          return;
+        }
+
+        // 处理文件上传逻辑
+        this.processUploadedFile(file);
+      }
+    },
+
+    // 添加处理上传文件的方法，避免重复逻辑
+    processUploadedFile(file) {
+      // 根据文件类型进行不同处理
+      if (file.type === 'image/tiff') {
+        // 处理TIFF文件
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.getTiffDataUrlHandler(e.target.result);
+
+          // TIFF处理完成后直接进行分析
+          setTimeout(() => {
+            if (this.image_src) {
+              // 准备表单数据用于API调用
+              this.prepareFormData(file);
+              this.clickStatistic(false);
+            }
+          }, 500);
+        };
+
+        reader.onerror = () => {
+          this.handleTiffError('读取文件时发生错误');
+        };
+
+        reader.readAsArrayBuffer(file);
+      } else {
+        // 处理JPG/PNG文件
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.image_src = e.target.result;
+          this.originalImageSrc = e.target.result;
+
+          // 重置图片变换
+          this.resetImage();
+
+          // 准备表单数据用于API调用
+          this.prepareFormData(file);
+
+          this.isLoading = false;
+
+          // 直接对图片进行处理，无需确认对话框
+          this.clickStatistic(false);
+        };
+        reader.readAsDataURL(file);
+      }
+
+      // 清空文件输入，以便用户可以上传相同的文件
+      document.getElementById('select_files').value = '';
+    },
+
+    // 准备表单数据
+    prepareFormData(file) {
+      this.form_data = new FormData();
+      this.form_data.append('image', file);
+    },
+
+    // 添加或修复 getTiffDataUrlHandler 方法
+    getTiffDataUrlHandler(tiffData) {
+      try {
+        this.isLoading = true;
+
+        // 如果传入的是URL字符串，需要先获取二进制数据
+        if (typeof tiffData === 'string' && tiffData.startsWith('http')) {
+          const xhr = new XMLHttpRequest();
+          xhr.open('GET', tiffData, true);
+          xhr.responseType = 'arraybuffer';
+
+          xhr.onload = () => {
+            if (xhr.status === 200) {
+              this.processTiffArrayBuffer(xhr.response);
+            } else {
+              this.handleTiffError(`Failed to load TIFF: ${xhr.statusText}`);
+            }
+          };
+
+          xhr.onerror = () => {
+            this.handleTiffError('Network error occurred when trying to load TIFF file');
+          };
+
+          xhr.send();
+        } else {
+          // 如果已经是ArrayBuffer，直接处理
+          this.processTiffArrayBuffer(tiffData);
+        }
+      } catch (error) {
+        this.handleTiffError(`Error processing TIFF: ${error.message}`);
+      }
+    },
+
+    // 处理TIFF ArrayBuffer数据
+    processTiffArrayBuffer(arrayBuffer) {
+      try {
+        // 使用Tiff.js解析TIFF数据
+        const tiff = new Tiff({ buffer: arrayBuffer });
+
+        // 获取TIFF图像的宽度和高度
+        const width = tiff.width();
+        const height = tiff.height();
+
+        // 创建Canvas元素并设置尺寸
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+
+        // 将TIFF渲染到Canvas
+        tiff.render(canvas);
+
+        // 将Canvas转换为base64数据URL
+        const dataUrl = canvas.toDataURL('image/png');
+
+        // 更新图像源
+        this.image_src = dataUrl;
+        this.originalImageSrc = dataUrl;
+
+        // 重置图像变换
+        this.resetImage();
+
+        // 完成加载
+        this.isLoading = false;
+
+        // 释放Tiff对象资源
+        tiff.close();
+
+        console.log('TIFF successfully converted to PNG');
+        return dataUrl;
+      } catch (error) {
+        this.handleTiffError(`Failed to process TIFF data: ${error.message}`);
+        return null;
+      }
+    },
+
+    // 处理TIFF错误
+    handleTiffError(message) {
+      console.error(message);
+      this.$message.error('TIFF处理失败：' + message);
+      this.isLoading = false;
+    },
+
+    // 修改clickStatistic方法，实现与原代码相似的逻辑
+    clickStatistic(transPic) {
+      this.isShowStatistic = false;
+      this.isLoading = true;
+
+      if (transPic === true) {
+        // 处理会话存储中的URL
+        let formdata = new FormData();
+        let tiff_url = sessionStorage.getItem("url");
+        if (tiff_url) {
+          // 处理URL格式，与原代码保持一致
+          let regex = /\/images\/(\d+)\/(\w+)\/(.+)/;
+          if (regex.test(tiff_url)) {
+            tiff_url = tiff_url.replace(regex, '$1\\$2\\$3');
+          }
+          formdata.append("image", tiff_url);
+
+          // 调用URL上传接口
+          this.uploadImageByUrl(formdata);
+        } else {
+          this.isLoading = false;
+          this.$message.error('会话存储中没有有效的图片URL');
+        }
+      } else {
+        // 处理直接上传的文件
+        if (!this.form_data) {
+          this.isLoading = false;
+          this.$message.error('没有选择图片');
+          return;
+        }
+
+        // 调用文件上传接口
+        this.uploadImageByFile(this.form_data);
+      }
+    },
+
+    // 添加URL上传处理方法
+    uploadImageByUrl(formdata) {
+      // 获取认证信息和请求配置
+      const config = this.getRequestConfig();
+
+      // 使用URL上传接口
+      axios.post("http://146.56.214.208:8100/image_recognition/updateAvatarUrl2", formdata, config)
+        .then(async(response) => {
+          const data = await response.data;
+          this.handleApiResponse(data);
+        })
+        .catch(error => {
+          this.handleApiError(error);
+        });
+    },
+
+    // 添加文件上传处理方法
+    uploadImageByFile(formData) {
+      // 获取认证信息和请求配置
+      const config = this.getRequestConfig();
+
+      // 使用文件上传接口
+      axios.post("http://146.56.214.208:8100/image_recognition/updateAvatarUrl", formData, config)
+        .then(response => {
+          this.handleApiResponse(response.data);
+          // 清除会话存储中的URL
+          sessionStorage.removeItem("url");
+        })
+        .catch(error => {
+          this.handleApiError(error);
+        });
+    },
+
+    // 添加请求配置获取方法
+    getRequestConfig() {
+      return {
+        headers: {
+          "content-type": "multipart/form-data",
+          Authorization: "Bearer " + this.getToken()
+        }
+      };
+    },
+
+    // 添加API响应处理方法
+    handleApiResponse(data) {
+      if (!data || data.code !== 200 || data.base64 === "预测出错：(str(e)") {
+        this.$message.error('预测出错，请上传重试');
+        this.isLoading = false;
+        this.image_src = "";
+        return;
+      }
+
+      // 更新图像和统计数据
+      this.isLoading = false;
+      this.image_src = "data:image/png;base64," + data.base64;
+      // 移除可能的换行符
+      this.image_src = this.image_src.replace(/[\r\n]/g, "");
+      this.isShowStatistic = true;
+
+      // 计算并显示统计数据
+      if (data.are_sum_bfb !== undefined) {
+        this.statisticData = (data.are_sum_bfb * 100).toFixed(2);
+      }
+
+      // 处理图表数据（如果实现了相关函数）
+      if (typeof this.processChartData === 'function') {
+        this.processChartData(data);
+      }
+    },
+
+    // 添加API错误处理方法
+    handleApiError(error) {
+      console.error('API请求失败:', error);
+      this.$message.error('出现未知错误，请刷新后重试');
+      this.isLoading = false;
+    },
+
+    // 获取认证Token的方法（如果mixins中没有提供）
+    getToken() {
+      // 如果mixins中已提供getToken，可以移除此方法
+      return sessionStorage.getItem('token') || localStorage.getItem('token') || '';
+    },
+
+    // 更新示例图片切换方法
+    getImgChange(item) {
+      // 检查当前图片是否为原始图片
+      if (item.showUrl === item.imgUrl) {
+        // 切换到处理后的图片
+        item.showUrl = item.img_edUrl;
+      } else {
+        // 切换回原始图片
+        item.showUrl = item.imgUrl;
+      }
+    }
+  },
+
+  beforeDestroy() {
+    // 清理可能的内存泄漏
+    if (this.image_src && this.image_src.startsWith('blob:')) {
+      URL.revokeObjectURL(this.image_src);
     }
   }
 };
@@ -534,15 +538,8 @@ export default {
 .image-content {
   width: 100%;
   position: relative;
+  height:100%;
 }
-
-/* .image-tit {
-  height: 60px;
-  line-height: 60px;
-  font-size: 40px;
-  text-align: center;
-  margin: 80px 0 20px;
-} */
 
 .image-content-1 {
   display: flex;
@@ -696,7 +693,9 @@ export default {
   overflow: hidden;
   position: relative;
   touch-action: none;
-  /* 防止触摸设备上的默认行为干扰自定义手势 */
+  /* 防止鼠标滚轮事件引起页面滚动 */
+  overscroll-behavior: none;
+  isolation: isolate;
 }
 
 /* 光标样式 */
@@ -797,5 +796,42 @@ export default {
   background-color: #f9f9f9;
   border-radius: 4px;
   overflow-y: auto;
+}
+
+/* 添加有图片状态的样式 */
+.center-pic.has-image {
+  border-color: #1989fa;
+}
+
+/* 修改dragging状态的鼠标样式，使其更明显 */
+.center-pic.dragging {
+  cursor: grabbing !important;
+  border-style: solid;
+  border-color: #409EFF;
+}
+
+/* 修改加载样式，确保它覆盖整个区域并阻止点击 */
+.center-pic .loading-component {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.7);
+  z-index: 10;
+  pointer-events: none; /* 允许点击穿透到下面的元素 */
+}
+
+@media (hover: none) and (pointer: coarse) {
+  /* 增加触摸设备特定样式 */
+  .image-container {
+    cursor: move;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: none;
+  }
 }
 </style>

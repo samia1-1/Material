@@ -141,7 +141,7 @@ export default {
 /* 底层容器 */
 .content-wrapper-bottom {
   position: relative;
-  height: 150vh;
+  height: 165vh;
   z-index: 1;
   background-color: rgba(240, 240, 240, 0.95);
   border-radius: 3px;
@@ -162,13 +162,13 @@ export default {
   padding-top: 50px;
   width: 100%;
   margin: 0 auto;
-  height: 150vh;
-  transform: translate(10px, -20px);
+  height: 165vh;
+  transform: translate(20px, -30px);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .content-wrapper:hover {
-  transform: translate(12px, -25px);
+  transform: translate(25px, -35px);
   box-shadow: 8px 8px 20px rgba(0, 0, 0, 0.4);
 }
 
