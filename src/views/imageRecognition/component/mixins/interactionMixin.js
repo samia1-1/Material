@@ -95,7 +95,15 @@ export default {
 
     // 开始拖动
     startDrag(event) {
-      if (!this.image_src) return;
+      if (!this.image_src || this.isLoading) return;
+
+      // 添加拖动标识类，用于自定义光标样式
+      const centerPic = this.$el.querySelector('.center-pic');
+      if (centerPic) {
+        centerPic.classList.add('dragging');
+        // 添加Element UI动画类
+        centerPic.classList.add('el-zoom-in-top');
+      }
 
       this.dragState = {
         ...this.dragState,
@@ -108,6 +116,10 @@ export default {
         lastTranslateY: this.imageTransform.translateY,
         dragStartTime: Date.now()
       };
+
+      // 添加拖拽状态到document，防止拖拽时文本选择
+      document.body.style.userSelect = 'none';
+      document.body.style.cursor = 'grabbing';
 
       event.preventDefault();
     },
@@ -137,6 +149,17 @@ export default {
     // 结束拖动
     endDrag() {
       if (!this.dragState.isDragging) return;
+
+      // 移除拖动标识类和动画类
+      const centerPic = this.$el.querySelector('.center-pic');
+      if (centerPic) {
+        centerPic.classList.remove('dragging');
+        centerPic.classList.remove('el-zoom-in-top');
+      }
+
+      // 恢复document状态
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
 
       // 记录拖动结束时间
       this.dragState.dragEndTime = Date.now();

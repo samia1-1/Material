@@ -72,7 +72,7 @@ export default {
           }
 
           this.processResponse(response.data);
-          this.showMessage('已使用文件上传接口处理图片', 'success');
+          // this.showMessage('已使用文件上传接口处理图片', 'success');
         })
         .catch(error => this.handleRequestError(error));
     },
@@ -120,87 +120,108 @@ export default {
 
     // 处理统计请求
     clickStatistic(transPic) {
+      this.isShowStatistic = false;
       this.isLoading = true;
-      this.originalImageSrc = this.image_src;
 
-      // 获取公共请求配置
+      if (transPic === true) {
+        // 处理会话存储中的URL
+        let formdata = new FormData();
+        let tiff_url = sessionStorage.getItem("url");
+        if (tiff_url) {
+          // 处理URL格式，与原代码保持一致
+          let regex = /\/images\/(\d+)\/(\w+)\/(.+)/;
+          if (regex.test(tiff_url)) {
+            tiff_url = tiff_url.replace(regex, '$1\\$2\\$3');
+          }
+          formdata.append("image", tiff_url);
+
+          // 调用URL上传接口
+          this.uploadImageByUrl(formdata);
+        } else {
+          this.isLoading = false;
+          this.$message.error('会话存储中没有有效的图片URL');
+        }
+      } else {
+        // 处理直接上传的文件
+        if (!this.form_data) {
+          this.isLoading = false;
+          this.$message.error('没有选择图片');
+          return;
+        }
+
+        // 调用文件上传接口
+        this.uploadImageByFile(this.form_data);
+      }
+    },
+
+    // 添加URL上传处理方法
+    uploadImageByUrl(formdata) {
+      // 获取认证信息和请求配置
       const config = this.getRequestConfig();
 
-      // 准备FormData和URL - 根据情况选择合适的API
-      const { formdata, url, error } = this.prepareRequestData(transPic);
+      // 使用URL上传接口
+      axios.post("http://146.56.214.208:8100/image_recognition/updateAvatarUrl2", formdata, config)
+        .then(async(response) => {
+          const data = await response.data;
+          this.handleApiResponse(data);
+        })
+        .catch(error => {
+          this.handleApiError(error);
+        });
+    },
 
-      // 检查是否有错误
-      if (error) {
-        this.showMessage(error, "warning");
+    // 添加文件上传处理方法
+    uploadImageByFile(formData) {
+      // 获取认证信息和请求配置
+      const config = this.getRequestConfig();
+
+      // 使用文件上传接口
+      axios.post("http://146.56.214.208:8100/image_recognition/updateAvatarUrl", formData, config)
+        .then(response => {
+          this.handleApiResponse(response.data);
+          // 清除会话存储中的URL
+          sessionStorage.removeItem("url");
+        })
+        .catch(error => {
+          this.handleApiError(error);
+        });
+    },
+
+    // 添加API响应处理方法
+    handleApiResponse(data) {
+      if (!data || data.code !== 200 || data.base64 === "预测出错：(str(e)") {
+        this.$message.error('预测出错，请上传重试');
         this.isLoading = false;
         return;
       }
 
-      // 设置请求超时
-      const requestConfig = {
-        ...config,
-        timeout: 30000 // 30秒超时
-      };
+      // 更新图像和统计数据
+      this.isLoading = false;
+      this.image_src = "data:image/png;base64," + data.base64;
+      // 移除可能的换行符
+      this.image_src = this.image_src.replace(/[\r\n]/g, "");
+      this.isShowStatistic = true;
 
-      // 发送请求 - 明确告知用户使用了哪个接口
-      axios.post(url, formdata, requestConfig)
-        .then(response => {
-          if (!response.data || response.status !== 200) {
-            throw new Error('请求响应无效');
-          }
-          this.processResponse(response.data);
-          if (!transPic) {
-            sessionStorage.removeItem("url");
-            this.showMessage("已使用文件上传接口处理图片", "success");
-          } else {
-            this.showMessage("已使用URL上传接口处理图片", "success");
-          }
-        })
-        .catch(error => this.handleRequestError(error));
+      // 计算并显示统计数据
+      if (data.are_sum_bfb !== undefined) {
+        this.statisticData = (data.are_sum_bfb * 100).toFixed(2);
+      }
+
+      // 处理图表数据（如果实现了相关函数）
+      if (typeof this.processChartData === 'function') {
+        this.processChartData(data);
+      }
     },
 
-    // 将tiff图片转换为png的base64编码
-    getTiffDataUrlHandler(url) {
-      this.originalImageSrc = this.image_src;
-
-      // 设置请求超时
-      const xhr = new XMLHttpRequest();
-      xhr.responseType = "arraybuffer";
-      xhr.open("GET", url);
-      xhr.timeout = 15000; // 15秒超时
-
-      const handleError = (message) => {
-        console.error(message);
-        this.showMessage("处理图片出错，请重试", "error");
-        this.isLoading = false;
-      };
-
-      xhr.onload = () => {
-        try {
-          // 检查响应状态
-          if (xhr.status !== 200) {
-            handleError(`加载图片失败，状态码: ${xhr.status}`);
-            return;
-          }
-
-          const tiff = new Tiff({ buffer: xhr.response });
-          const canvas = tiff.toCanvas();
-
-          this.$nextTick(() => {
-            this.image_src = canvas.toDataURL();
-            this.isLoading = false;
-          });
-        } catch (error) {
-          handleError("处理TIFF图片时出错: " + error);
-        }
-      };
-
-      xhr.onerror = () => handleError("加载图片失败");
-      xhr.ontimeout = () => handleError("加载图片超时");
-      xhr.onabort = () => handleError("加载图片被中断");
-
-      xhr.send();
+    // 添加API错误处理方法
+    handleApiError(error) {
+      console.error('API请求失败:', error);
+      this.$message.error('出现未知错误，请刷新后重试');
+      this.isLoading = false;
     },
+
+    // 移除TIFF相关方法，已在imageMixin中定义
+    // getTiffDataUrlHandler(url) { ... }
 
     // 准备请求数据
     prepareRequestData(transPic) {
@@ -235,10 +256,13 @@ export default {
 
     // 获取请求配置
     getRequestConfig() {
+      const token = getToken();
+      console.log('Using token for request:', token ? 'Token exists' : 'No token found');
+
       return {
         headers: {
           "content-type": "multipart/form-data",
-          Authorization: "Bearer " + getToken(),
+          Authorization: token ? `Bearer ${token}` : '',
         },
       };
     },
@@ -251,7 +275,7 @@ export default {
       this.isLoading = false;
 
       // 根据错误类型提供更具体的消息
-      let errorMessage = "网络请求失败，已恢复原始图片";
+      let errorMessage = "网络请求失败，图片已保留";
 
       if (error.code === 'ECONNABORTED') {
         errorMessage = "请求超时，请检查网络连接";
@@ -264,11 +288,6 @@ export default {
       }
 
       this.showMessage(errorMessage, "error");
-
-      // 恢复原始图片
-      if (this.originalImageSrc) {
-        this.image_src = this.originalImageSrc;
-      }
     },
 
     // 处理API响应
@@ -276,11 +295,6 @@ export default {
       if (!data || data.base64 === "预测出错：(str(e)" || data.code === 500) {
         this.showMessage("处理图片出错，请重试", "error");
         this.isLoading = false; // 确保设置加载状态为false
-
-        // 如果有原始图片，恢复它
-        if (this.originalImageSrc) {
-          this.image_src = this.originalImageSrc;
-        }
         return;
       }
 
@@ -307,12 +321,7 @@ export default {
         });
       } catch (error) {
         console.error("处理响应数据时出错:", error);
-        this.showMessage("处理数据时出错，已恢复原始图片", "error");
-
-        // 恢复原始图片
-        if (this.originalImageSrc) {
-          this.image_src = this.originalImageSrc;
-        }
+        this.showMessage("处理数据时出错，图片已保留", "error");
 
         // 确保关闭加载状态
         this.isLoading = false;
