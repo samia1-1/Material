@@ -204,11 +204,12 @@ export const constantRoutes = [
       {
         path: 'changeinfo',
         component: () => import('@/views/system/user/changeInfo/index'),
-        name: 'changeInfo',
+        // name: 'changeInfo',
         children: [
           {
             path: '',
             component: () => import('@/views/system/user/changeInfo/changeProfile'),
+            name: 'changeProfile'
           },
           {
             path: 'changeac',

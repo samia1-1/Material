@@ -84,7 +84,7 @@ Vue.use(Element, {
 })
 
 Vue.config.productionTip = false
-
+Vue.config.devtools = true;
 const aoo = new Vue({
   el: '#app',
   router,
