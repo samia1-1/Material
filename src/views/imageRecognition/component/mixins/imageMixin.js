@@ -6,16 +6,18 @@ import Tiff from "tiff.js";
 
 export default {
   methods: {
-    // 上传图片
-    imgUpload() {
-      // 确保文件输入框元素存在并且可用
-      const fileInput = document.getElementById("select_files");
-      if (fileInput) {
-        // 清除之前的选择，确保change事件总是触发
-        fileInput.value = '';
-        fileInput.click();
+    // 上传图片 - 重写为调用组件中的triggerUpload方法
+    imgUpload(event) {
+      // 防止事件冒泡（如果是事件触发的）
+      if (event && event.stopPropagation) {
+        event.stopPropagation();
+      }
+
+      // 调用组件中的方法
+      if (typeof this.triggerUpload === 'function') {
+        this.triggerUpload();
       } else {
-        this.showMessage("文件上传组件不可用", "error");
+        console.warn('triggerUpload method not found in component');
       }
     },
 
@@ -75,28 +77,6 @@ export default {
       this.imgUpload();
     },
 
-    // 优化显示选中的图片方法，提供API处理选项
-    showSelectedImage() {
-      const fileInput = document.getElementById("select_files");
-      const file = fileInput.files[0];
-
-      if (!file) {
-        this.showMessage("请正确上传数据", "warning");
-        return;
-      }
-
-      this.isLoading = true; // 立即显示加载状态
-      this.originalImageSrc = this.image_src;
-      sessionStorage.removeItem("url");
-      this.image_src = URL.createObjectURL(file);
-      this.form_data = file;
-      this.resetDataFields();
-      this.resetImageTransform();
-
-      // 自动处理上传的图片，不再询问
-      this.processWithFileUploadAPI(file);
-    },
-
     // 从URL获取图片为Blob对象
     fetchImageAsBlob(url) {
       return new Promise((resolve, reject) => {
@@ -134,58 +114,6 @@ export default {
     prepareFormData(file) {
       this.form_data = new FormData();
       this.form_data.append('image', file);
-    },
-
-    // 添加处理上传文件的方法，避免重复逻辑
-    processUploadedFile(file) {
-      // 根据文件类型进行不同处理
-      if (file.type === 'image/tiff') {
-        // 处理TIFF文件
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          this.getTiffDataUrlHandler(e.target.result);
-
-          // TIFF处理完成后直接进行分析
-          setTimeout(() => {
-            if (this.image_src) {
-              // 准备表单数据用于API调用
-              this.prepareFormData(file);
-              this.clickStatistic(false);
-            }
-          }, 500);
-        };
-
-        reader.onerror = () => {
-          this.handleTiffError('读取文件时发生错误');
-        };
-
-        reader.readAsArrayBuffer(file);
-      } else {
-        // 处理JPG/PNG文件
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          // 保存原始图片URL，以便在API处理成功后可以用新图替换
-          this.originalImageSrc = this.image_src;
-
-          // 设置新上传的图片
-          this.image_src = e.target.result;
-
-          // 只重置图片变换参数，不重置图片本身
-          this.resetImageTransform();
-
-          // 准备表单数据用于API调用
-          this.prepareFormData(file);
-
-          this.isLoading = false;
-
-          // 直接对图片进行处理，无需确认对话框
-          this.clickStatistic(false);
-        };
-        reader.readAsDataURL(file);
-      }
-
-      // 清空文件输入，以便用户可以上传相同的文件
-      document.getElementById('select_files').value = '';
     },
 
     // 添加或修复 getTiffDataUrlHandler 方法

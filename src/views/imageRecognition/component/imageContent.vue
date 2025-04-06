@@ -1,64 +1,122 @@
 <template>
   <div class="image-content">
-    <div class="image-content-1">
-      <div class="left-selection">
-        <image-selection></image-selection>
-      </div>
-      <div class="center-pic" :class="{ 'dragging': isDragging, 'has-image': !!image_src }" @click="handleCenterPicClick">
-        <div class="image-container" ref="imageContainer" @wheel="handleWheel" @touchstart.passive="startTouch"
-          @touchmove.passive="onTouch" @touchend.passive="endTouch" @mousedown="startDrag" @mousemove="onDrag"
-          @mouseup="endDrag" @mouseleave="endDrag">
-          <img :src="image_src" v-if="image_src" class="showed-image" :style="imageTransformStyle">
-          <div v-if="!isLoading && !image_src" class="pic-text">
-            <span>点击上传一个小于10 MB的PNG或JPG图像来使用</span>
+    <el-container class="main-container">
+      <!-- 左侧边栏：操作按钮和数据显示区域 -->
+      <el-aside width="320px" class="left-sidebar">
+        <!-- 操作按钮区域 -->
+        <el-card class="operation-card">
+          <div slot="header" class="card-header">
+            <span><i class="el-icon-s-tools"></i> 操作面板</span>
           </div>
-        </div>
-        <loading v-show="isLoading"></loading>
-        <input type="file" id="select_files" name="input_image" @change="showSelectedImage()" />
-        <div v-show="isShowStatistic" class="show-statistic">识别区域图片总区域比例：{{ statisticData }} %</div>
-      </div>
-
-      <div class="right-statistic">
-        <div class="data-display-container">
           <div class="operation-buttons">
-            <el-button type="default" v-for="(btn, idx) in operationButtons" :key="idx" @click="btn.handler"
+            <el-button
+              v-for="(btn, idx) in operationButtons"
+              :key="idx"
+              @click="btn.handler"
+              :type="btn.type || 'default'"
+              :icon="btn.icon"
               class="op-button">
               {{ btn.label }}
             </el-button>
           </div>
+        </el-card>
 
-          <div class="data-row" v-for="(item, index) in dataFields" :key="index">
-            <div class="data-label">{{ item.label }}:</div>
-            <el-input v-model="item.value" :placeholder="item.placeholder || '未获取数据'" :disabled="true"
-              class="data-value-input"></el-input>
+        <!-- 数据显示区域 -->
+        <el-card class="data-card">
+          <div slot="header" class="card-header">
+            <span><i class="el-icon-data-analysis"></i> 数据分析</span>
+            <el-button v-if="!isShowStatistic" type="text" @click="getStatistic" icon="el-icon-refresh">
+              刷新
+            </el-button>
           </div>
-
+          <el-form label-position="top" size="small" class="data-form">
+            <el-form-item v-for="(item, index) in dataFields" :key="index" :label="item.label">
+              <el-input v-model="item.value" :placeholder="item.placeholder || '未获取数据'" :disabled="true">
+              </el-input>
+            </el-form-item>
+          </el-form>
           <div class="chart-action" v-if="!isShowStatistic">
-            <el-button type="primary" @click="getStatistic">查询统计数据</el-button>
+            <el-button type="primary" @click="getStatistic" icon="el-icon-data-analysis" style="width: 100%">
+              查询统计数据
+            </el-button>
           </div>
+        </el-card>
+      </el-aside>
+
+      <!-- 主内容区：图片显示 -->
+      <el-main class="main-content">
+        <el-card class="image-card" shadow="hover">
+          <div class="center-pic" :class="{ 'dragging': isDragging, 'has-image': !!image_src }" @click.stop="handleCenterPicClick">
+            <div class="image-container" ref="imageContainer" @wheel="handleWheel" @touchstart.passive="startTouch"
+              @touchmove.passive="onTouch" @touchend.passive="endTouch" @mousedown="startDrag" @mousemove="onDrag"
+              @mouseup="endDrag" @mouseleave="endDrag">
+              <img :src="image_src" v-if="image_src" class="showed-image" :style="imageTransformStyle">
+              <div v-if="!isLoading && !image_src" class="upload-placeholder">
+                <!-- 修改上传组件，使用手动上传模式 -->
+                <div class="upload-area" @click.stop="triggerUpload">
+                  <i class="el-icon-upload"></i>
+                  <div class="upload-text">点击上传图片或拖拽到此处</div>
+                  <div class="upload-tip">支持PNG、JPG格式，最大10MB</div>
+                </div>
+              </div>
+            </div>
+            <loading v-show="isLoading"></loading>
+            <div v-show="isShowStatistic" class="show-statistic">
+              <el-tag type="success">识别区域图片总区域比例：{{ statisticData }} %</el-tag>
+            </div>
+          </div>
+        </el-card>
+      </el-main>
+    </el-container>
+
+    <!-- 将示例图片区域移到页脚部分 -->
+    <div class="footer-examples">
+      <el-card class="example-card" shadow="hover">
+        <div slot="header" class="card-header">
+          <span><i class="el-icon-picture"></i> 示例图片</span>
+          <el-tooltip content="点击图片查看处理前后对比效果" placement="top">
+            <i class="el-icon-question"></i>
+          </el-tooltip>
         </div>
-      </div>
+        <div class="show-img-list">
+          <el-row :gutter="20">
+            <el-col :xs="8" :sm="6" :md="4" :lg="4" :xl="3"
+              v-for="(item, index) in imgList" :key="index">
+              <el-card
+                :body-style="{ padding: '0px' }"
+                shadow="hover"
+                class="img-item-card"
+                @click.native="getImgChange(item)">
+                <img :src="item.showUrl" class="show-img">
+                <div class="img-item-footer">
+                  <span>示例 {{index + 1}}</span>
+                  <i class="el-icon-refresh"></i>
+                </div>
+              </el-card>
+            </el-col>
+          </el-row>
+        </div>
+      </el-card>
     </div>
 
-    <div class="show-example">
-      <div class="intro-example">可以单击我们测试集中的示例图像：</div>
-      <div class="show-img-list">
-        <div class="show-img-item" v-for="(item, index) in imgList" :key="index" @click="getImgChange(item)">
-          <img class="show-img" :src="item.showUrl">
-        </div>
-      </div>
-    </div>
+    <!-- 隐藏的文件输入 -->
+    <input
+      type="file"
+      ref="fileInput"
+      style="display:none"
+      accept="image/jpeg,image/png,image/tiff"
+      @change="handleNativeFileChange"
+    />
   </div>
 </template>
 
 <script>
 import Loading from "@/components/Loading/index.vue";
-import ImageSelection from "./imageSelection";
 import { imageMixin, apiMixin, interactionMixin } from "./mixins";
 
 export default {
   name: "ImageContent",
-  components: { Loading, ImageSelection },
+  components: { Loading },
   mixins: [imageMixin, apiMixin, interactionMixin],
 
   data() {
@@ -108,6 +166,7 @@ export default {
       statisticData: null,
       originalImageSrc: "",
       apiReturnedUrl: "",
+      processingFile: false,
 
       // 数据字段
       dataFields: [
@@ -152,7 +211,13 @@ export default {
         startY: 0,
         startDistance: 0,
         lastScale: 1
-      }
+      },
+
+      // 上传处理相关的标志
+      uploadInProgress: false, // 标记是否有上传操作正在进行中
+      fileUploadVersion: 0,    // 用于区分不同的上传操作
+      preventDuplicateUpload: false, // 防止重复触发上传的标志
+      lastUploadTime: 0        // 记录上次上传触发时间
     };
   },
 
@@ -175,12 +240,13 @@ export default {
     // 操作按钮配置
     operationButtons() {
       return [
-        { label: 'Reset', handler: this.resetImage },
-        { label: 'Zoom In', handler: this.handleZoomIn },
-        { label: 'Zoom Out', handler: this.handleZoomOut },
-        { label: 'Segmentation', handler: this.handleSegmentation },
-        { label: 'Reduction', handler: this.handleReduction },
-        { label: 'Display', handler: this.handleDisplay }
+        { label: '上传图片', handler: this.imgUpload, icon: 'el-icon-upload', type: 'primary' },
+        { label: '重置图片', handler: this.resetImage, icon: 'el-icon-refresh-left' },
+        { label: '放大', handler: this.handleZoomIn, icon: 'el-icon-zoom-in' },
+        { label: '缩小', handler: this.handleZoomOut, icon: 'el-icon-zoom-out' },
+        { label: '图像分割', handler: this.handleSegmentation, icon: 'el-icon-crop', type: 'success' },
+        { label: '降维处理', handler: this.handleReduction, icon: 'el-icon-s-operation' },
+        { label: '显示分析', handler: this.handleDisplay, icon: 'el-icon-view', type: 'info' }
       ];
     }
   },
@@ -217,10 +283,118 @@ export default {
     if (this.image_src && this.image_src.startsWith('blob:')) {
       URL.revokeObjectURL(this.image_src);
     }
+
+    // 清理文件输入框的事件监听
+    const fileInput = document.getElementById('select_files');
+    if (fileInput && this._handleInputChange) {
+      fileInput.removeEventListener('change', this._handleInputChange);
+    }
   },
 
   methods: {
-    // 直接在组件中添加updateLoadingState方法，确保挂载时可用
+    // 触发文件上传 - 完全使用原生方式
+    triggerUpload(event) {
+      // 阻止事件冒泡
+      if (event) {
+        event.stopPropagation();
+      }
+
+      // 检查是否在短时间内重复触发
+      const now = Date.now();
+      if (now - this.lastUploadTime < 500) {
+        return;
+      }
+
+      this.lastUploadTime = now;
+
+      // 清空文件输入以确保change事件总是触发
+      if (this.$refs.fileInput) {
+        this.$refs.fileInput.value = '';
+      }
+
+      // 触发文件选择
+      this.$refs.fileInput.click();
+    },
+
+    // 处理原生文件变更
+    handleNativeFileChange(event) {
+      if (this.preventDuplicateUpload) {
+        return;
+      }
+
+      // 设置标志以阻止重复触发
+      this.preventDuplicateUpload = true;
+      setTimeout(() => {
+        this.preventDuplicateUpload = false;
+      }, 1000);
+
+      const file = event.target.files[0];
+      if (!file) {
+        return;
+      }
+
+      // 文件验证和处理逻辑
+      if (!this.validateFileType(file.type)) {
+        this.showMessage('请选择JPG、PNG或TIFF格式的图片', 'error');
+        this.clearFileInput();
+        return;
+      }
+
+      if (file.size > 10 * 1024 * 1024) {
+        this.showMessage('图片大小不能超过10MB', 'error');
+        this.clearFileInput();
+        return;
+      }
+
+      // 设置加载状态
+      this.isLoading = true;
+
+      // 直接使用原始文件，不尝试创建副本
+      this.uploadFileToServer(file); // 调用mixin中的方法
+    },
+
+    // 改进中心图片区域点击处理，防止重复触发
+    handleCenterPicClick(event) {
+      // 阻止事件冒泡
+      event.stopPropagation();
+
+      // 加载状态下不允许操作
+      if (this.isLoading) {
+        return;
+      }
+
+      // 如果标记为拖动，或距离上次拖动结束时间很短，则不触发上传
+      const timeSinceDragEnd = Date.now() - this.dragState.dragEndTime;
+      if (this.dragState.wasDragged || timeSinceDragEnd < 300) {
+        return;
+      }
+
+      // 检查是否在短时间内重复触发
+      const now = Date.now();
+      if (now - this.lastUploadTime < 500) {
+        console.log('忽略重复的上传触发');
+        return;
+      }
+
+      // 只有在未上传图片时才触发文件选择
+      if (!this.image_src) {
+        this.triggerUpload();
+      }
+    },
+
+    // 清除文件输入框的值
+    clearFileInput() {
+      if (this.$refs.fileInput) {
+        this.$refs.fileInput.value = '';
+      }
+    },
+
+    // 验证文件类型
+    validateFileType(type) {
+      return ['image/jpeg', 'image/png', 'image/tiff'].includes(type);
+    },
+
+    // 更新加载状态
     updateLoadingState() {
       const centerPic = this.$el && this.$el.querySelector('.center-pic');
       if (centerPic) {
@@ -231,9 +405,7 @@ export default {
           centerPic.removeAttribute('loading');
         }
       }
-    },
-
-    // ...existing code...
+    }
   }
 };
 </script>
@@ -242,358 +414,282 @@ export default {
 .image-content {
   width: 100%;
   position: relative;
-  height:100%;
+  display: flex;
+  flex-direction: column;
+  margin:10px 30px;
 }
 
-.image-content-1 {
+/* 整体布局 */
+.main-container {
+  display: flex;
+  margin: 20px 0 0 0;
+  margin-left: 0 ! important;/* 移除左边距 */
+  padding: 0; /* 确保没有内边距 */
+}
+
+/* 左侧边栏 */
+.left-sidebar {
+  background-color: #f5f7fa;
+  border-right: 1px solid #e6e6e6;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+  height: calc(100% - 50px); /* 减去内边距 */
+}
+
+/* 卡片通用样式 */
+.operation-card, .data-card, .image-card, .example-card {
+  margin-bottom: 15px;
+  border-radius: 8px;
+}
+
+.card-header {
   display: flex;
   justify-content: space-between;
-  height: 75vh;
+  align-items: center;
 }
 
-.right-statistic {
-  width: 52vw;
-  height: 75vh;
+.card-header span {
+  font-weight: bold;
+  font-size: 16px;
 }
 
-.chartContainer {
+/* 操作按钮区域 */
+.operation-buttons {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+/* 修复按钮样式问题 */
+.op-button {
+  width: 100% !important;
+  height: 36px;
   display: flex;
-  justify-content: space-evenly;
-  flex-wrap: wrap;
-  flex-direction: row;
-  padding: 10px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 15px;
+  margin: 5px 0; /* 添加垂直方向的边距，确保所有按钮有一致的边距 */
 }
 
+.op-button i {
+  margin-right: 5px;
+  font-size: 16px;
+}
+
+/* 数据表单 */
+.data-form {
+  max-height: 50vh;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.data-form .el-form-item {
+  margin-bottom: 10px;
+}
+
+/* 主内容区 */
+.main-content {
+  padding: 50px;
+  background-color: #fff;
+  display: flex;
+  align-items: stretch;
+}
+
+/* 图片卡片区域 - 使其填充整个主内容区 */
+.image-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;
+  height: 100%;
+  padding: 30px;
+}
+
+/* 图片区域 - 使其填充卡片 */
 .center-pic {
-  width: 30vw;
-  height: 30vw;
-  border: 4px dashed rgb(216, 216, 216);
+  width: 100%;
+  height: 100%;
+  min-height: 500px; /* 最小高度确保在内容少时也有合理显示 */
+  border: 2px dashed #dcdfe6;
+  border-radius: 8px;
   position: relative;
-  margin-top: 5vh;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  background-color: #f9f9f9;
 }
 
 .center-pic:hover {
-  border: 4px dashed #5f5f5f;
+  border-color: #409EFF;
+}
+
+.center-pic.has-image {
+  border-style: solid;
+  border-color: #67C23A;
+}
+
+.center-pic.dragging {
+  cursor: grabbing !important;
+  border-color: #E6A23C;
+  box-shadow: 0 0 15px rgba(230, 162, 60, 0.3);
+}
+
+/* 图片样式 */
+.image-container {
+  width: 100%;
+  height: 800px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 100px;
+  overflow: hidden;
 }
 
 .showed-image {
-  max-width: 28vw;
-  /* 稍微减小默认尺寸，留出操作空间 */
-  max-height: 28vw;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
   transform-origin: center;
   will-change: transform;
-  /* 优化变换性能 */
   user-select: none;
-  /* 防止拖动时选中图片 */
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.1));
 }
 
-#select_files {
-  display: none;
-}
-
-.pic-text {
-  width: 30vw;
-  text-align: center;
-  height: 20vh;
-  line-height: 0vh;
-  font-size: 1.8vh;
-  color: #5f5f5f;
-  position: relative;
-  /* 确保相对定位 */
-}
-
-/* 添加新的样式类控制文本位置 */
-.pic-text span {
-  position: relative;
-  top: -50px;
-  /* 向上移动文本，可以根据需要调整这个值 */
-  display: inline-block;
-  font-size: 2vh;
-}
-
-.pic-text::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translateX(-50%);
-  width: 12vw;
-  border-top: 4px dashed rgb(148, 148, 148);
-  z-index: 1;
-}
-
-.pic-text::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 12vw;
-  border-left: 4px dashed rgb(148, 148, 148);
-  z-index: 1;
-}
-
-.center-pic:hover {
-  cursor: pointer;
-}
-
-.show-statistic {
-  width: auto;
-  height: 50px;
-  padding: 0 10px;
-  line-height: 50px;
-  font-size: 18px;
-  color: aliceblue;
-  position: absolute;
-  right: 0;
-  bottom: 0;
-}
-
-.show-example {
-  width: 1200px;
-  margin: 100px auto 0;
-  border-top: 3px solid rgb(10, 47, 255);
-}
-
-.show-img-list {
-  width: 1200px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-}
-
-.show-img-item {
-  float: left;
-  margin: 20px;
-  display: block;
-  width: 256px;
-  height: 256px;
-  border: 3px dashed #e2e2e2;
-  box-sizing: border-box;
-}
-
-.show-img-item:hover {
-  cursor: pointer;
-  border: 3px dashed #5f5f5f;
-}
-
-.show-img-item img {
-  width: 250px;
-  height: 250px;
-}
-
-.el-empty__image {
-  width: 50vh;
-}
-
-/* 新增图片容器样式，确保图片始终正确显示 */
-.image-container {
+/* 上传占位符样式 */
+.upload-placeholder {
   width: 100%;
   height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
-  position: relative;
-  touch-action: none;
-  /* 防止鼠标滚轮事件引起页面滚动 */
-  overscroll-behavior: none;
-  isolation: isolate;
 }
 
-/* 光标样式 */
-.image-container:hover .showed-image {
-  cursor: grab;
-}
-
-.image-container:active .showed-image {
-  cursor: grabbing;
-}
-
-/* 优化拖拽状态下的光标样式 */
-.image-container .showed-image {
-  cursor: grab;
-}
-
-.image-container:active .showed-image {
-  cursor: grabbing !important;
-}
-
-/* 当正在拖动时，整个容器应该表明不可点击上传 */
-.center-pic.dragging {
-  cursor: grabbing;
-}
-
-.center-pic {
-  cursor: pointer;
-}
-
-/* 为数据输出框添加样式 */
-.data-display-container {
+.upload-area {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 4px;
-  overflow-y: auto;
-}
-
-.data-row {
-  display: flex;
   align-items: center;
-  margin-bottom: 15px;
-}
-
-.data-label {
-  width: 180px;
-  text-align: right;
-  padding-right: 12px;
-  font-weight: bold;
-  color: #606266;
-}
-
-.data-value-input {
-  flex: 1;
-}
-
-.chart-action {
-  width: 100%;
-  display: flex;
   justify-content: center;
+  padding: 30px;
+  width: 80%;
+  max-width: 500px;
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  background-color: #fafafa;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.upload-area:hover {
+  border-color: #409EFF;
+}
+
+.upload-area i {
+  font-size: 48px;
+  color: #c0c4cc;
+  margin-bottom: 16px;
+}
+
+.upload-text {
+  font-size: 16px;
+  color: #606266;
+  margin-bottom: 10px;
+}
+
+.upload-tip {
+  font-size: 14px;
+  color: #909399;
+}
+
+/* 统计数据显示 */
+.show-statistic {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  padding: 5px;
+  z-index: 2;
+}
+
+/* 页脚示例图片区域 */
+.footer-examples {
+  width: 100%;
   margin-top: 20px;
 }
 
-/* 为操作按钮添加样式 */
-.operation-buttons {
+/* 示例图片区域 */
+.show-img-list {
+  padding: 10px 0;
+}
+
+.img-item-card {
+  margin-bottom: 15px;
+  transition: transform 0.3s;
+  cursor: pointer;
+}
+
+.img-item-card:hover {
+  transform: translateY(-5px);
+}
+
+.show-img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+}
+
+.img-item-footer {
+  padding: 5px 10px;
   display: flex;
   justify-content: space-between;
-  flex-wrap: wrap;
-  margin-bottom: 20px;
-  padding: 10px;
-  background-color: #f0f2f5;
-  border-radius: 4px;
+  align-items: center;
+  font-size: 12px;
+  color: #909399;
 }
 
-.op-button {
-  margin: 5px;
-  flex: 1;
-  min-width: calc(33.33% - 10px);
-  /* 每行3个按钮 */
+/* 响应式设计 */
+@media screen and (max-width: 992px) {
+  .main-container {
+    flex-direction: column;
+  }
+
+  .left-sidebar {
+    width: 100% !important;
+    border-right: none;
+    border-bottom: 1px solid #e6e6e6;
+  }
+
+  .operation-buttons {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .center-pic {
+    min-height: 400px;
+  }
 }
 
-/* 确保操作按钮在移动设备上也能良好显示 */
 @media screen and (max-width: 768px) {
-  .op-button {
-    min-width: calc(50% - 10px);
-    /* 在小屏幕上每行2个按钮 */
+  .operation-buttons {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .center-pic {
+    min-height: 300px;
   }
 }
 
-/* 调整数据容器的样式以更好地适应新的按钮 */
-.data-display-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+/* Element UI兼容性修复
+:deep(.el-card__header) {
+  padding: 12px 15px;
+}
+
+:deep(.el-card__body) {
   padding: 15px;
-  background-color: #f9f9f9;
-  border-radius: 4px;
-  overflow-y: auto;
 }
 
-/* 添加有图片状态的样式 */
-.center-pic.has-image {
-  border-color: #1989fa;
-}
-
-/* 修改dragging状态的鼠标样式，使其更明显 */
-.center-pic.dragging {
-  cursor: grabbing !important;
-  border-style: solid;
-  border-color: #409EFF;
-}
-
-/* 修改加载样式，确保它覆盖整个区域并阻止点击 */
-.center-pic .loading-component {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(255, 255, 255, 0.7);
-  z-index: 10;
-  pointer-events: none; /* 允许点击穿透到下面的元素 */
-}
-
-@media (hover: none) and (pointer: coarse) {
-  /* 增加触摸设备特定样式 */
-  .image-container {
-    cursor: move;
-    -webkit-user-select: none;
-    user-select: none;
-    touch-action: none;
-  }
-}
-
-/* 优化光标样式，使用更现代的图标 */
-.image-container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-  position: relative;
-  touch-action: none;
-  /* 防止鼠标滚轮事件引起页面滚动 */
-  overscroll-behavior: none;
-  isolation: isolate;
-}
-
-/* 修改鼠标图标样式，提供更好的视觉反馈 */
-.center-pic.has-image {
-  border-color: #1989fa;
-  cursor: default; /* 有图片时默认光标 */
-}
-
-.center-pic.has-image .image-container {
-  cursor: grab; /* 有图片时容器显示grab */
-}
-
-.center-pic.has-image.dragging .image-container {
-  cursor: grabbing !important; /* 拖动时显示grabbing */
-}
-
-.image-container .showed-image {
-  cursor: inherit; /* 继承容器的光标样式 */
-  pointer-events: none; /* 防止图片本身捕获鼠标事件 */
-}
-
-/* 当图片正在加载时阻止交互 */
-.center-pic.has-image.loading .image-container {
-  cursor: wait; /* 加载时显示等待光标 */
-}
-
-/* 针对Firefox的特殊处理 */
-@-moz-document url-prefix() {
-  .center-pic.has-image .image-container {
-    cursor: -moz-grab;
-  }
-  .center-pic.has-image.dragging .image-container {
-    cursor: -moz-grabbing !important;
-  }
-}
-
-/* 修改拖动状态边框样式，使其更明显 */
-.center-pic.dragging {
-  cursor: grabbing !important;
-  border-style: solid;
-  border-color: #409EFF;
-  border-width: 4px;
-  box-shadow: 0 0 8px rgba(64, 158, 255, 0.5); /* 添加阴影效果 */
-}/* 修改拖拽时的光标和视觉效果，与Element UI风格保持一致 */
+:deep(.el-input.is-disabled .el-input__inner) {
+  background-color: #f5f7fa;
+  border-color: #e4e7ed;
+  color: #606266;
+} */
 </style>

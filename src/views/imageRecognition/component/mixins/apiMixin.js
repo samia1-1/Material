@@ -2,10 +2,9 @@
  * API交互相关功能
  * 负责与后端API通信，处理图像识别和数据处理
  */
-import axios from "axios";
 import { getToken } from "@/utils/auth";
 
-// 将API URL和其他常量提取到模块范围
+// API配置
 const API_CONFIG = {
   BASE_URL: "http://146.56.214.208:8100/image_recognition",
   ENDPOINTS: {
@@ -25,59 +24,56 @@ export default {
       this.fetchImageAsBlob(item.showUrl)
         .then(blob => {
           const imageFile = new File([blob], 'example-image.jpg', { type: 'image/jpeg' });
-
-          // 使用文件上传接口处理
           this.processWithFileUploadAPI(imageFile);
         })
         .catch(error => {
           console.error('无法获取图片:', error);
-
-          // 失败时尝试使用URL上传接口
           this.processWithUrlUploadAPI(item.showUrl);
         });
     },
 
-    // 使用文件上传API处理图片 - 捕获返回的URL
+    // 使用文件上传API处理图片 - 使用fetch
     processWithFileUploadAPI(file) {
+      // 保存文件引用
       this.form_data = file;
 
-      // 如果没有设置image_src，则设置（避免重复设置）
-      if (!this.image_src || this.image_src === this.originalImageSrc) {
-        this.image_src = URL.createObjectURL(file);
-      }
+      // 创建FormData
+      const formData = new FormData();
+      formData.append("image", file, file.name);
 
+      // 设置加载状态
       this.isLoading = true;
 
-      const config = {
-        ...this.getRequestConfig(),
-        timeout: 30000 // 30秒超时
-      };
-
-      const formdata = new FormData();
-      formdata.append("image", file);
-
-      const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.FILE_UPLOAD}`;
-
-      axios.post(url, formdata, config)
-        .then(response => {
-          if (!response.data) {
-            throw new Error('响应数据为空');
-          }
-
-          // 保存API返回的URL (如果存在)
-          if (response.data.image_url) {
-            this.apiReturnedUrl = response.data.image_url;
-            // 同时保存到会话存储
-            sessionStorage.setItem("apiUrl", this.apiReturnedUrl);
-          }
-
-          this.processResponse(response.data);
-          // this.showMessage('已使用文件上传接口处理图片', 'success');
-        })
-        .catch(error => this.handleRequestError(error));
+      // 使用fetch发送请求
+      fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.FILE_UPLOAD}`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': getToken() ? `Bearer ${getToken()}` : ''
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`服务器返回错误: ${response.status} ${response.statusText}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        // 保存API返回的URL
+        if (data && data.image_url) {
+          this.apiReturnedUrl = data.image_url;
+          sessionStorage.setItem("apiUrl", this.apiReturnedUrl);
+        }
+        this.handleUploadSuccess(data);
+      })
+      .catch(error => {
+        console.error('请求失败:', error);
+        this.showMessage('图片上传失败: ' + (error.message || '未知错误'), 'error');
+        this.isLoading = false;
+      });
     },
 
-    // 使用URL上传API处理图片 - 优先使用API返回的URL
+    // 使用URL上传API处理图片 - 使用fetch
     processWithUrlUploadAPI(imageUrl) {
       // 优先使用API返回的URL，其次使用传入的URL
       const urlToUse = this.apiReturnedUrl || imageUrl;
@@ -87,27 +83,32 @@ export default {
 
       const tiff_url = urlToUse.replace(/\/images\/(\d+)\/(\w+)\/(.+)/, '\$1\\\$2\\\$3');
 
-      const config = {
-        ...this.getRequestConfig(),
-        timeout: 30000 // 30秒超时
-      };
-
-      const formdata = new FormData();
-      formdata.append("image", tiff_url);
-
-      const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.URL_UPLOAD}`;
+      const formData = new FormData();
+      formData.append("image", tiff_url);
 
       this.showMessage('正在使用后端返回的URL处理图片...', 'info');
 
-      axios.post(url, formdata, config)
-        .then(response => {
-          if (!response.data) {
-            throw new Error('响应数据为空');
-          }
-          this.processResponse(response.data);
-          this.showMessage('已使用URL上传接口处理图片', 'success');
-        })
-        .catch(error => this.handleRequestError(error));
+      // 使用fetch发送请求
+      fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.URL_UPLOAD}`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': getToken() ? `Bearer ${getToken()}` : ''
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`服务器返回错误: ${response.status} ${response.statusText}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        this.processResponse(data);
+        this.showMessage('已使用URL上传接口处理图片', 'success');
+      })
+      .catch(error => {
+        this.handleRequestError(error);
+      });
     },
 
     // 获取统计数据
@@ -125,18 +126,18 @@ export default {
 
       if (transPic === true) {
         // 处理会话存储中的URL
-        let formdata = new FormData();
+        let formData = new FormData();
         let tiff_url = sessionStorage.getItem("url");
         if (tiff_url) {
-          // 处理URL格式，与原代码保持一致
+          // 处理URL格式
           let regex = /\/images\/(\d+)\/(\w+)\/(.+)/;
           if (regex.test(tiff_url)) {
             tiff_url = tiff_url.replace(regex, '$1\\$2\\$3');
           }
-          formdata.append("image", tiff_url);
+          formData.append("image", tiff_url);
 
           // 调用URL上传接口
-          this.uploadImageByUrl(formdata);
+          this.uploadImageByUrl(formData);
         } else {
           this.isLoading = false;
           this.$message.error('会话存储中没有有效的图片URL');
@@ -154,37 +155,55 @@ export default {
       }
     },
 
-    // 添加URL上传处理方法
-    uploadImageByUrl(formdata) {
-      // 获取认证信息和请求配置
-      const config = this.getRequestConfig();
-
-      // 使用URL上传接口
-      axios.post("http://146.56.214.208:8100/image_recognition/updateAvatarUrl2", formdata, config)
-        .then(async(response) => {
-          const data = await response.data;
-          this.handleApiResponse(data);
-        })
-        .catch(error => {
-          this.handleApiError(error);
-        });
+    // 添加URL上传处理方法 - 使用fetch
+    uploadImageByUrl(formData) {
+      fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.URL_UPLOAD}`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': getToken() ? `Bearer ${getToken()}` : ''
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`服务器返回错误: ${response.status} ${response.statusText}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        this.handleApiResponse(data);
+      })
+      .catch(error => {
+        this.handleApiError(error);
+      });
     },
 
-    // 添加文件上传处理方法
-    uploadImageByFile(formData) {
-      // 获取认证信息和请求配置
-      const config = this.getRequestConfig();
+    // 添加文件上传处理方法 - 使用fetch
+    uploadImageByFile(file) {
+      const formData = new FormData();
+      formData.append("image", file, file.name);
 
-      // 使用文件上传接口
-      axios.post("http://146.56.214.208:8100/image_recognition/updateAvatarUrl", formData, config)
-        .then(response => {
-          this.handleApiResponse(response.data);
-          // 清除会话存储中的URL
-          sessionStorage.removeItem("url");
-        })
-        .catch(error => {
-          this.handleApiError(error);
-        });
+      fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.FILE_UPLOAD}`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': getToken() ? `Bearer ${getToken()}` : ''
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`服务器返回错误: ${response.status} ${response.statusText}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        this.handleApiResponse(data);
+        // 清除会话存储中的URL
+        sessionStorage.removeItem("url");
+      })
+      .catch(error => {
+        this.handleApiError(error);
+      });
     },
 
     // 添加API响应处理方法
@@ -220,73 +239,110 @@ export default {
       this.isLoading = false;
     },
 
-    // 移除TIFF相关方法，已在imageMixin中定义
-    // getTiffDataUrlHandler(url) { ... }
-
-    // 准备请求数据
-    prepareRequestData(transPic) {
-      let formdata = new FormData();
-      let url = "";
-      let error = null;
-
-      if (transPic) {
-        // 优先使用API返回的URL
-        let tiff_url = this.apiReturnedUrl || sessionStorage.getItem("apiUrl") || sessionStorage.getItem("url");
-        if (!tiff_url) {
-          error = "没有找到图片数据，请重新上传";
-          return { formdata, url, error };
-        }
-
-        let regex = /\/images\/(\d+)\/(\w+)\/(.+)/;
-        tiff_url = tiff_url.replace(regex, '\$1\\\$2\\\$3');
-        formdata.append("image", tiff_url);
-        url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.URL_UPLOAD}`;
-      } else {
-        // 文件上传逻辑保持不变
-        if (!this.form_data) {
-          error = "没有找到图片数据，请重新上传";
-          return { formdata, url, error };
-        }
-        formdata.append("image", this.form_data);
-        url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.FILE_UPLOAD}`;
+    // 上传文件到服务器 - 统一使用fetch
+    uploadFileToServer(file) {
+      // 验证文件对象
+      if (!(file instanceof File)) {
+        this.showMessage('上传的不是有效的文件对象', 'error');
+        this.isLoading = false;
+        return;
       }
 
-      return { formdata, url, error };
+      // 保存文件引用
+      this.form_data = file;
+
+      // 显示文件预览
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        // 设置预览图片
+        this.image_src = e.target.result;
+
+        // 创建FormData
+        const formData = new FormData();
+        formData.append("image", file, file.name);
+
+        // 设置加载状态
+        this.isLoading = true;
+
+        // 使用fetch发送请求
+        fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.FILE_UPLOAD}`, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Authorization': getToken() ? `Bearer ${getToken()}` : ''
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`服务器返回错误: ${response.status} ${response.statusText}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data && data.image_url) {
+            this.apiReturnedUrl = data.image_url;
+            sessionStorage.setItem("apiUrl", this.apiReturnedUrl);
+          }
+          this.handleUploadSuccess(data);
+        })
+        .catch(error => {
+          console.error('上传失败:', error);
+          this.showMessage('上传失败: ' + (error.message || '未知错误'), 'error');
+          this.isLoading = false;
+        });
+      };
+
+      reader.onerror = () => {
+        this.showMessage('读取文件失败', 'error');
+        this.isLoading = false;
+      };
+
+      // 开始读取文件
+      reader.readAsDataURL(file);
     },
 
-    // 获取请求配置
-    getRequestConfig() {
-      const token = getToken();
-      console.log('Using token for request:', token ? 'Token exists' : 'No token found');
+    // 处理上传成功
+    handleUploadSuccess(data) {
+      if (!data || data.code === 500 || data.base64 === "预测出错：(str(e)") {
+        this.showMessage("图像处理失败，请重试", "error");
+        this.isLoading = false;
+        return;
+      }
 
-      return {
-        headers: {
-          "content-type": "multipart/form-data",
-          Authorization: token ? `Bearer ${token}` : '',
-        },
-      };
+      try {
+        // 更新图片显示
+        const base64Data = data.base64.replace(/[\r\n]/g, "");
+        this.image_src = "data:image/png;base64," + base64Data;
+
+        // 显示统计数据
+        this.isShowStatistic = true;
+
+        if (data.are_sum_bfb !== undefined) {
+          this.statisticData = (data.are_sum_bfb * 100).toFixed(2);
+        }
+
+        // 更新数据字段
+        this.updateDataFields(data);
+
+        // 关闭加载状态
+        this.isLoading = false;
+
+        // 显示成功消息
+        this.showMessage("图像处理完成", "success");
+      } catch (error) {
+        console.error('处理响应出错:', error);
+        this.showMessage("处理响应数据出错", "error");
+        this.isLoading = false;
+      }
     },
 
     // 处理请求错误
     handleRequestError(error) {
       console.error("请求出错:", error);
-
-      // 确保停止加载状态
       this.isLoading = false;
 
       // 根据错误类型提供更具体的消息
       let errorMessage = "网络请求失败，图片已保留";
-
-      if (error.code === 'ECONNABORTED') {
-        errorMessage = "请求超时，请检查网络连接";
-      } else if (error.response) {
-        // 服务器返回了错误状态码
-        errorMessage = `服务器返回错误(${error.response.status})，请稍后重试`;
-      } else if (error.request) {
-        // 请求发送但没有收到响应
-        errorMessage = "服务器无响应，请检查网络连接";
-      }
-
       this.showMessage(errorMessage, "error");
     },
 
@@ -305,25 +361,33 @@ export default {
           sessionStorage.setItem("apiUrl", this.apiReturnedUrl);
         }
 
+        // 获取base64编码的图像数据
         const base64Data = data.base64.replace(/[\r\n]/g, "");
         const newImageSrc = "data:image/png;base64," + base64Data;
 
-        // 先设置图片，再更新其他状态
+        // 更新图片
         this.image_src = newImageSrc;
 
         this.$nextTick(() => {
+          // 显示统计数据
           this.isShowStatistic = true;
-          this.statisticData = (data.are_sum_bfb * 100).toFixed(2);
+
+          if (data.are_sum_bfb !== undefined) {
+            this.statisticData = (data.are_sum_bfb * 100).toFixed(2);
+          }
+
+          // 更新数据字段
           this.updateDataFields(data);
 
-          // 最后关闭加载状态
+          // 关闭加载状态
           this.isLoading = false;
+
+          // 提示用户处理完成
+          this.showMessage("图片处理完成", "success");
         });
       } catch (error) {
         console.error("处理响应数据时出错:", error);
         this.showMessage("处理数据时出错，图片已保留", "error");
-
-        // 确保关闭加载状态
         this.isLoading = false;
       }
     },
