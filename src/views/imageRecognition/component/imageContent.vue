@@ -29,7 +29,7 @@
               刷新
             </el-button>
           </div>
-          <el-form label-position="top" size="small" class="data-form">
+          <el-form label-position="left" size="small" class="data-form" label-width="150px">
             <el-form-item v-for="(item, index) in dataFields" :key="index" :label="item.label">
               <el-input v-model="item.value" :placeholder="item.placeholder || '未获取数据'" :disabled="true">
               </el-input>
@@ -103,7 +103,11 @@
                     shadow="hover"
                     class="img-item-card"
                     @click.native="loadExampleImage(item)">
-                    <img :src="item.imgUrl" class="show-img">
+                    <!-- 修改示例图片的加载方式，使用预处理的预览图 -->
+                    <div class="img-preview-container" :class="{'tiff-image': item.isTiff}">
+                      <img :src="getImagePreviewUrl(item)" class="show-img" :alt="item.name">
+                      <div class="tiff-badge" v-if="item.isTiff">TIFF</div>
+                    </div>
                     <div class="img-item-footer">
                       <span>{{ category.name }} {{index + 1}}</span>
                       <i class="el-icon-picture-outline-round"></i>
@@ -130,13 +134,13 @@
 
 <script>
 import Loading from "@/components/Loading/index.vue";
-import { imageMixin, apiMixin, interactionMixin, uploadMixin } from "./mixins";
+import { imageMixin, apiMixin, interactionMixin, uploadMixin, previewMixin } from "./mixins";
 import categoryConfig from './config/categoryConfig';
 
 export default {
   name: "ImageContent",
   components: { Loading },
-  mixins: [imageMixin, apiMixin, interactionMixin, uploadMixin],
+  mixins: [imageMixin, apiMixin, interactionMixin, uploadMixin, previewMixin],
 
   data() {
     return {
@@ -198,10 +202,6 @@ export default {
       // 分类数据
       categories: categoryConfig,
       activeCategory: '0', // 默认选中"所有分类"
-
-      // 图片数据 - 改为按分类存储
-      categoryImages: {},
-      allImages: [] // 存储所有分类的图片
     };
   },
 
@@ -308,117 +308,20 @@ export default {
       }
     },
 
-    // 更新加载状态
+    // 更新加载状态 - 修复DOM选择错误
     updateLoadingState() {
-      const centerPic = this.$el && this.$el.querySelector('.center-pic');
-      if (centerPic) {
-        // 根据加载状态设置属性
-        if (this.isLoading) {
-          centerPic.setAttribute('loading', 'true');
-        } else {
-          centerPic.removeAttribute('loading');
-        }
-      }
-    },
-
-    // 添加新方法：加载示例图片到主图片区域
-    loadExampleImage(item) {
-      // 只有当已有图片时才执行重置
-      if (this.image_src) {
-        this.resetImage();
-      }
-
-      // 显示加载状态
-      this.isLoading = true;
-
-      // 直接加载示例图片
-      this.fetchImageAsBlob(item.imgUrl)
-        .then(blob => {
-          // 创建URL并设置图片
-          const url = URL.createObjectURL(blob);
-          this.image_src = url;
-
-          // 创建文件对象
-          const imageFile = new File([blob], `example-${Date.now()}.jpg`, { type: 'image/jpeg' });
-          this.form_data = imageFile;
-
-          // 处理图片
-          this.processWithFileUploadAPI(imageFile);
-        })
-        .catch(error => {
-          console.error('加载示例图片失败:', error);
-          this.showMessage('无法加载示例图片', 'error');
-          this.isLoading = false;
-        });
-    },
-
-    // 加载所有分类的图片
-    loadImagesForAllCategories() {
-      this.allImages = []; // 清空所有图片数组
-
-      // 先加载所有分类的图片
-      this.categories.forEach(category => {
-        // 跳过"所有分类"虚拟分类
-        if (category.id !== 0) {
-          this.loadImagesForCategory(category);
-        }
-      });
-    },
-
-    // 为特定分类加载图片
-    loadImagesForCategory(category) {
-      try {
-        // 跳过"所有分类"
-        if (category.id === 0) return;
-
-        // 使用webpack的require.context动态加载图片
-        const imageContext = require.context('@/assets/test/' + category.folder, false, /\.(jpg|jpeg|png)$/);
-        const imagePaths = imageContext.keys();
-
-        // 为每个图片创建对象
-        const images = imagePaths.map((path, index) => {
-          const imgUrl = imageContext(path);
-          // 查找对应的处理后图片(如果存在)
-          let img_edUrl = '';
-          try {
-            // 尝试查找对应的处理后图片
-            img_edUrl = require(`@/assets/test/${category.folder}/processed${path.substring(1)}`);
-          } catch (e) {
-            // 如果找不到处理后的图片，使用原图
-            img_edUrl = imgUrl;
+      // 确保DOM已经挂载并且能正确获取到元素
+      if (this.$el && typeof this.$el.querySelector === 'function') {
+        const centerPic = this.$el.querySelector('.center-pic');
+        if (centerPic) {
+          // 根据加载状态设置属性
+          if (this.isLoading) {
+            centerPic.setAttribute('loading', 'true');
+          } else {
+            centerPic.removeAttribute('loading');
           }
-
-          const imageObj = {
-            imgUrl,
-            img_edUrl,
-            showUrl: imgUrl,
-            categoryId: category.id,
-            name: `${category.name} ${index + 1}`
-          };
-
-          // 将图片添加到所有图片数组
-          this.allImages.push({ ...imageObj });
-
-          return imageObj;
-        });
-
-        // 保存到分类图片对象中
-        this.$set(this.categoryImages, category.id, images);
-      } catch (error) {
-        console.error(`无法加载分类 ${category.name} 的图片:`, error);
-        // 初始化为空数组，避免undefined错误
-        this.$set(this.categoryImages, category.id, []);
+        }
       }
-    },
-
-    // 获取特定分类的图片
-    getCategoryImages(categoryId) {
-      // 如果是"所有分类"，返回所有图片数组
-      if (categoryId === 0) {
-        return this.allImages;
-      }
-      // 否则返回对应分类的图片
-      return this.categoryImages[categoryId] || [];
     }
   }
 };
@@ -430,7 +333,7 @@ export default {
   position: relative;
   display: flex;
   flex-direction: column;
-  margin:10px 30px;
+  margin:10px 30px 10px 5px;
 }
 
 /* 整体布局 */
@@ -445,7 +348,7 @@ export default {
 .left-sidebar {
   background-color: #f5f7fa;
   border-right: 1px solid #e6e6e6;
-  padding: 15px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
   gap: 15px;
@@ -456,7 +359,7 @@ export default {
 /* 卡片通用样式 */
 .operation-card, .data-card, .image-card, .example-card {
   margin-bottom: 15px;
-  border-radius: 8px;
+  border-radius: 12px;
 }
 
 .card-header {
@@ -518,7 +421,26 @@ export default {
 }
 
 .data-form .el-form-item {
-  margin-bottom: 10px;
+  margin-bottom: 8px; /* 减少每项之间的间距 */
+}
+
+/* 覆盖Element UI的默认样式，确保标签对齐 */
+.data-form >>> .el-form-item__label {
+  line-height: 32px;
+  padding-right: 8px;
+  font-size: 13px;
+  color: #606266;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.data-form >>> .el-form-item__content {
+  line-height: 32px;
+}
+
+.data-form >>> .el-input__inner {
+  height: 32px;
+  line-height: 32px;
 }
 
 /* 主内容区 */
@@ -545,7 +467,7 @@ export default {
   height: 100%;
   min-height: 500px; /* 最小高度确保在内容少时也有合理显示 */
   border: 2px dashed #dcdfe6;
-  border-radius: 8px;
+  border-radius: 12px;
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
@@ -570,7 +492,7 @@ export default {
 /* 图片样式 */
 .image-container {
   width: 100%;
-  height: 800px;
+  height: 770px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -707,6 +629,45 @@ export default {
   font-weight: bold;
 }
 
+/* 添加TIFF图片预览样式 */
+.img-preview-container {
+  position: relative;
+  width: 100%;
+  height: 120px; /* 固定高度确保一致性 */
+  overflow: hidden;
+  background-color: #f8f8f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tiff-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: rgba(0, 120, 215, 0.8);
+  color: white;
+  padding: 2px 6px;
+  font-size: 10px;
+  border-bottom-left-radius: 8px;
+  z-index: 2;
+}
+
+.tiff-image {
+  background-color: #f0f0f0;
+}
+
+.show-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.img-item-card:hover .show-img {
+  transform: scale(1.05);
+}
+
 /* 响应式设计 */
 @media screen and (max-width: 992px) {
   .main-container {
@@ -717,6 +678,7 @@ export default {
     width: 100% !important;
     border-right: none;
     border-bottom: 1px solid #e6e6e6;
+    padding:0px;
   }
 
   .operation-buttons {

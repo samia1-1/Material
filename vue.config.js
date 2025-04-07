@@ -101,7 +101,18 @@ module.exports = {
         symbolId: 'icon-[name]'
       })
       .end()
-
+    // 修改TIF文件处理规则，使用url-loader而不是file-loader
+    config.module
+      .rule('tif')
+      .test(/\.(tif|tiff|TIF|TIFF)$/i)
+      .use('url-loader')  // 改用url-loader
+      .loader('url-loader')
+      .options({
+        limit: false,  // 不转为base64，确保保留原始文件
+        esModule: false, // 禁用ES模块语法，避免Module对象问题
+        name: 'static/img/[name].[hash:8].[ext]'
+      })
+      .end();
     config
       .when(process.env.NODE_ENV !== 'development',
         config => {
@@ -132,7 +143,7 @@ module.exports = {
                   name: 'chunk-echarts', // split echarts into a single package
                   priority: 20, // the weight needs to be larger than libs and app or it will be packaged into libs or app
                   test: /[\\/]node_modules[\\/]_?echarts(.*)/ // in order to adapt to cnpm
-              },
+                },
                 commons: {
                   name: 'chunk-commons',
                   test: resolve('src/components'), // can customize your rules

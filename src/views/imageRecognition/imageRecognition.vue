@@ -54,7 +54,7 @@ export default {
   background-color: #fff;
   margin-bottom: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  border-radius: 8px;
+  border-radius: 12px;
   position: relative;
   overflow: hidden;
 }
@@ -87,7 +87,7 @@ export default {
   width: 60px;
   height: 60px;
   background: linear-gradient(135deg, #409EFF, #67C23A);
-  border-radius: 50%;
+  border-radius: 70%;
   margin-right: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
@@ -100,6 +100,7 @@ export default {
 .title-text {
   background: linear-gradient(to right, #409EFF, #67C23A);
   -webkit-background-clip: text;
+  background-clip: text;
   color: transparent;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
   display: inline-block;
@@ -114,7 +115,7 @@ export default {
   width: 100%;
   height: 2px;
   background: linear-gradient(to right, #409EFF, #67C23A);
-  transform: scaleX(0.8);
+  transform: scaleX(0.97);
   opacity: 0.7;
 }
 
@@ -123,7 +124,7 @@ export default {
   width: 98%;
   margin: 0 15px 15px 30px;
   background-color: #fff;
-  border-radius: 8px;
+  border-radius: 12px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   overflow: hidden;
   display: flex;

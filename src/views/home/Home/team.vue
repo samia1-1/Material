@@ -79,6 +79,7 @@ export default {};
   width: 20vw;
   background-color: #f9f9f9;
   margin-bottom: 5px;
+  margin-left: 20px;
   display: flex;
   flex-wrap: nowrap;
   justify-content: center;
@@ -102,6 +103,27 @@ export default {};
   font-size: 1.6vh;
   margin-top: 10px;
   margin-left: 10px;
+}
+.pofile-name a {
+  color: #121d6f;
+  text-decoration: none;
+  font-weight: normal;
+  padding: 0; /* 移除内边距 */
+  border-radius: 0;
+  transition: all 0.3s ease;
+}
+
+.pofile-name a:hover {
+  color: #0d47a1;
+  text-decoration: underline;
+  background-color: rgba(26, 115, 232, 0.1);
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+
+.pofile-name a:active {
+  color: #0d47a1;
+  transform: scale(0.99);
 }
 </style>
 
