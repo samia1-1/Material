@@ -12,9 +12,8 @@
     </div>
 
     <div class="header-nav-item">
-      <router-link to="/datasearch">材料数据</router-link>
+      <router-link to="/datasearch">中国高温合金</router-link>
     </div>
-
     <div class="header-nav-item">
       <router-link to="/alloycomposition">合金成分查询性能</router-link>
     </div>

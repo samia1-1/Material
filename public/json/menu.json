@@ -1,0 +1,719 @@
+{
+    "code":200,
+    "menu":[{
+        "index":"1","name":"固溶强化型变形高温合金","list":[
+            {"index":"1-1","name":"GH1015","key_component":["C","Cr","Ni","W","Mo","Fe","Nb","B","Ce","Mn","Si","P","S","Cu"],"key_craft":[8,11,13],"key_density":8.32},
+            {"index":"1-2","name":"GH1016","key_component":["Cr","Ni","W","Mo","Fe","Nb","V","B","Ce","Mn","Si","P","S","N"],"key_craft":[8,11],"key_density":8.31},
+            {"index":"1-3","name":"GH1035","key_component":["C","Cr","Ni","W","Al","Ti","Fe","Nb","Ce","Mn","Si","P","S"],"key_craft":[1,8,11],"key_density":8.17},
+            {"index":"1-4","name":"GH1040","key_component":["C","Cr","Ni","Mo","Fe","Si","Mn","P","S","Cu","N"],"key_craft":[1,4,8,11],"key_density":8.08},
+            {"index":"1-5","name":"GH1131","key_component":["C","Cr","Ni","W","Mo","Fe","Nb","B","Mn","Si","P","S","N"],"key_craft":[11,8],"key_density":8.33},
+            {"index":"1-6","name":"GH1139","key_component":["C","Cr","Ni","Fe","B","Mn","Si","S","P","N"],"key_craft":[11],"key_density":7.83},
+            {"index":"1-7","name":"GH1140","key_component":["C","Cr","Ni","W","Mo","Al","Ti","Fe","Ce","Mn","Si","P","S"],"key_craft":[1,8,11,13],"key_density":8.09},
+            {"index":"1-8","name":"GH1180","key_component":["C","Cr","Ni","Al","Ti","Fe","Mn","Si","P","S","Cu"],"key_craft":[13],"key_density":7.97},
+            {"index":"1-9","name":"GH1333","key_component":["C","Cr","Ni","Co","W","Mo","Al","Ti","Fe","Nb","B","Si","Mn","S","P","Sn","Pb","Cu"],"key_craft":[11,8],"key_density":8.23},
+            {"index":"1-10","name":"GH3030","key_component":["C","Cr","Ni","Al","Ti","Fe","S","P","Si","Mn","Cu"],"key_craft":[1, 4, 8, 9, 11, 10],"key_density":8.4},
+            {"index":"1-11","name":"GH3039","key_component":["C","Cr","Ni","Mo","Al","Ti","Fe","Nb","Mn","Si","P","S","Cu"],"key_craft":[1, 8, 7, 11, 12, 13, 14],"key_density":8.3},
+            {"index":"1-12","name":"GH3044","key_component":["C","Cr","Ni","W","Mo","Al","Ti","Fe","Mn","Si","P","S","Cu"],"key_craft":[8, 7, 11, 10],"key_density":8.89},
+            {"index":"1-13","name":"GH3128","key_component":["C","Cr","Ni","W","Mo","Al","Ti","Fe","Zr","B","Ce","Si","P","S","Mn"],"key_craft":[11,13],"key_density":8.81},
+            {"index":"1-14","name":"GH3170","key_component":["C","Cr","Ni","Co","W","Al","La","B","Zr","Mn","Si","P","S"],"key_craft":[13],"key_density":9.34},
+            {"index":"1-15","name":"GH3181","key_component":["C","Cr","Ni","Mo","Al","Ti","Fe","La","Zr","Mn","Si","P","S"],"key_craft":[13],"key_density":9.29},
+            {"index":"1-16","name":"GH3230","key_component":["C","Cr","Ni","Co","W","Mo","Al","Ti","Fe","La","B","Si","Mn","S","P","Cu"],"key_craft":[13],"key_density":8.934},
+            {"index":"1-17","name":"GH3536","key_component":[],"key_craft":[],"key_density":8.28},
+            {"index":"1-18","name":"GH3600","key_component":[],"key_craft":[],"key_density":8.43},
+            {"index":"1-19","name":"GH3625","key_component":[],"key_craft":[],"key_density":8.44},
+            {"index":"1-20","name":"GH3652","key_component":[],"key_craft":[],"key_density":7.97},
+            {"index":"1-21","name":"GH5188","key_component":[],"key_craft":[],"key_density":9.09},
+            {"index":"1-22","name":"GH5605","key_component":[],"key_craft":[],"key_density":9.13},
+            {"index":"1-23","name":"GH5605S","key_component":[],"key_craft":[],"key_density":9.1}
+        ]
+    },{
+        "index":"2","name":"等轴晶铸造高温合金","list":[{"index":"2-1","name":"K213","key_component":["C","Cr","Ni","W","Al","Ti","Fe","B","Si","Mn","S","P","Pb","Sb","As","Sn","Bi"],"key_craft":[5],"key_density":8.14},
+        {"index":"2-2","name":"K214","key_component":["C","Cr","Ni","W","Al","Ti","Fe","B","Si","Mn","P","S","Pb","Sb","Bi","As","Sn"],"key_craft":[5],"key_density":8.03},
+        {"index":"2-3","name":"K2136","key_component":["C","Cr","Ni","Mo","Al","Ti","Fe","V","B","Si","Mn","P","S"],"key_craft":[5],"key_density":8.04},
+        {"index":"2-4","name":"K403","key_component":["C","Cr","Ni","Co","W","Mo","Al","Ti","Fe","Ce","B","Zr","Mn","Si","P","S","Pb","Sn","Sb","Bi","As"],"key_craft":[5],"key_density":8.10},
+        {"index":"2-5","name":"K405","key_component":["C","Cr","Ni","Co","W","Mo","Al","Ti","Fe","Ce","B","Zr","Mn","Si","P","S","Pb","Sn","Sb","Bi","As"],"key_craft":[5],"key_density":8.12},
+        {"index":"2-6","name":"K406","key_component":["C","Cr","Ni","Mo","Al","Ti","Fe","B","Zr","Mn","Si","P","S","Pb","Bi","As","Sn","Sb"],"key_craft":[],"key_density":8.05},
+        {"index":"2-7","name":"K406C","key_component":["C","Cr","Ni","Mo","Al","Ti","Fe","B","Zr","Mn","Si","P","S","Pb","Bi","As","Sn","Sb"],"key_craft":[5],"key_density":8.05},
+        {"index":"2-8","name":"K409","key_component":["C","Cr","Ni","Co","W","Mo","Al","Ti","Fe","Nb","Ta","B","Zr","Mn","Si","P","S","Pb","Bi"],"key_craft":[5],"key_density":8.18},
+        {"index":"2-9","name":"K412","key_component":["C","Cr","Ni","W","Mo","Al","Ti","Fe","B","V","Mn","Si","P","S"],"key_craft":[5],"key_density":8.2},
+        {"index":"2-10","name":"K414","key_component":["C","Cr","Ni","Mo","Ti","Al","Fe","B","Ce","Si","Mn","S","P","Pb","Bi"],"key_craft":[5],"key_density":8.106},
+        {"index":"2-11","name":"K417","key_component":["C","Cr","Ni","Co","Mo","Al","Ti","Fe","V","B","Zr","Mn","Si","P","S","Pb","Bi","As","Sn","Sb"],"key_craft":[5],"key_density":7.8},
+        {"index":"2-12","name":"K417G","key_component":["C","Cr","Ni","Co","Mo","Al","Ti","Fe","V","B","Zr","Mn","Si","P","S","Pb","Bi","As","Sn","Sb"],"key_craft":[5],"key_density":7.85},
+        {"index":"2-13","name":"K417L","key_component":["C","Cr","Ni","Co","Mo","Al","Ti","B","P","S","Pb","As","Sn","Sb","Bi","Se"],"key_craft":[5],"key_density":7.8},
+        {"index":"2-14","name":"K418","key_component":["C","Cr","Ni","Mo","Al","Ti","Fe","Nb","B","Zr","Mn","Si","P","S","Pb","Sb","As","Sn","Bi"],"key_craft":[5],"key_density":8.0},
+        {"index":"2-15","name":"K418B","key_component":["C","Cr","Ni","Co","Mo","Al","Ti","Nb","Fe","B","Zr","Mn","Si","P","S","Cu","Pb","Ag","Bi"],"key_craft":[5],"key_density":8.01},
+        {"index":"2-16","name":"K419","key_component":["C","Cr","Ni","Co","W","Mo","Al","Ti","Nb","Fe","B","Zr","Mg","V","S","Si","Mn","Cu","Ag","Pb","Bi"],"key_craft":[5],"key_density":8.5},
+        {"index":"2-17","name":"K419H","key_component":["C","Cr","Ni","Co","W","Mo","Al","Ti","Fe","Nb","Hf","B","Zr","V","S","Mn","Si","Cu","Mg","Ag","Pb","Bi"],"key_craft":[5],"key_density":8.50},
+        {"index":"2-18","name":"K420","key_component":["C","Cr","Ni","Co","W","Mo","Al","Ti","Nb","B","Zr"],"key_craft":[5],"key_density":8.75},
+        {"index":"2-19","name":"K423","key_component":["C","Cr","Ni","Co","Mo","W","Al","Ti","Fe","Nb","B","Hf","Mg","Mn","Si","P","S","Pb","Sn","Sb","Bi","As","Ag","Ga","In","Se","Te","Tl","Zn","Cd"],"key_craft":[5],"key_density":8.5},
+            {
+                "index": "2-31",
+                "name": "K480",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.16
+            },
+            {
+                "index": "2-32",
+                "name": "K487",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.486
+            },
+            {
+                "index": "2-33",
+                "name": "K4002",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.5
+            },
+            {
+                "index": "2-34",
+                "name": "K4130",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.33
+            },
+            {
+                "index": "2-35",
+                "name": "K4163",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.33
+            },
+            {
+                "index": "2-36",
+                "name": "K4169",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.22
+            },
+            {
+                "index": "2-37",
+                "name": "K4202",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.47
+            },
+            {
+                "index": "2-38",
+                "name": "K4208",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.7
+            },
+            {
+                "index": "2-39",
+                "name": "K4222",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.26
+            },
+            {
+                "index": "2-40",
+                "name": "K4242",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.41
+            },
+            {
+                "index": "2-41",
+                "name": "K4537",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.3
+            },
+            {
+                "index": "2-42",
+                "name": "K4648",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.266
+            },
+            {
+                "index": "2-43",
+                "name": "K4708",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.55
+            },
+            {
+                "index": "2-44",
+                "name": "K4951",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.15
+            },
+            {
+                "index": "2-45",
+                "name": "K640",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.6
+            },
+            {
+                "index": "2-46",
+                "name": "K640S",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.68
+            },
+            {
+                "index": "2-47",
+                "name": "K644",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.64
+            },
+            {
+                "index": "2-48",
+                "name": "K6509",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.865
+            },
+            {
+                "index": "2-49",
+                "name": "K825",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 7.98
+            }
+        
+    ]
+    },{
+        "index":"3","name":"沉淀硬化型变形高温合金","list":[
+            {"index":"3-24","name":"GH2018","key_component":[],"key_craft":[],"key_density":8.16},
+            {"index":"3-25","name":"GH2026","key_component":[],"key_craft":[],"key_density":8.20},
+            {"index":"3-26","name":"GH2035A","key_component":[],"key_craft":[],"key_density":8.17},
+            {"index":"3-27","name":"GH2036","key_component":[],"key_craft":[],"key_density":7.85},
+            {"index":"3-28","name":"GH2038","key_component":[],"key_craft":[],"key_density":7.94},
+            {"index":"3-29","name":"GH2130","key_component":[],"key_craft":[],"key_density":8.2},
+            {"index":"3-30","name":"GH2132","key_component":[],"key_craft":[],"key_density":0},
+                {
+                    "index": "3-31",
+                    "name": "GH2135",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 7.92
+                },
+                {
+                    "index": "3-32",
+                    "name": "GH2136",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.03
+                },
+                {
+                    "index": "3-33",
+                    "name": "GH2150",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.26
+                },
+                {
+                    "index": "3-36",
+                    "name": "GH2328",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 7.557
+                },
+                {
+                    "index": "3-37",
+                    "name": "GH2696",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 7.93
+                },
+                {
+                    "index": "3-34",
+                    "name": "GH2150A",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.31
+                },
+                {
+                    "index": "3-35",
+                    "name": "GH2302",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.09
+                },
+                {
+                    "index": "3-38",
+                    "name": "GH2706",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.06
+                },
+                {
+                    "index": "3-39",
+                    "name": "GH2747",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 7.78
+                },
+                {
+                    "index": "3-40",
+                    "name": "GH2761",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.1
+                },
+                {
+                    "index": "3-41",
+                    "name": "GH2787",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.04
+                },
+                {
+                    "index": "3-42",
+                    "name": "GH2901",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.21
+                },
+                {
+                    "index": "3-43",
+                    "name": "GH2903",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.23
+                },
+                {
+                    "index": "3-44",
+                    "name": "GH2907",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.28
+                },
+                {
+                    "index": "3-47",
+                    "name": "GH4033",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.2
+                },
+                {
+                    "index": "3-48",
+                    "name": "GH4037",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.4
+                },
+                {
+                    "index": "3-45",
+                    "name": "GH2909",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.26
+                },
+                {
+                    "index": "3-49",
+                    "name": "GH4049",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.44
+                },
+                {
+                    "index": "3-46",
+                    "name": "GH2984",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.09
+                },
+                {
+                    "index": "3-50",
+                    "name": "GH4079",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.32
+                },
+                {
+                    "index": "3-51",
+                    "name": "GH4080A",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.15
+                },
+                {
+                    "index": "3-52",
+                    "name": "GH4090",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.18
+                },
+                {
+                    "index": "3-53",
+                    "name": "GH4093",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.19
+                },
+                {
+                    "index": "3-55",
+                    "name": "GH4099",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.47
+                },
+                {
+                    "index": "3-56",
+                    "name": "GH4105",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 7.97
+                },
+                {
+                    "index": "3-57",
+                    "name": "GH4133",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.21
+                },
+                {
+                    "index": "3-54",
+                    "name": "GH4098",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.4
+                },
+                {
+                    "index": "3-58",
+                    "name": "GH4137",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 7.9
+                },
+                {
+                    "index": "3-59",
+                    "name": "GH4141",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.27
+                },
+                {
+                    "index": "3-60",
+                    "name": "GH4145",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.25
+                },
+                {
+                    "index": "3-61",
+                    "name": "GH4163",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": null
+                },
+                {
+                    "index": "3-62",
+                    "name": "GH4169",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.24
+                },
+                {
+                    "index": "3-63",
+                    "name": "GH4199",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.64
+                },
+                {
+                    "index": "3-64",
+                    "name": "GH4202",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.36
+                },
+                {
+                    "index": "3-65",
+                    "name": "GH4220",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.36
+                },
+                {
+                    "index": "3-66",
+                    "name": "GH4413",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.498
+                },
+                {
+                    "index": "3-67",
+                    "name": "GH4500",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.05
+                },
+                {
+                    "index": "3-68",
+                    "name": "GH4586",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.39
+                },
+                {
+                    "index": "3-69",
+                    "name": "GH4648",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.28
+                },
+                {
+                    "index": "3-70",
+                    "name": "GH4698",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.32
+                },
+                {
+                    "index": "3-71",
+                    "name": "GH4708",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.55
+                },
+                {
+                    "index": "3-72",
+                    "name": "GH4710",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.08
+                },
+                {
+                    "index": "3-73",
+                    "name": "GH4720Li",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.14
+                },
+                {
+                    "index": "3-74",
+                    "name": "GH4738",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.22
+                },
+                {
+                    "index": "3-75",
+                    "name": "GH4742",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.23
+                },
+                {
+                    "index": "3-76",
+                    "name": "GH6159",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 8.33
+                },
+                {
+                    "index": "3-77",
+                    "name": "GH6783",
+                    "key_component": [],
+                    "key_craft": [],
+                    "key_density": 7.81
+                }
+            
+        ]
+    },{
+        "index":"4","name":"定向凝固柱晶高温合金","list":[
+            {
+                "index": "4-50",
+                "name": "DZ404",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": null
+            },
+            {
+                "index": "4-51",
+                "name": "DZ405",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.12
+            },
+            {
+                "index": "4-52",
+                "name": "DZ406",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.698
+            },
+            {
+                "index": "4-53",
+                "name": "DZ408",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.577
+            },
+            {
+                "index": "4-54",
+                "name": "DZ411",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": null
+            },
+            {
+                "index": "4-55",
+                "name": "DZ417G",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 7.84
+            },
+            {
+                "index": "4-56",
+                "name": "DZ422",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.56
+            },
+            {
+                "index": "4-57",
+                "name": "DZ422B",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.56
+            },
+            {
+                "index": "4-58",
+                "name": "DZ438G",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.1
+            },
+            {
+                "index": "4-59",
+                "name": "DZ468",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.455
+            },
+            {
+                "index": "4-60",
+                "name": "DZ4125",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.595
+            },
+            {
+                "index": "4-61",
+                "name": "DZ4125L",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.35
+            },
+            {
+                "index": "4-62",
+                "name": "DZ4951",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.17
+            },
+            {
+                "index": "4-63",
+                "name": "DZ640M",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.68
+            }
+        ]
+    },{
+        "index":"5","name":"单晶高温合金","list":[
+            {
+                "index": "5-64",
+                "name": "DD402",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.67
+            },
+            {
+                "index": "5-65",
+                "name": "DD403",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.2
+            },
+            {
+                "index": "5-66",
+                "name": "DD404",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.49
+            },
+            {
+                "index": "5-67",
+                "name": "DD406",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.78
+            },
+            {
+                "index": "5-68",
+                "name": "DD407",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.24
+            },
+            {
+                "index": "5-69",
+                "name": "DD408",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.26
+            },
+            {
+                "index": "5-70",
+                "name": "DD426",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.477
+            },
+            {
+                "index": "5-71",
+                "name": "DD432",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.849
+            },
+            {
+                "index": "5-72",
+                "name": "DD499",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 8.512
+            }
+        ]
+    },{
+        "index":"6","name":"粉末冶金高温合金","list":[
+            {
+                "index": "6-73",
+                "name": "FGH4095",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 0
+            },
+            {
+                "index": "6-74",
+                "name": "FGH4096",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 0
+            },
+            {
+                "index": "6-75",
+                "name": "FGH4097",
+                "key_component": [],
+                "key_craft": [],
+                "key_density": 0
+            }
+        ]
+
+    }
+]
+}
+

@@ -8,10 +8,10 @@
       <div class="part1-in">
         <img
           class="part-img-1"
-          src="@/assets/images/cfc68c0488f7216820bd6aed556b0b3.jpg"
+          src="@/assets/images/cfc68c0488f7216820bd6aed556b0b3.png"
         >
         <div class="part1-text">
-          <div class="part1-text-tit">大量可靠数据</div>
+          <div class="part1-text-tit" @click="goToMaterialData" :class="{'clickable': true}">中国高温合金</div>
           <!-- <div class="part1-text-intro">实验室前期收集了《中国高温合金手册》和中南大学粉末冶金国家重点实验室的实验数据(中国金属学会高温材料分会2012)。主要包含铸造高温合金成分数据、拉伸性能数据、蠕变性能数据和持久性能数据。</div> -->
           <div class="part1-text-intro">对于《中国高温合金手册》，我们运用半自动化方法，系统性地提取了手册中 168 个牌号合金的文本数据、表格数据和图形数据，最终构建起一个内容丰富的高温合金数据库。该数据库涵盖了 6914 条文本数据，3289 个表格数据，以及 1352 个图形数据。据统计，这 168 个牌号合金所涉及的性能数据量约为 65000 个，数据内容主要聚焦于变形高温合金和铸造高温合金，包含了其成分、拉伸性能、持久性能、蠕变性能和疲劳性能等方面的数据信息。同时，为了充分发挥数据库的价值，提升数据利用效率，平台还提供了数据查询、筛选及交互式可视化功能。</div>
         </div>
@@ -44,7 +44,13 @@
 </template>
 
 <script>
-export default {};
+export default {
+  methods: {
+    goToMaterialData() {
+      this.$router.push('/datasearch');
+    }
+  }
+};
 </script>
 
 <style scoped>
@@ -74,10 +80,11 @@ export default {};
   position: relative;
 }
 .part-img-1 {
-  width: 400px; /* 增加图片宽度 */
-  margin: 50px 10px 20px 150px;
+  width: 370px; /* 增加图片宽度 */
+  margin: 30px 10px 20px 180px;
   border: #978c8cd6 dashed 0.5px;
   padding:0px;
+  height:320px;
 }
 .part1-text {
   width: 480px;
@@ -92,6 +99,27 @@ export default {};
   height: 50px;
   line-height: 50px;
   text-align: center;
+}
+.clickable {
+  cursor: pointer;
+  position: relative;
+}
+.clickable:hover {
+  color: #409EFF;
+}
+.clickable:after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  bottom: 0;
+  left: 0;
+  background-color: #409EFF;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+.clickable:hover:after {
+  transform: scaleX(1);
 }
 .part1-text-intro {
   font-size: 16px;

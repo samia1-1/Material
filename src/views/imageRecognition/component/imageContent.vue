@@ -56,7 +56,7 @@
                 <div class="upload-area" @click.stop="triggerUpload">
                   <i class="el-icon-upload"></i>
                   <div class="upload-text">点击上传图片或拖拽到此处</div>
-                  <div class="upload-tip">支持PNG、JPG格式，最大10MB</div>
+                  <div class="upload-tip">支持PNG、JPG、TIFF格式，最大10MB</div>
                 </div>
               </div>
             </div>
@@ -86,11 +86,11 @@
                 :body-style="{ padding: '0px' }"
                 shadow="hover"
                 class="img-item-card"
-                @click.native="getImgChange(item)">
-                <img :src="item.showUrl" class="show-img">
+                @click.native="loadExampleImage(item)">
+                <img :src="item.imgUrl" class="show-img">
                 <div class="img-item-footer">
                   <span>示例 {{index + 1}}</span>
-                  <i class="el-icon-refresh"></i>
+                  <i class="el-icon-picture-outline-round"></i>
                 </div>
               </el-card>
             </el-col>
@@ -405,6 +405,37 @@ export default {
           centerPic.removeAttribute('loading');
         }
       }
+    },
+
+    // 添加新方法：加载示例图片到主图片区域
+    loadExampleImage(item) {
+      // 只有当已有图片时才执行重置
+      if (this.image_src) {
+        this.resetImage();
+      }
+
+      // 显示加载状态
+      this.isLoading = true;
+
+      // 直接加载示例图片
+      this.fetchImageAsBlob(item.imgUrl)
+        .then(blob => {
+          // 创建URL并设置图片
+          const url = URL.createObjectURL(blob);
+          this.image_src = url;
+
+          // 创建文件对象
+          const imageFile = new File([blob], `example-${Date.now()}.jpg`, { type: 'image/jpeg' });
+          this.form_data = imageFile;
+
+          // 处理图片
+          this.processWithFileUploadAPI(imageFile);
+        })
+        .catch(error => {
+          console.error('加载示例图片失败:', error);
+          this.showMessage('无法加载示例图片', 'error');
+          this.isLoading = false;
+        });
     }
   }
 };
@@ -459,7 +490,7 @@ export default {
 /* 操作按钮区域 */
 .operation-buttons {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1fr; /* 修改为两列布局 */
   gap: 10px;
 }
 
@@ -470,13 +501,19 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 15px;
-  margin: 5px 0; /* 添加垂直方向的边距，确保所有按钮有一致的边距 */
+  padding: 0 10px; /* 减小内边距以适应更窄的按钮 */
+  margin: 2px 0; /* 减小垂直边距 */
+  font-size: 12px; /* 稍微减小字体大小 */
 }
 
 .op-button i {
-  margin-right: 5px;
-  font-size: 16px;
+  margin-right: 4px; /* 减小图标和文字的间距 */
+  font-size: 14px; /* 适当减小图标大小 */
+}
+
+/* 特殊按钮可以占据整行 */
+.operation-buttons .op-button:last-child {
+  grid-column: span 2; /* 最后一个按钮占据两列 */
 }
 
 /* 数据表单 */
@@ -492,7 +529,7 @@ export default {
 
 /* 主内容区 */
 .main-content {
-  padding: 50px;
+  padding: 15px;
   background-color: #fff;
   display: flex;
   align-items: stretch;
@@ -634,7 +671,7 @@ export default {
 
 .show-img {
   width: 100%;
-  height: 120px;
+  height: 100%;
   object-fit: cover;
 }
 
@@ -660,7 +697,11 @@ export default {
   }
 
   .operation-buttons {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, 1fr); /* 在中等屏幕上改为三列 */
+  }
+
+  .operation-buttons .op-button:last-child {
+    grid-column: span 3; /* 在中等屏幕上最后一个按钮占据三列 */
   }
 
   .center-pic {
@@ -670,26 +711,15 @@ export default {
 
 @media screen and (max-width: 768px) {
   .operation-buttons {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr); /* 在小屏幕上保持两列 */
+  }
+
+  .operation-buttons .op-button:last-child {
+    grid-column: span 2; /* 在小屏幕上最后一个按钮占据两列 */
   }
 
   .center-pic {
     min-height: 300px;
   }
 }
-
-/* Element UI兼容性修复
-:deep(.el-card__header) {
-  padding: 12px 15px;
-}
-
-:deep(.el-card__body) {
-  padding: 15px;
-}
-
-:deep(.el-input.is-disabled .el-input__inner) {
-  background-color: #f5f7fa;
-  border-color: #e4e7ed;
-  color: #606266;
-} */
 </style>

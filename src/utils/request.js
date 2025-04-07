@@ -15,7 +15,7 @@ axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8'
 // 创建axios实例
 const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API,
-  timeout: 200000
+  timeout: 20000000
 })
 
 // request拦截器
@@ -59,26 +59,27 @@ service.interceptors.request.use(config => {
   }
   return config
 }, error => {
-    console.log(error)
-    Promise.reject(error)
+  console.log(error)
+  Promise.reject(error)
 })
 
 // 响应拦截器
-service.interceptors.response.use(function(res) {
-    // 未设置状态码则默认成功状态
-    const code = res.data.code || 200;
-  if(code === 200){
-    store.dispatch('checkAvatarState',true).then((res) => {})
+service.interceptors.response.use(function (res) {
+
+  // 未设置状态码则默认成功状态
+  const code = res.data.code || 200;
+  if (code === 200) {
+    store.dispatch('checkAvatarState', true).then((res) => { })
   }
 
-    // 获取错误信息
-    const msg = errorCode[code] || res.data.msg || errorCode['default']
-    // 二进制数据则直接返回
-    if (res.request.responseType ===  'blob' || res.request.responseType ===  'arraybuffer') {
-      return res.data
-    }
-    if (code === 401) {
-      store.dispatch('checkAvatarState',false).then((res) => {})
+  // 获取错误信息
+  const msg = errorCode[code] || res.data.msg || errorCode['default']
+  // 二进制数据则直接返回
+  if (res.request.responseType === 'blob' || res.request.responseType === 'arraybuffer') {
+    return res.data
+  }
+  if (code === 401) {
+    store.dispatch('checkAvatarState', false).then((res) => { })
     //   if (!isRelogin.show) {
     //     isRelogin.show = true;
     //     store.dispatch('checkAvatarState',false).then((res) => {})
@@ -91,20 +92,20 @@ service.interceptors.response.use(function(res) {
     //     isRelogin.show = false;
     //   });
     // }
-      return //Promise.reject('登录过期，请重新登录。')
-    } else if (code === 500) {
-      Message({ message: msg, type: 'error' })
-      return Promise.reject(new Error(msg))
-    } else if (code === 601) {
-      Message({ message: msg, type: 'warning' })
-      return Promise.reject('error')
-    } else if (code !== 200) {
-      Notification.error({ title: msg })
-      return Promise.reject('error')
-    } else {
-      return res.data
-    }
-  },
+    return //Promise.reject('登录过期，请重新登录。')
+  } else if (code === 500) {
+    Message({ message: msg, type: 'error' })
+    return Promise.reject(new Error(msg))
+  } else if (code === 601) {
+    Message({ message: msg, type: 'warning' })
+    return Promise.reject('error')
+  } else if (code !== 200) {
+    Notification.error({ title: msg })
+    return Promise.reject('error')
+  } else {
+    return res.data
+  }
+},
   error => {
     console.log('err' + error)
     let { message } = error;
@@ -148,3 +149,4 @@ export function download(url, params, filename, config) {
 }
 
 export default service
+

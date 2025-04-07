@@ -1,0 +1,29 @@
+{
+    "code":200,
+    "menu":[{
+        "index":"1","name":"固溶强化型变形高温合金","list":[
+            {"index":"1-1","name":"GH1015","key_component":["C","Cr","Ni","W","Mo","Fe","Nb","B","Ce","Mn","Si","P","S","Cu"],"key_craft":[8,11,13],"key_density":8.32},
+            {"index":"1-2","name":"GH1016","key_component":["Cr","Ni","W","Mo","Fe","Nb","V","B","Ce","Mn","Si","P","S","N"],"key_craft":[8,11],"key_density":8.31},
+            {"index":"1-3","name":"GH1035","key_component":["C","Cr","Ni","W","Al","Ti","Fe","Nb","Ce","Mn","Si","P","S"],"key_craft":[1,8,11],"key_density":8.17},
+            {"index":"1-4","name":"GH1040","key_component":["C","Cr","Ni","Mo","Fe","Si","Mn","P","S","Cu","N"],"key_craft":[1,4,8,11],"key_density":8.08},
+            {"index":"1-5","name":"GH1131","key_component":["C","Cr","Ni","W","Mo","Fe","Nb","B","Mn","Si","P","S","N"],"key_craft":[11,8],"key_density":8.33}
+  
+        ]
+    },{
+        "index":"2","name":"等轴晶铸造高温合金","list":[{"index":"2-1","name":"K213","key_component":["C","Cr","Ni","W","Al","Ti","Fe","B","Si","Mn","S","P","Pb","Sb","As","Sn","Bi"],"key_craft":[5],"key_density":8.14},
+        {"index":"2-2","name":"K214","key_component":["C","Cr","Ni","W","Al","Ti","Fe","B","Si","Mn","P","S","Pb","Sb","Bi","As","Sn"],"key_craft":[5],"key_density":8.03},
+        {"index":"2-3","name":"K2136","key_component":["C","Cr","Ni","Mo","Al","Ti","Fe","V","B","Si","Mn","P","S"],"key_craft":[5],"key_density":8.04},
+        {"index":"2-4","name":"K403","key_component":["C","Cr","Ni","Co","W","Mo","Al","Ti","Fe","Ce","B","Zr","Mn","Si","P","S","Pb","Sn","Sb","Bi","As"],"key_craft":[5],"key_density":8.10},
+        {"index":"2-5","name":"K405","key_component":["C","Cr","Ni","Co","W","Mo","Al","Ti","Fe","Ce","B","Zr","Mn","Si","P","S","Pb","Sn","Sb","Bi","As"],"key_craft":[5],"key_density":8.12},
+        {"index":"2-6","name":"K406","key_component":["C","Cr","Ni","Mo","Al","Ti","Fe","B","Zr","Mn","Si","P","S","Pb","Bi","As","Sn","Sb"],"key_craft":[],"key_density":8.05},
+        {"index":"2-7","name":"K406C","key_component":["C","Cr","Ni","Mo","Al","Ti","Fe","B","Zr","Mn","Si","P","S","Pb","Bi","As","Sn","Sb"],"key_craft":[5],"key_density":8.05},
+        {"index":"2-8","name":"K409","key_component":["C","Cr","Ni","Co","W","Mo","Al","Ti","Fe","Nb","Ta","B","Zr","Mn","Si","P","S","Pb","Bi"],"key_craft":[5],"key_density":8.18}
+  
+    
+           
+        
+    ]
+    } 
+]
+}
+

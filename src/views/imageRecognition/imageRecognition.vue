@@ -9,7 +9,7 @@
     <br>
     <!-- 标题区域 -->
     <div class="page-header">
-      <h1 class="image-tit"><i class="el-icon-picture-outline"></i> 微观组织识别系统</h1>
+      <h1 class="image-tit"><i class="el-icon-picture-outline"></i> 分割一切微观组织模型</h1>
     </div>
 
     <!-- 内容容器 -->
@@ -62,7 +62,7 @@ export default {
 
 /* 内容容器 */
 .content-container {
-  width: 100%;
+  width: 98%;
   margin: 0 15px 15px 30px;
   background-color: #fff;
   border-radius: 8px;

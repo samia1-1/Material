@@ -64,3 +64,12 @@ export function getTemMin() {
 //     method: 'delete'
 //   })
 // }
+export function getJson(url) {
+  return request({
+    url: url,
+    method: 'get',
+    dataType: "json",
+    crossDomain: true,
+    cache: false
+  })
+}

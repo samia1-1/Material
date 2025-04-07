@@ -64,42 +64,42 @@ export default {
   data() {
     return {
       usTeamMembersList: [
-        {
-          name: "王青林",
-          text: "华中农业大学人工智能与统计学习团队2020级研究生",
-          url: "http://aisle.hzau.edu.cn/info/1128/1086.htm",
-          target:true,
-        },
+        // {
+        //   name: "王青林",
+        //   text: "华中农业大学人工智能与统计学习团队2020级研究生",
+        //   url: "http://aisle.hzau.edu.cn/info/1128/1086.htm",
+        //   target:true,
+        // },
         {
           name: "刘青秀",
           text: "华中农业大学人工智能与统计学习团队2023级研究生",
           url: "http://aisle.hzau.edu.cn/info/1158/1760.htm",
           target:true,
         },
-        {
-          name: "吴昊",
-          text: "华中农业大学人工智能与统计学习团队2022级研究生",
-          url: "http://aisle.hzau.edu.cn/info/1159/1537.htm",
-          target:true,
-        },
-        {
-          name: "刘雪丽",
-          text: "华中农业大学人工智能与统计学习团队2022级研究生",
-          url: "http://aisle.hzau.edu.cn/info/1159/1532.htm",
-          target:true,
-        },
-        {
-          name: "刘洋",
-          text: "华中农业大学信息与计算科学2021级本科生",
-          url: "javascript:void(0)",
-          target:false,
-        },
-        {
-          name: "曾新月",
-          text: "华中农业大学信息与计算科学2021级本科生",
-          url: "javascript:void(0)",
-          target:false,
-        },
+        // {
+        //   name: "吴昊",
+        //   text: "华中农业大学人工智能与统计学习团队2022级研究生",
+        //   url: "http://aisle.hzau.edu.cn/info/1159/1537.htm",
+        //   target:true,
+        // },
+        // {
+        //   name: "刘雪丽",
+        //   text: "华中农业大学人工智能与统计学习团队2022级研究生",
+        //   url: "http://aisle.hzau.edu.cn/info/1159/1532.htm",
+        //   target:true,
+        // },
+        // {
+        //   name: "刘洋",
+        //   text: "华中农业大学信息与计算科学2021级本科生",
+        //   url: "javascript:void(0)",
+        //   target:false,
+        // },
+        // {
+        //   name: "曾新月",
+        //   text: "华中农业大学信息与计算科学2021级本科生",
+        //   url: "javascript:void(0)",
+        //   target:false,
+        // },
         {
           name: "涂佳濠",
           text: "华中农业大学人工智能与统计学习团队2023级研究生",
@@ -212,8 +212,8 @@ export default {
   height: 330px;
 }
 .us-team-members-item {
-  width: 270px;
-  height: 120px;
+  width: 540px;
+  height: 150px;
   border: 1px solid rgb(196, 196, 196);
   border-radius: 3px;
   margin: 10px;
@@ -224,8 +224,13 @@ export default {
   color: white;
 }
 .us-team-members-item-name {
-  font-size: 24px;
+  font-size: 30px;
   font-weight: 500;
   margin-bottom: 7px;
+  padding:15px;
+}
+.us-team-members-item-text{
+  font-size:15px;
+  padding:15px;
 }
 </style>

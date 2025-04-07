@@ -50,14 +50,40 @@ export default {
       this.showMessage("图片已重置", "success");
     },
 
-    // 切换示例图片 - 直接处理，无需确认
+    // 切换示例图片 - 修改为在主区域显示图片
     getImgChange(item) {
-      // 切换显示
-      item.showUrl = item.showUrl === item.imgUrl ? item.img_edUrl : item.imgUrl;
+      // 显示加载状态
+      this.isLoading = true;
 
-      // 直接处理图片，不再询问确认
-      this.showMessage("正在处理图片...", "info");
-      this.processExampleImage(item);
+      // 保存原始状态，以便可以恢复（仅当有图片时）
+      if (this.image_src) {
+        this.originalImageSrc = this.image_src;
+      }
+
+      // 直接加载示例图片到主区域
+      this.fetchImageAsBlob(item.imgUrl)
+        .then(blob => {
+          // 为blob创建URL
+          const url = URL.createObjectURL(blob);
+
+          // 设置主图片区域的图片
+          this.image_src = url;
+
+          // 创建文件对象以便上传处理
+          const imageFile = new File([blob], 'example-image.jpg', { type: 'image/jpeg' });
+          this.form_data = imageFile;
+
+          // 准备处理图片
+          this.showMessage("正在处理图片...", "info");
+
+          // 调用API处理图片
+          this.processWithFileUploadAPI(imageFile);
+        })
+        .catch(error => {
+          console.error('无法获取示例图片:', error);
+          this.showMessage('加载示例图片失败', 'error');
+          this.isLoading = false;
+        });
     },
 
     // 处理中心图片区域点击事件 - 移除确认对话框，直接上传
