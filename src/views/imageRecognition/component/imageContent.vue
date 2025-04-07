@@ -83,24 +83,37 @@
             <i class="el-icon-question"></i>
           </el-tooltip>
         </div>
-        <div class="show-img-list">
-          <el-row :gutter="20">
-            <el-col :xs="8" :sm="6" :md="4" :lg="4" :xl="3"
-              v-for="(item, index) in imgList" :key="index">
-              <el-card
-                :body-style="{ padding: '0px' }"
-                shadow="hover"
-                class="img-item-card"
-                @click.native="loadExampleImage(item)">
-                <img :src="item.imgUrl" class="show-img">
-                <div class="img-item-footer">
-                  <span>示例 {{index + 1}}</span>
-                  <i class="el-icon-picture-outline-round"></i>
-                </div>
-              </el-card>
-            </el-col>
-          </el-row>
-        </div>
+
+        <!-- 分类标签页 -->
+        <el-tabs v-model="activeCategory" type="card">
+          <el-tab-pane
+            v-for="category in categories"
+            :key="category.id"
+            :label="category.name"
+            :name="category.id.toString()">
+
+            <div class="show-img-list">
+              <el-row :gutter="20">
+                <el-col
+                  :xs="8" :sm="6" :md="4" :lg="4" :xl="3"
+                  v-for="(item, index) in getCategoryImages(category.id)"
+                  :key="index">
+                  <el-card
+                    :body-style="{ padding: '0px' }"
+                    shadow="hover"
+                    class="img-item-card"
+                    @click.native="loadExampleImage(item)">
+                    <img :src="item.imgUrl" class="show-img">
+                    <div class="img-item-footer">
+                      <span>{{ category.name }} {{index + 1}}</span>
+                      <i class="el-icon-picture-outline-round"></i>
+                    </div>
+                  </el-card>
+                </el-col>
+              </el-row>
+            </div>
+          </el-tab-pane>
+        </el-tabs>
       </el-card>
     </div>
 
@@ -118,6 +131,7 @@
 <script>
 import Loading from "@/components/Loading/index.vue";
 import { imageMixin, apiMixin, interactionMixin, uploadMixin } from "./mixins";
+import categoryConfig from './config/categoryConfig';
 
 export default {
   name: "ImageContent",
@@ -126,43 +140,6 @@ export default {
 
   data() {
     return {
-      imgList: [
-        {
-          imgUrl: require("@/assets/images/img/0500_0500_164.jpg"),
-          img_edUrl: require("@/assets/images/img/img_ed/0500_0500_164.jpg"),
-          showUrl: require("@/assets/images/img/0500_0500_164.jpg"),
-        },
-        {
-          imgUrl: require("@/assets/images/img/0500_0900_164.jpg"),
-          showUrl: require("@/assets/images/img/0500_0900_164.jpg"),
-          img_edUrl: require("@/assets/images/img/img_ed/0500_0900_164.jpg"),
-        },
-        {
-          imgUrl: require("@/assets/images/img/0500_1000_164.jpg"),
-          showUrl: require("@/assets/images/img/0500_1000_164.jpg"),
-          img_edUrl: require("@/assets/images/img/img_ed/0500_1000_164.jpg"),
-        },
-        {
-          imgUrl: require("@/assets/images/img/0550_0700_164.jpg"),
-          showUrl: require("@/assets/images/img/0550_0700_164.jpg"),
-          img_edUrl: require("@/assets/images/img/img_ed/0550_0700_164.jpg"),
-        },
-        {
-          imgUrl: require("@/assets/images/img/0550_0800_164.jpg"),
-          showUrl: require("@/assets/images/img/0550_0800_164.jpg"),
-          img_edUrl: require("@/assets/images/img/img_ed/0550_0800_164.jpg"),
-        },
-        {
-          imgUrl: require("@/assets/images/img/0550_0950_164.jpg"),
-          showUrl: require("@/assets/images/img/0550_0950_164.jpg"),
-          img_edUrl: require("@/assets/images/img/img_ed/0550_0950_164.jpg"),
-        },
-        {
-          imgUrl: require("@/assets/images/img/0550_1000_164.jpg"),
-          showUrl: require("../../../assets/images/img/0550_1000_164.jpg"),
-          img_edUrl: require("@/assets/images/img/img_ed/0550_1000_164.jpg"),
-        },
-      ],
       // 主要状态
       image_src: "",
       form_data: undefined,
@@ -216,7 +193,15 @@ export default {
         startY: 0,
         startDistance: 0,
         lastScale: 1
-      }
+      },
+
+      // 分类数据
+      categories: categoryConfig,
+      activeCategory: '0', // 默认选中"所有分类"
+
+      // 图片数据 - 改为按分类存储
+      categoryImages: {},
+      allImages: [] // 存储所有分类的图片
     };
   },
 
@@ -263,6 +248,9 @@ export default {
       // 直接处理保存的图片，无需确认对话框
       this.clickStatistic(true);
     }
+
+    // 加载图片数据
+    this.loadImagesForAllCategories();
   },
 
   watch: {
@@ -362,6 +350,75 @@ export default {
           this.showMessage('无法加载示例图片', 'error');
           this.isLoading = false;
         });
+    },
+
+    // 加载所有分类的图片
+    loadImagesForAllCategories() {
+      this.allImages = []; // 清空所有图片数组
+
+      // 先加载所有分类的图片
+      this.categories.forEach(category => {
+        // 跳过"所有分类"虚拟分类
+        if (category.id !== 0) {
+          this.loadImagesForCategory(category);
+        }
+      });
+    },
+
+    // 为特定分类加载图片
+    loadImagesForCategory(category) {
+      try {
+        // 跳过"所有分类"
+        if (category.id === 0) return;
+
+        // 使用webpack的require.context动态加载图片
+        const imageContext = require.context('@/assets/test/' + category.folder, false, /\.(jpg|jpeg|png)$/);
+        const imagePaths = imageContext.keys();
+
+        // 为每个图片创建对象
+        const images = imagePaths.map((path, index) => {
+          const imgUrl = imageContext(path);
+          // 查找对应的处理后图片(如果存在)
+          let img_edUrl = '';
+          try {
+            // 尝试查找对应的处理后图片
+            img_edUrl = require(`@/assets/test/${category.folder}/processed${path.substring(1)}`);
+          } catch (e) {
+            // 如果找不到处理后的图片，使用原图
+            img_edUrl = imgUrl;
+          }
+
+          const imageObj = {
+            imgUrl,
+            img_edUrl,
+            showUrl: imgUrl,
+            categoryId: category.id,
+            name: `${category.name} ${index + 1}`
+          };
+
+          // 将图片添加到所有图片数组
+          this.allImages.push({ ...imageObj });
+
+          return imageObj;
+        });
+
+        // 保存到分类图片对象中
+        this.$set(this.categoryImages, category.id, images);
+      } catch (error) {
+        console.error(`无法加载分类 ${category.name} 的图片:`, error);
+        // 初始化为空数组，避免undefined错误
+        this.$set(this.categoryImages, category.id, []);
+      }
+    },
+
+    // 获取特定分类的图片
+    getCategoryImages(categoryId) {
+      // 如果是"所有分类"，返回所有图片数组
+      if (categoryId === 0) {
+        return this.allImages;
+      }
+      // 否则返回对应分类的图片
+      return this.categoryImages[categoryId] || [];
     }
   }
 };
@@ -636,6 +693,18 @@ export default {
   align-items: center;
   font-size: 12px;
   color: #909399;
+}
+
+/* 修改标签页样式 */
+.example-card >>> .el-tabs__item {
+  height: 40px;
+  line-height: 40px;
+  font-weight: 500;
+}
+
+.example-card >>> .el-tabs__item.is-active {
+  color: #409EFF;
+  font-weight: bold;
 }
 
 /* 响应式设计 */
