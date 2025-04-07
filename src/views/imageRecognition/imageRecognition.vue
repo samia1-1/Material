@@ -9,7 +9,10 @@
     <br>
     <!-- 标题区域 -->
     <div class="page-header">
-      <h1 class="image-tit"><i class="el-icon-picture-outline"></i> 分割一切微观组织模型</h1>
+      <h1 class="image-tit">
+        <span class="title-icon"><i class="el-icon-picture-outline"></i></span>
+        <span class="title-text">分割一切微观组织模型</span>
+      </h1>
     </div>
 
     <!-- 内容容器 -->
@@ -50,14 +53,69 @@ export default {
   padding: 20px;
   background-color: #fff;
   margin-bottom: 20px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.page-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #409EFF, #67C23A, #E6A23C);
 }
 
 .image-tit {
-  font-size: 24px;
-  color: #303133;
-  margin: 10px 0 0;
-  font-weight: 600;
+  font-size: 42px;
+  margin: 0;
+  padding: 25px 30px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  letter-spacing: 1px;
+  position: relative;
+}
+
+.title-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #409EFF, #67C23A);
+  border-radius: 50%;
+  margin-right: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.title-icon i {
+  font-size: 32px;
+  color: #fff;
+}
+
+.title-text {
+  background: linear-gradient(to right, #409EFF, #67C23A);
+  -webkit-background-clip: text;
+  color: transparent;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  display: inline-block;
+  position: relative;
+}
+
+.title-text::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to right, #409EFF, #67C23A);
+  transform: scaleX(0.8);
+  opacity: 0.7;
 }
 
 /* 内容容器 */
@@ -80,11 +138,23 @@ export default {
   }
 
   .page-header {
-    padding: 15px;
+    padding: 12px;
   }
 
   .image-tit {
-    font-size: 20px;
+    font-size: 24px;
+    padding: 15px;
+    flex-wrap: wrap;
+  }
+
+  .title-icon {
+    width: 40px;
+    height: 40px;
+    margin-right: 12px;
+  }
+
+  .title-icon i {
+    font-size: 22px;
   }
 }
 </style>

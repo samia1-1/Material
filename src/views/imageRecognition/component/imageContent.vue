@@ -52,8 +52,13 @@
               @mouseup="endDrag" @mouseleave="endDrag">
               <img :src="image_src" v-if="image_src" class="showed-image" :style="imageTransformStyle">
               <div v-if="!isLoading && !image_src" class="upload-placeholder">
-                <!-- 修改上传组件，使用手动上传模式 -->
-                <div class="upload-area" @click.stop="triggerUpload">
+                <!-- 修改上传组件，增加拖拽功能 -->
+                <div class="upload-area"
+                  @click.stop="triggerUpload"
+                  @dragover.prevent="handleDragOver"
+                  @dragleave.prevent="handleDragLeave"
+                  @drop.prevent="handleDrop"
+                  :class="{'drag-over': isDragOver}">
                   <i class="el-icon-upload"></i>
                   <div class="upload-text">点击上传图片或拖拽到此处</div>
                   <div class="upload-tip">支持PNG、JPG、TIFF格式，最大10MB</div>
@@ -112,12 +117,12 @@
 
 <script>
 import Loading from "@/components/Loading/index.vue";
-import { imageMixin, apiMixin, interactionMixin } from "./mixins";
+import { imageMixin, apiMixin, interactionMixin, uploadMixin } from "./mixins";
 
 export default {
   name: "ImageContent",
   components: { Loading },
-  mixins: [imageMixin, apiMixin, interactionMixin],
+  mixins: [imageMixin, apiMixin, interactionMixin, uploadMixin],
 
   data() {
     return {
@@ -211,13 +216,7 @@ export default {
         startY: 0,
         startDistance: 0,
         lastScale: 1
-      },
-
-      // 上传处理相关的标志
-      uploadInProgress: false, // 标记是否有上传操作正在进行中
-      fileUploadVersion: 0,    // 用于区分不同的上传操作
-      preventDuplicateUpload: false, // 防止重复触发上传的标志
-      lastUploadTime: 0        // 记录上次上传触发时间
+      }
     };
   },
 
@@ -241,12 +240,12 @@ export default {
     operationButtons() {
       return [
         { label: '上传图片', handler: this.imgUpload, icon: 'el-icon-upload', type: 'primary' },
-        { label: '重置图片', handler: this.resetImage, icon: 'el-icon-refresh-left' },
-        { label: '放大', handler: this.handleZoomIn, icon: 'el-icon-zoom-in' },
-        { label: '缩小', handler: this.handleZoomOut, icon: 'el-icon-zoom-out' },
+        { label: '重置图片', handler: this.resetImage, icon: 'el-icon-refresh-left', type: 'danger' },
+        { label: '放大', handler: this.handleZoomIn, icon: 'el-icon-zoom-in', type: 'info' },
+        { label: '缩小', handler: this.handleZoomOut, icon: 'el-icon-zoom-out', type: 'info' },
         { label: '图像分割', handler: this.handleSegmentation, icon: 'el-icon-crop', type: 'success' },
-        { label: '降维处理', handler: this.handleReduction, icon: 'el-icon-s-operation' },
-        { label: '显示分析', handler: this.handleDisplay, icon: 'el-icon-view', type: 'info' }
+        { label: '降维处理', handler: this.handleReduction, icon: 'el-icon-s-operation', type: 'info' },
+        { label: '显示分析', handler: this.handleDisplay, icon: 'el-icon-view', type: 'primary' }
       ];
     }
   },
@@ -292,67 +291,6 @@ export default {
   },
 
   methods: {
-    // 触发文件上传 - 完全使用原生方式
-    triggerUpload(event) {
-      // 阻止事件冒泡
-      if (event) {
-        event.stopPropagation();
-      }
-
-      // 检查是否在短时间内重复触发
-      const now = Date.now();
-      if (now - this.lastUploadTime < 500) {
-        return;
-      }
-
-      this.lastUploadTime = now;
-
-      // 清空文件输入以确保change事件总是触发
-      if (this.$refs.fileInput) {
-        this.$refs.fileInput.value = '';
-      }
-
-      // 触发文件选择
-      this.$refs.fileInput.click();
-    },
-
-    // 处理原生文件变更
-    handleNativeFileChange(event) {
-      if (this.preventDuplicateUpload) {
-        return;
-      }
-
-      // 设置标志以阻止重复触发
-      this.preventDuplicateUpload = true;
-      setTimeout(() => {
-        this.preventDuplicateUpload = false;
-      }, 1000);
-
-      const file = event.target.files[0];
-      if (!file) {
-        return;
-      }
-
-      // 文件验证和处理逻辑
-      if (!this.validateFileType(file.type)) {
-        this.showMessage('请选择JPG、PNG或TIFF格式的图片', 'error');
-        this.clearFileInput();
-        return;
-      }
-
-      if (file.size > 10 * 1024 * 1024) {
-        this.showMessage('图片大小不能超过10MB', 'error');
-        this.clearFileInput();
-        return;
-      }
-
-      // 设置加载状态
-      this.isLoading = true;
-
-      // 直接使用原始文件，不尝试创建副本
-      this.uploadFileToServer(file); // 调用mixin中的方法
-    },
-
     // 改进中心图片区域点击处理，防止重复触发
     handleCenterPicClick(event) {
       // 阻止事件冒泡
@@ -380,18 +318,6 @@ export default {
       if (!this.image_src) {
         this.triggerUpload();
       }
-    },
-
-    // 清除文件输入框的值
-    clearFileInput() {
-      if (this.$refs.fileInput) {
-        this.$refs.fileInput.value = '';
-      }
-    },
-
-    // 验证文件类型
-    validateFileType(type) {
-      return ['image/jpeg', 'image/png', 'image/tiff'].includes(type);
     },
 
     // 更新加载状态
@@ -497,23 +423,34 @@ export default {
 /* 修复按钮样式问题 */
 .op-button {
   width: 100% !important;
-  height: 36px;
+  height: 42px; /* 增加高度 */
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 10px; /* 减小内边距以适应更窄的按钮 */
-  margin: 2px 0; /* 减小垂直边距 */
-  font-size: 12px; /* 稍微减小字体大小 */
+  padding: 0 12px; /* 稍微增加内边距 */
+  margin: 3px 0; /* 调整垂直边距 */
+  font-size: 14px; /* 增加字体大小 */
+  border-radius: 20px; /* 使按钮更圆润 */
+  font-weight: 500; /* 使文字更加醒目 */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 添加轻微阴影增强视觉效果 */
+  transition: all 0.3s; /* 平滑过渡效果 */
+}
+
+.op-button:hover {
+  transform: translateY(-2px); /* 悬停时轻微上浮效果 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .op-button i {
-  margin-right: 4px; /* 减小图标和文字的间距 */
-  font-size: 14px; /* 适当减小图标大小 */
+  margin-right: 6px; /* 增加图标和文字的间距 */
+  font-size: 18px; /* 增加图标大小 */
 }
 
-/* 特殊按钮可以占据整行 */
+/* 确保最后一个按钮也有相同的样式 */
 .operation-buttons .op-button:last-child {
   grid-column: span 2; /* 最后一个按钮占据两列 */
+  height: 42px; /* 保持一致的高度 */
+  border-radius: 20px; /* 保持一致的圆角 */
 }
 
 /* 数据表单 */
@@ -603,6 +540,14 @@ export default {
   align-items: center;
 }
 
+/* 上传区域拖拽样式 */
+.upload-area.drag-over {
+  border-color: #409EFF;
+  background-color: rgba(64, 158, 255, 0.06);
+  box-shadow: 0 0 10px rgba(64, 158, 255, 0.3);
+  transform: scale(1.02);
+}
+
 .upload-area {
   display: flex;
   flex-direction: column;
@@ -611,32 +556,41 @@ export default {
   padding: 30px;
   width: 80%;
   max-width: 500px;
-  border: 1px dashed #d9d9d9;
-  border-radius: 6px;
+  border: 2px dashed #d9d9d9;
+  border-radius: 12px;
   background-color: #fafafa;
   cursor: pointer;
-  transition: border-color 0.3s;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .upload-area:hover {
   border-color: #409EFF;
+  background-color: rgba(64, 158, 255, 0.02);
 }
 
 .upload-area i {
-  font-size: 48px;
-  color: #c0c4cc;
-  margin-bottom: 16px;
+  font-size: 64px;
+  color: #409EFF;
+  margin-bottom: 20px;
+  transition: transform 0.3s ease;
+}
+
+.upload-area:hover i,
+.upload-area.drag-over i {
+  transform: translateY(-5px);
 }
 
 .upload-text {
-  font-size: 16px;
-  color: #606266;
-  margin-bottom: 10px;
+  font-size: 18px;
+  color: #303133;
+  margin-bottom: 12px;
+  font-weight: 500;
 }
 
 .upload-tip {
   font-size: 14px;
   color: #909399;
+  text-align: center;
 }
 
 /* 统计数据显示 */
