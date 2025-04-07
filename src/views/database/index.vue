@@ -210,8 +210,8 @@ import axios from 'axios';
 export default {
   components: { smallNav,BackProfile },
   created() {
-    // this.getMsg('http://www.ai4matter.com/json/GH1015.json');
-    this.getMsg('http://localhost:8100/json/GH1015.json');
+    this.getMsg('http://www.ai4matter.com/json/GH1015.json');
+    // this.getMsg('http://192.168.31.63:8100/json/GH1015.json');
     this.getMenu()
   },
   mounted() {
@@ -844,8 +844,8 @@ export default {
       }
     },
     getMenu(){
-      let getJsonUrl="http://localhost:8100/json/menu.json"
-      // let getJsonUrl="http://www.ai4matter.com/json/menu.json"
+      // let getJsonUrl="http://192.168.31.63:8100/json/menu.json"
+      let getJsonUrl="http://www.ai4matter.com/json/menu.json"
         getJson(getJsonUrl).then(data => {
                 console.log(data)
             this.menuData=data.menu
