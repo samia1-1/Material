@@ -8,7 +8,7 @@
       <div class="part1-in">
         <img class="part-img-1" src="@/assets/images/cfc68c0488f7216820bd6aed556b0b3.png">
         <div class="part1-text">
-          <div class="part1-text-tit" @click="goToMaterialData" :class="{ 'clickable': true }">中国高温合金</div>
+          <div class="part1-text-tit" @click="goToMaterialData" :class="{ 'clickable': true }">大量可靠数据</div>
           <!-- <div class="part1-text-intro">实验室前期收集了《中国高温合金手册》和中南大学粉末冶金国家重点实验室的实验数据(中国金属学会高温材料分会2012)。主要包含铸造高温合金成分数据、拉伸性能数据、蠕变性能数据和持久性能数据。</div> -->
           <div class="part1-text-intro">对于《中国高温合金手册》，我们运用半自动化方法，系统性地提取了手册中 168
             个牌号合金的文本数据、表格数据和图形数据，最终构建起一个内容丰富的高温合金数据库。该数据库涵盖了 6914 条文本数据，3289 个表格数据，以及 1352 个图形数据。据统计，这 168
