@@ -4,6 +4,28 @@
  */
 
 export default {
+  mounted() {
+    // 使用bind确保this上下文正确
+    this.handleGlobalMouseUpBound = this.handleGlobalMouseUp.bind(this);
+    this.handleGlobalMouseMoveBound = this.handleGlobalMouseMove.bind(this);
+
+    // 添加全局mouseup和mousemove事件监听
+    document.addEventListener('mouseup', this.handleGlobalMouseUpBound, { passive: false, capture: true });
+    document.addEventListener('mousemove', this.handleGlobalMouseMoveBound, { passive: false });
+
+    // 记录已添加的监听器
+    this.hasGlobalListeners = true;
+  },
+
+  beforeDestroy() {
+    // 确保移除全局事件监听器
+    if (this.hasGlobalListeners) {
+      document.removeEventListener('mouseup', this.handleGlobalMouseUpBound, { passive: false, capture: true });
+      document.removeEventListener('mousemove', this.handleGlobalMouseMoveBound, { passive: false });
+      this.hasGlobalListeners = false;
+    }
+  },
+
   methods: {
     // 处理显示分析按钮
     handleDisplay() {
@@ -80,9 +102,16 @@ export default {
       }
     },
 
-    // 拖拽相关方法
+    // 处理拖拽相关方法
     startDrag(event) {
       if (!this.image_src) return;
+
+      // 确保只监听左键拖拽
+      if (event.button !== 0) return;
+
+      // 阻止默认行为，避免干扰拖拽
+      event.preventDefault();
+      event.stopPropagation();
 
       // 记录拖拽起始状态
       this.dragState.isDragging = true;
@@ -93,16 +122,42 @@ export default {
       this.dragState.lastTranslateY = this.imageTransform.translateY;
       this.dragState.distance = 0;
       this.dragState.dragStartTime = Date.now();
+
+      // 记录当前鼠标按钮状态
+      this.dragState.mouseDown = true;
+    },
+
+    // 处理全局鼠标移动事件 - 确保即使鼠标移出容器也能继续拖拽
+    handleGlobalMouseMove(event) {
+      // 首先检查鼠标按钮状态
+      if (event.buttons === 0 && this.dragState.isDragging) {
+        // 如果鼠标按钮已释放但拖拽状态仍为true，立即结束拖拽
+        this.handleGlobalMouseUp(event);
+        return;
+      }
+
+      if (this.dragState.isDragging) {
+        // 使用requestAnimationFrame确保平滑渲染
+        window.requestAnimationFrame(() => {
+          this.onDrag(event);
+        });
+      }
     },
 
     onDrag(event) {
       if (!this.dragState.isDragging) return;
 
+      // 再次检查鼠标按钮状态
+      if (event.buttons === 0) {
+        this.handleGlobalMouseUp(event);
+        return;
+      }
+
       // 计算拖拽距离
       const deltaX = event.clientX - this.dragState.startX;
       const deltaY = event.clientY - this.dragState.startY;
 
-      // 更新图像位置
+      // 实时更新图像位置，不使用过渡效果确保图像跟随鼠标移动
       this.imageTransform.translateX = this.dragState.lastTranslateX + deltaX;
       this.imageTransform.translateY = this.dragState.lastTranslateY + deltaY;
 
@@ -115,10 +170,30 @@ export default {
       }
     },
 
-    endDrag() {
-      // 结束拖拽状态
+    // 处理全局鼠标释放事件 - 确保在任何位置松开鼠标都能结束拖拽
+    handleGlobalMouseUp(event) {
+      if (this.dragState.isDragging) {
+        // 阻止其他事件处理程序
+        if (event) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+
+        this.endDrag(event);
+      }
+
+      // 重置鼠标按钮状态
+      this.dragState.mouseDown = false;
+    },
+
+    endDrag(event) {
+      // 立即重置所有拖拽状态
       this.dragState.isDragging = false;
+      this.dragState.mouseDown = false;
       this.dragState.dragEndTime = Date.now();
+
+      // 强制刷新视图状态，确保UI立即反应
+      this.$forceUpdate();
     },
 
     // 触摸相关方法

@@ -36,7 +36,7 @@
             </el-form-item>
           </el-form>
           <div class="chart-action" v-if="!isShowStatistic">
-            <el-button type="primary" @click="getStatistic" icon="el-icon-data-analysis" style="width: 100%">
+            <el-button type="primary" @click="getStatistic" icon="el-icon-data-analysis" style="width: 100%;border-radius: 12px;">
               查询统计数据
             </el-button>
           </div>
@@ -48,8 +48,7 @@
         <el-card class="image-card" shadow="hover">
           <div class="center-pic" :class="{ 'dragging': isDragging, 'has-image': !!image_src }" @click.stop="handleCenterPicClick">
             <div class="image-container" ref="imageContainer" @wheel="handleWheel" @touchstart.passive="startTouch"
-              @touchmove.passive="onTouch" @touchend.passive="endTouch" @mousedown="startDrag" @mousemove="onDrag"
-              @mouseup="endDrag" @mouseleave="endDrag">
+              @touchmove.passive="onTouch" @touchend.passive="endTouch" @mousedown="startDrag">
               <img :src="image_src" v-if="image_src" class="showed-image" :style="imageTransformStyle">
               <div v-if="!isLoading && !image_src" class="upload-placeholder">
                 <!-- 修改上传组件，增加拖拽功能 -->
@@ -104,9 +103,8 @@
                     class="img-item-card"
                     @click.native="loadExampleImage(item)">
                     <!-- 修改示例图片的加载方式，使用预处理的预览图 -->
-                    <div class="img-preview-container" :class="{'tiff-image': item.isTiff}">
+                    <div class="img-preview-container">
                       <img :src="getImagePreviewUrl(item)" class="show-img" :alt="item.name">
-                      <div class="tiff-badge" v-if="item.isTiff">TIFF</div>
                     </div>
                     <div class="img-item-footer">
                       <span>{{ category.name }} {{index + 1}}</span>
@@ -159,7 +157,7 @@ export default {
         { label: 'Current coordinates', value: '', placeholder: '点击查询后显示' },
         { label: 'Area fraction', value: '', placeholder: '点击查询后显示' },
         { label: 'Circularity', value: '', placeholder: '点击查询后显示' },
-        { label: 'Minimumccd', value: '', placeholder: '点击查询后显示' },
+        { label: 'Minimum ccd', value: '', placeholder: '点击查询后显示' },
         { label: 'Maximum icd', value: '', placeholder: '点击查询后显示' },
         { label: 'Equal area circle diam', value: '', placeholder: '点击查询后显示' },
         { label: 'Width of the Mbr', value: '', placeholder: '点击查询后显示' },
@@ -211,8 +209,12 @@ export default {
       const { scale, translateX, translateY } = this.imageTransform;
       return {
         transform: `translate(${translateX}px, ${translateY}px) scale(${scale})`,
+        // 拖拽时完全禁用过渡效果，确保立即响应
         transition: this.dragState.isDragging ? 'none' : 'transform 0.1s ease-out',
-        cursor: this.dragState.isDragging ? 'grabbing' : 'grab'
+        // 根据拖拽状态更改鼠标样式
+        cursor: this.dragState.isDragging ? 'grabbing' : 'grab',
+        // 提高GPU硬件加速
+        willChange: this.dragState.isDragging ? 'transform' : 'auto'
       };
     },
 
@@ -359,7 +361,7 @@ export default {
 /* 卡片通用样式 */
 .operation-card, .data-card, .image-card, .example-card {
   margin-bottom: 15px;
-  border-radius: 12px;
+  border-radius: 36px;
 }
 
 .card-header {
@@ -603,18 +605,16 @@ export default {
 }
 
 .show-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  transition: transform 0.3s ease;
 }
 
-.img-item-footer {
-  padding: 5px 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 12px;
-  color: #909399;
+.img-item-card:hover .show-img {
+  transform: scale(1.05);
 }
 
 /* 修改标签页样式 */
@@ -629,45 +629,18 @@ export default {
   font-weight: bold;
 }
 
-/* 添加TIFF图片预览样式 */
+/* 添加图片预览样式 */
 .img-preview-container {
   position: relative;
   width: 100%;
-  height: 120px; /* 固定高度确保一致性 */
+  height: 160px; /* 增加高度以便完整显示图片 */
   overflow: hidden;
   background-color: #f8f8f8;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 8px; /* 添加内边距避免图片紧贴边缘 */
 }
-
-.tiff-badge {
-  position: absolute;
-  top: 0;
-  right: 0;
-  background-color: rgba(0, 120, 215, 0.8);
-  color: white;
-  padding: 2px 6px;
-  font-size: 10px;
-  border-bottom-left-radius: 8px;
-  z-index: 2;
-}
-
-.tiff-image {
-  background-color: #f0f0f0;
-}
-
-.show-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.img-item-card:hover .show-img {
-  transform: scale(1.05);
-}
-
 /* 响应式设计 */
 @media screen and (max-width: 992px) {
   .main-container {

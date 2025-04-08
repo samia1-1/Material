@@ -323,19 +323,10 @@ export default {
       }
     },
 
-    // 在Canvas上添加TIFF标记
+    // 在Canvas上添加TIFF标记 - 不添加任何标记
     addTiffMarker(ctx, width, height) {
-      try {
-        // 右上角添加TIFF标记
-        ctx.fillStyle = 'rgba(0, 120, 215, 0.8)';
-        ctx.fillRect(width - 40, 0, 40, 16);
-        ctx.fillStyle = 'white';
-        ctx.font = '10px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('TIFF', width - 20, 11);
-      } catch (error) {
-        console.error('添加TIFF标记失败:', error);
-      }
+      // 不添加任何标记
+      return;
     },
 
     // 加载所有分类的图片

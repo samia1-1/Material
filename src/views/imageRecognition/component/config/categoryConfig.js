@@ -5,7 +5,7 @@
 export default [
   {
     id: 0,
-    name: '所有分类',
+    name: '所有类别',
     folder: 'all',
     description: ''
   },
