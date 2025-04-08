@@ -9,7 +9,7 @@
         mode="horizontal"
       >
         <el-menu-item index="1" @click="toIndex">首页</el-menu-item>
-        <el-menu-item index="2" @click="toDatabase">材料数据</el-menu-item>
+        <el-menu-item index="2" @click="toDatabase">中国高温合金</el-menu-item>
         <el-menu-item index="3" @click="toAlloyComposition">合金成分查询性能</el-menu-item>
         <el-menu-item index="4" @click="toPredict">性能预测</el-menu-item>
         <el-menu-item index="5" @click="toImageRecognition">图像识别</el-menu-item>
