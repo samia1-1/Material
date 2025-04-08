@@ -28,10 +28,12 @@ export default {
       }
     },
 
-    // 新增：重置图片函数
-    resetImage() {
+    // 修改：重置图片函数，添加是否显示提示信息的参数
+    resetImage(showNotification = true) {
       if (!this.image_src) {
-        this.showMessage("没有图片需要重置", "info");
+        if (showNotification) {
+          this.showMessage("没有图片需要重置", "info");
+        }
         return;
       }
 
@@ -54,7 +56,10 @@ export default {
       this.apiReturnedUrl = "";
       sessionStorage.removeItem("apiUrl");
 
-      this.showMessage("图片已重置", "success");
+      // 仅在指定时显示提示信息
+      if (showNotification) {
+        this.showMessage("图片已重置", "success");
+      }
     },
 
     // 切换示例图片 - 修改为在主区域显示图片
@@ -223,11 +228,11 @@ export default {
       });
     },
 
-    // 修复：加载示例图片 - 重新组织TIFF处理逻辑
+    // 修改：加载示例图片 - 重新组织TIFF处理逻辑，添加静默重置
     loadExampleImage(item) {
-      // 只有当已有图片时才执行重置
+      // 只有当已有图片时才执行重置，但不显示提示信息
       if (this.image_src) {
-        this.resetImage();
+        this.resetImage(false); // 传递false参数，不显示重置提示
       }
 
       // 显示加载状态
