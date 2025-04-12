@@ -9,13 +9,8 @@
             <span><i class="el-icon-s-tools"></i> 操作面板</span>
           </div>
           <div class="operation-buttons">
-            <el-button
-              v-for="(btn, idx) in operationButtons"
-              :key="idx"
-              @click="btn.handler"
-              :type="btn.type || 'default'"
-              :icon="btn.icon"
-              class="op-button">
+            <el-button v-for="(btn, idx) in operationButtons" :key="idx" @click="btn.handler"
+              :type="btn.type || 'default'" :icon="btn.icon" class="op-button">
               {{ btn.label }}
             </el-button>
           </div>
@@ -36,7 +31,8 @@
             </el-form-item>
           </el-form>
           <div class="chart-action" v-if="!isShowStatistic">
-            <el-button type="primary" @click="getStatistic" icon="el-icon-data-analysis" style="width: 100%;border-radius: 12px;">
+            <el-button type="primary" @click="getStatistic" icon="el-icon-data-analysis"
+              style="width: 100%;border-radius: 12px;">
               查询统计数据
             </el-button>
           </div>
@@ -46,18 +42,15 @@
       <!-- 主内容区：图片显示 -->
       <el-main class="main-content">
         <el-card class="image-card" shadow="hover">
-          <div class="center-pic" :class="{ 'dragging': isDragging, 'has-image': !!image_src }" @click.stop="handleCenterPicClick">
+          <div class="center-pic" :class="{ 'dragging': isDragging, 'has-image': !!image_src }"
+            @click.stop="handleCenterPicClick">
             <div class="image-container" ref="imageContainer" @wheel="handleWheel" @touchstart.passive="startTouch"
               @touchmove.passive="onTouch" @touchend.passive="endTouch" @mousedown="startDrag">
               <img :src="image_src" v-if="image_src" class="showed-image" :style="imageTransformStyle">
               <div v-if="!isLoading && !image_src" class="upload-placeholder">
                 <!-- 修改上传组件，增加拖拽功能 -->
-                <div class="upload-area"
-                  @click.stop="triggerUpload"
-                  @dragover.prevent="handleDragOver"
-                  @dragleave.prevent="handleDragLeave"
-                  @drop.prevent="handleDrop"
-                  :class="{'drag-over': isDragOver}">
+                <div class="upload-area" @click.stop="triggerUpload" @dragover.prevent="handleDragOver"
+                  @dragleave.prevent="handleDragLeave" @drop.prevent="handleDrop" :class="{ 'drag-over': isDragOver }">
                   <i class="el-icon-upload"></i>
                   <div class="upload-text">点击上传图片或拖拽到此处</div>
                   <div class="upload-tip">支持PNG、JPG、TIFF格式，最大10MB</div>
@@ -85,29 +78,21 @@
 
         <!-- 分类标签页 -->
         <el-tabs v-model="activeCategory" type="card">
-          <el-tab-pane
-            v-for="category in categories"
-            :key="category.id"
-            :label="category.name"
+          <el-tab-pane v-for="category in categories" :key="category.id" :label="category.name"
             :name="category.id.toString()">
 
             <div class="show-img-list">
               <el-row :gutter="20">
-                <el-col
-                  :xs="8" :sm="6" :md="4" :lg="4" :xl="3"
-                  v-for="(item, index) in getCategoryImages(category.id)"
+                <el-col :xs="8" :sm="6" :md="4" :lg="4" :xl="3" v-for="(item, index) in getCategoryImages(category.id)"
                   :key="index">
-                  <el-card
-                    :body-style="{ padding: '0px' }"
-                    shadow="hover"
-                    class="img-item-card"
+                  <el-card :body-style="{ padding: '0px' }" shadow="hover" class="img-item-card"
                     @click.native="loadExampleImage(item)">
                     <!-- 修改示例图片的加载方式，使用预处理的预览图 -->
                     <div class="img-preview-container">
                       <img :src="getImagePreviewUrl(item)" class="show-img" :alt="item.name">
                     </div>
                     <div class="img-item-footer">
-                      <span>{{ category.name }} {{index + 1}}</span>
+                      <span>{{ category.name }} {{ index + 1 }}</span>
                       <i class="el-icon-picture-outline-round"></i>
                     </div>
                   </el-card>
@@ -120,13 +105,8 @@
     </div>
 
     <!-- 隐藏的文件输入 -->
-    <input
-      type="file"
-      ref="fileInput"
-      style="display:none"
-      accept="image/jpeg,image/png,image/tiff"
-      @change="handleNativeFileChange"
-    />
+    <input type="file" ref="fileInput" style="display:none" accept="image/jpeg,image/png,image/tiff"
+      @change="handleNativeFileChange" />
   </div>
 </template>
 
@@ -335,15 +315,17 @@ export default {
   position: relative;
   display: flex;
   flex-direction: column;
-  margin:10px 30px 10px 5px;
+  margin: 10px 30px 10px 5px;
 }
 
 /* 整体布局 */
 .main-container {
   display: flex;
   margin: 20px 0 0 0;
-  margin-left: 0 ! important;/* 移除左边距 */
-  padding: 0; /* 确保没有内边距 */
+  margin-left: 0 ! important;
+  /* 移除左边距 */
+  padding: 0;
+  /* 确保没有内边距 */
 }
 
 /* 左侧边栏 */
@@ -355,11 +337,15 @@ export default {
   flex-direction: column;
   gap: 15px;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
-  height: calc(100% - 50px); /* 减去内边距 */
+  height: calc(100% - 50px);
+  /* 减去内边距 */
 }
 
 /* 卡片通用样式 */
-.operation-card, .data-card, .image-card, .example-card {
+.operation-card,
+.data-card,
+.image-card,
+.example-card {
   margin-bottom: 15px;
   border-radius: 36px;
 }
@@ -378,41 +364,56 @@ export default {
 /* 操作按钮区域 */
 .operation-buttons {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* 修改为两列布局 */
+  grid-template-columns: 1fr 1fr;
+  /* 修改为两列布局 */
   gap: 10px;
 }
 
 /* 修复按钮样式问题 */
 .op-button {
   width: 100% !important;
-  height: 42px; /* 增加高度 */
+  height: 42px;
+  /* 增加高度 */
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 12px; /* 稍微增加内边距 */
-  margin: 3px 0; /* 调整垂直边距 */
-  font-size: 14px; /* 增加字体大小 */
-  border-radius: 20px; /* 使按钮更圆润 */
-  font-weight: 500; /* 使文字更加醒目 */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 添加轻微阴影增强视觉效果 */
-  transition: all 0.3s; /* 平滑过渡效果 */
+  padding: 0 12px;
+  /* 稍微增加内边距 */
+  margin: 3px 0;
+  /* 调整垂直边距 */
+  font-size: 14px;
+  /* 增加字体大小 */
+  border-radius: 20px;
+  /* 使按钮更圆润 */
+  font-weight: 500;
+  /* 使文字更加醒目 */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  /* 添加轻微阴影增强视觉效果 */
+  transition: all 0.3s;
+  /* 平滑过渡效果 */
 }
 
 .op-button:hover {
-  transform: translateY(-2px); /* 悬停时轻微上浮效果 */
+  transform: translateY(-2px);
+  /* 悬停时轻微上浮效果 */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .op-button i {
-  margin-right: 6px; /* 增加图标和文字的间距 */
-  font-size: 18px; /* 增加图标大小 */
+  margin-right: 6px;
+  /* 增加图标和文字的间距 */
+  font-size: 18px;
+  /* 增加图标大小 */
 }
 
 /* 确保最后一个按钮也有相同的样式 */
 .operation-buttons .op-button:last-child {
-  grid-column: span 2; /* 最后一个按钮占据两列 */
-  height: 42px; /* 保持一致的高度 */
-  border-radius: 20px; /* 保持一致的圆角 */
+  grid-column: span 2;
+  /* 最后一个按钮占据两列 */
+  height: 42px;
+  /* 保持一致的高度 */
+  border-radius: 20px;
+  /* 保持一致的圆角 */
 }
 
 /* 数据表单 */
@@ -423,11 +424,12 @@ export default {
 }
 
 .data-form .el-form-item {
-  margin-bottom: 8px; /* 减少每项之间的间距 */
+  margin-bottom: 8px;
+  /* 减少每项之间的间距 */
 }
 
 /* 覆盖Element UI的默认样式，确保标签对齐 */
-.data-form >>> .el-form-item__label {
+.data-form>>>.el-form-item__label {
   line-height: 32px;
   padding-right: 8px;
   font-size: 13px;
@@ -436,11 +438,11 @@ export default {
   white-space: nowrap;
 }
 
-.data-form >>> .el-form-item__content {
+.data-form>>>.el-form-item__content {
   line-height: 32px;
 }
 
-.data-form >>> .el-input__inner {
+.data-form>>>.el-input__inner {
   height: 32px;
   line-height: 32px;
 }
@@ -467,7 +469,8 @@ export default {
 .center-pic {
   width: 100%;
   height: 100%;
-  min-height: 500px; /* 最小高度确保在内容少时也有合理显示 */
+  min-height: 500px;
+  /* 最小高度确保在内容少时也有合理显示 */
   border: 2px dashed #dcdfe6;
   border-radius: 12px;
   position: relative;
@@ -618,13 +621,13 @@ export default {
 }
 
 /* 修改标签页样式 */
-.example-card >>> .el-tabs__item {
+.example-card>>>.el-tabs__item {
   height: 40px;
   line-height: 40px;
   font-weight: 500;
 }
 
-.example-card >>> .el-tabs__item.is-active {
+.example-card>>>.el-tabs__item.is-active {
   color: #409EFF;
   font-weight: bold;
 }
@@ -633,14 +636,17 @@ export default {
 .img-preview-container {
   position: relative;
   width: 100%;
-  height: 160px; /* 增加高度以便完整显示图片 */
+  height: 160px;
+  /* 增加高度以便完整显示图片 */
   overflow: hidden;
   background-color: #f8f8f8;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px; /* 添加内边距避免图片紧贴边缘 */
+  padding: 8px;
+  /* 添加内边距避免图片紧贴边缘 */
 }
+
 /* 响应式设计 */
 @media screen and (max-width: 992px) {
   .main-container {
@@ -651,15 +657,17 @@ export default {
     width: 100% !important;
     border-right: none;
     border-bottom: 1px solid #e6e6e6;
-    padding:0px;
+    padding: 0px;
   }
 
   .operation-buttons {
-    grid-template-columns: repeat(3, 1fr); /* 在中等屏幕上改为三列 */
+    grid-template-columns: repeat(3, 1fr);
+    /* 在中等屏幕上改为三列 */
   }
 
   .operation-buttons .op-button:last-child {
-    grid-column: span 3; /* 在中等屏幕上最后一个按钮占据三列 */
+    grid-column: span 3;
+    /* 在中等屏幕上最后一个按钮占据三列 */
   }
 
   .center-pic {
@@ -669,11 +677,13 @@ export default {
 
 @media screen and (max-width: 768px) {
   .operation-buttons {
-    grid-template-columns: repeat(2, 1fr); /* 在小屏幕上保持两列 */
+    grid-template-columns: repeat(2, 1fr);
+    /* 在小屏幕上保持两列 */
   }
 
   .operation-buttons .op-button:last-child {
-    grid-column: span 2; /* 在小屏幕上最后一个按钮占据两列 */
+    grid-column: span 2;
+    /* 在小屏幕上最后一个按钮占据两列 */
   }
 
   .center-pic {
