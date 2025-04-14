@@ -5,7 +5,7 @@
 export default [
   {
     id: 0,
-    name: '所有类别',
+    name: '所有数据',
     folder: 'all',
     description: ''
   },
@@ -47,7 +47,7 @@ export default [
   },
   {
     id: 7,
-    name: '烟台',
+    name: '中科院自动化所',
     folder: 'yantai',
     description: ''
   },
