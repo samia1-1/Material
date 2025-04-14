@@ -202,7 +202,7 @@
 
 <script>
 import * as echarts from "echarts";
-// import * as XLSX from 'xlsx';
+import * as XLSX from 'xlsx';
 import smallNav from "../../components/smallNav/smallNav";
 import BackProfile from '../../components/BackProfile/index.vue'
 import { getJson } from '@/api/database/dataStretch.js'
@@ -211,7 +211,7 @@ export default {
   components: { smallNav,BackProfile },
   created() {
     this.getMsg('http://www.ai4matter.com/json/GH1015.json');
-    // this.getMsg('http://www.ai4matter.com/json/GH1015.json');
+    // this.getMsg('http://localhost:8100/json/GH1015.json');
     this.getMenu()
   },
   mounted() {
@@ -288,7 +288,7 @@ export default {
         //   menuData.push({"index":"3-33","name":"GH2130","key_component":[],"key_craft":[],"key_density":0})
         // })
         for(let i=0;i<keyList.length;i++){
-          let url= "http://www.ai4matter.com/json/"+keyList[i]+".json"
+          let url= "http://localhost:8100/json/"+keyList[i]+".json"
           let num=0;
           getJson(url).then(data => {
             console.log(data.physicalChemistry[7].con)
@@ -433,7 +433,7 @@ export default {
       this.name2=data.name
       this.defaultActive=data.index
       let getJsonUrl="http://www.ai4matter.com/json/"+data.name+".json"
-      // let getJsonUrl="http://www.ai4matter.com/json/"+data.name+".json"
+      // let getJsonUrl="http://localhost:8100/json/"+data.name+".json"
       this.getMsg(getJsonUrl)
     },
     URLFun(){
@@ -466,7 +466,7 @@ export default {
 
     //获取元素
     getysFun(){
-      let url= "http://www.ai4matter.com/json/K423.json"
+      let url= "http://localhost:8100/json/K423.json"
       let list=[]
       let componentList=[]
       getJson(url).then(data => {
@@ -512,7 +512,7 @@ export default {
       console.log(sheetNames2)
 
        //获取table数据
-      let url= "http://www.ai4matter.com/json/source/19_K423.json"
+      let url= "http://localhost:8100/json/source/19_K423.json"
       getJson(url).then(data => {
           //table处理
           sheetNames.some((self)=>{
@@ -844,7 +844,7 @@ export default {
       }
     },
     getMenu(){
-      // let getJsonUrl="http://www.ai4matter.com/json/menu.json"
+      // let getJsonUrl="http://localhost:8100/json/menu.json"
       let getJsonUrl="http://www.ai4matter.com/json/menu.json"
         getJson(getJsonUrl).then(data => {
                 console.log(data)
