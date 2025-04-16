@@ -13,28 +13,32 @@
           <div class="panel-section operation-section">
             <div class="section-title">
               <i class="el-icon-s-tools"></i> 操作控制
+              <span class="glow-line"></span>
             </div>
             <div class="operation-buttons">
               <el-button v-for="(btn, idx) in operationButtons.slice(0, 4)" :key="idx" @click="btn.handler"
-                :icon="btn.icon" class="op-button">
+                :icon="btn.icon" class="op-button" :class="{'glow-button': idx === 0}">
                 {{ btn.label }}
               </el-button>
             </div>
             <div class="operation-buttons">
               <el-button v-for="(btn, idx) in operationButtons.slice(4)" :key="idx + 4" @click="btn.handler"
-                :icon="btn.icon" class="op-button special-button">
+                :icon="btn.icon" class="op-button special-button" :class="{'glow-button': idx === 0}">
                 {{ btn.label }}
               </el-button>
             </div>
           </div>
 
           <!-- 分隔线 -->
-          <div class="panel-divider"></div>
+          <div class="panel-divider">
+            <div class="flowing-light"></div>
+          </div>
 
           <!-- 数据分析区域 -->
           <div class="panel-section data-section">
             <div class="section-title">
               <i class="el-icon-data-analysis"></i> 数据分析
+              <span class="glow-line"></span>
             </div>
             <el-form label-position="left" size="small" class="data-form" label-width="160px">
               <el-form-item v-for="(item, index) in dataFields" :key="index" :label="item.label">
@@ -43,7 +47,7 @@
               </el-form-item>
             </el-form>
             <div class="chart-action">
-              <el-button @click="getStatistic" icon="el-icon-data-analysis" class="analysis-button">
+              <el-button @click="getStatistic" icon="el-icon-data-analysis" class="analysis-button glow-button">
                 查询统计数据
               </el-button>
             </div>
@@ -60,11 +64,19 @@
               @touchmove.passive="onTouch" @touchend.passive="endTouch" @mousedown="startDrag">
               <img :src="image_src" v-if="image_src" class="showed-image" :style="imageTransformStyle" @load="onImageLoad">
               <div v-if="!isLoading && !image_src" class="upload-placeholder">
-                <!-- 修改上传组件，增加拖拽功能，确保文字居中 -->
+                <!-- 修改上传组件，增加流光动态效果 -->
                 <div class="upload-area" @click.stop="triggerUpload" @dragover.prevent="handleDragOver"
                   @dragleave.prevent="handleDragLeave" @drop.prevent="handleDrop" :class="{ 'drag-over': isDragOver }">
+                  <!-- 背景动态元素 -->
+                  <div class="dynamic-border"></div>
+                  <div class="corner-lights">
+                    <div class="corner top-left"></div>
+                    <div class="corner top-right"></div>
+                    <div class="corner bottom-left"></div>
+                    <div class="corner bottom-right"></div>
+                  </div>
                   <div class="upload-content">
-                    <i class="el-icon-upload"></i>
+                    <i class="el-icon-upload pulse-icon"></i>
                     <div class="upload-text">点击上传图片或拖拽到此处</div>
                     <div class="upload-tip">支持PNG、JPG、TIFF格式，最大10MB</div>
                   </div>
@@ -104,9 +116,9 @@
                     shadow="hover"
                     class="img-item-card"
                     @click.native="loadExampleImage(item)">
-                    <!-- 修改示例图片的加载方式，使用预处理的预览图 -->
                     <div class="img-preview-container">
                       <img :src="getImagePreviewUrl(item)" class="show-img" :alt="item.name">
+                      <div class="hover-shine"></div>
                     </div>
                     <div class="img-item-footer">
                       <span>{{ category.name }} {{ index + 1 }}</span>
@@ -469,11 +481,35 @@ export default {
   border-bottom: 1px dashed #151515;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
 }
 
 .section-title i {
   margin-right: 5px;
   color: #3a7cbd;
+}
+
+.glow-line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #3a7cbd, transparent);
+  width: 30px;
+  z-index: 1;
+  animation: line-glow 3s infinite alternate;
+}
+
+@keyframes line-glow {
+  0% {
+    width: 30px;
+    opacity: 0.5;
+  }
+  100% {
+    width: 80px;
+    opacity: 0.8;
+  }
 }
 
 /* 面板分隔线优化 */
@@ -482,6 +518,26 @@ export default {
   margin: 12px 0;
   background: linear-gradient(90deg, transparent, #3a7cbd, transparent);
   opacity: 0.6;
+  position: relative;
+  overflow: hidden;
+}
+
+.panel-divider .flowing-light {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.5) 50%,
+    rgba(255,255,255,0) 100%);
+  animation: divider-flow 4s infinite;
+}
+
+@keyframes divider-flow {
+  0% { left: -100%; }
+  100% { left: 100%; }
 }
 
 /* 操作按钮区域优化 */
@@ -515,6 +571,8 @@ export default {
   border: 1px solid #151515;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
   transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .op-button:hover {
@@ -527,6 +585,38 @@ export default {
   margin-right: 6px;
   font-size: 16px;
   color: #3a7cbd;
+}
+
+.glow-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.glow-button::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -100%;
+  width: 60%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(45deg);
+  animation: button-shine 6s infinite;
+  z-index: 1;
+}
+
+@keyframes button-shine {
+  0% {
+    left: -100%;
+  }
+  10%, 100% {
+    left: 200%;
+  }
 }
 
 /* 特殊按钮样式优化 */
@@ -749,6 +839,8 @@ export default {
   align-items: center;
   justify-content: center;
   padding: 0 20px;
+  position: relative;
+  z-index: 2;
 }
 
 .upload-area i {
@@ -775,6 +867,107 @@ export default {
   text-align: center;
   width: 100%;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* 动态边框效果 */
+.dynamic-border {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    transparent,
+    rgba(58, 123, 189, 0.3),
+    rgba(58, 123, 189, 0.5),
+    rgba(58, 123, 189, 0.3),
+    transparent
+  );
+  animation: rotate-border 8s linear infinite;
+  opacity: 0.3;
+  z-index: -1;
+}
+
+@keyframes rotate-border {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 添加角落灯光效果 */
+.corner-lights {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.corner {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: #3a7cbd;
+  border-radius: 50%;
+  opacity: 0.7;
+  filter: blur(3px);
+  animation: corner-pulse 4s infinite alternate;
+}
+
+.top-left {
+  top: -2px;
+  left: -2px;
+  animation-delay: 0s;
+}
+
+.top-right {
+  top: -2px;
+  right: -2px;
+  animation-delay: 1s;
+}
+
+.bottom-left {
+  bottom: -2px;
+  left: -2px;
+  animation-delay: 2s;
+}
+
+.bottom-right {
+  bottom: -2px;
+  right: -2px;
+  animation-delay: 3s;
+}
+
+@keyframes corner-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0.8;
+  }
+}
+
+/* 上传图标脉冲效果 - 修改为只有发光效果，没有放大缩小 */
+.pulse-icon {
+  animation: icon-glow 2s infinite alternate;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5));
+}
+
+@keyframes icon-glow {
+  0% {
+    text-shadow: 0 0 5px rgba(58, 123, 189, 0.5);
+    color: #3a7cbd;
+  }
+  100% {
+    text-shadow: 0 0 15px rgba(58, 123, 189, 0.8);
+    color: #56a9ff;
+  }
 }
 
 /* 拖拽悬停状态优化 */
@@ -856,6 +1049,28 @@ export default {
   padding: 4px;
   height: calc(100% - 30px);
   min-height: 95px;
+  position: relative;
+}
+
+.hover-shine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(30deg) translateY(-100%) translateX(-100%);
+  transition: all 0.5s ease-in-out;
+  pointer-events: none;
+}
+
+.img-item-card:hover .hover-shine {
+  transform: rotate(30deg) translateY(-50%) translateX(-50%);
 }
 
 /* 示例图片列表优化 */

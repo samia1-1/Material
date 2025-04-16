@@ -8,7 +8,8 @@ export default class TableChecker {
     this.checkProgress = 0;
     this.currentCheckingFile = '';
     this.allMaterials = [];
-    this.tableRegex = /见表\s*\d+-\d+/g; // 匹配"见表x-x"格式
+    // 修改正则表达式，增加对"表x-x"格式的支持
+    this.tableRegex = /(见表|表)\s*\d+[-－]\d+/g; // 匹配"见表x-x"和"表x-x"格式，支持中文破折号
   }
 
   // 检查当前加载的材料是否存在表格引用但没有表格数据
@@ -74,6 +75,8 @@ export default class TableChecker {
     let hasTable = false;
 
     items.forEach(item => {
+      // 每次测试前重置正则表达式的lastIndex
+      this.tableRegex.lastIndex = 0;
       if (item.con && this.tableRegex.test(item.con)) {
         hasReference = true;
       }
@@ -199,6 +202,7 @@ export default class TableChecker {
 
       data[section].forEach(item => {
         // 处理一级内容的引用
+        this.tableRegex.lastIndex = 0; // 重置正则表达式的lastIndex
         if (item.con && this.tableRegex.test(item.con)) {
           const matches = item.con.match(this.tableRegex);
           if (matches) {
@@ -217,6 +221,7 @@ export default class TableChecker {
         // 处理二级内容
         if (item.two) {
           item.two.forEach(second => {
+            this.tableRegex.lastIndex = 0; // 重置正则表达式的lastIndex
             if (second.con && this.tableRegex.test(second.con)) {
               const matches = second.con.match(this.tableRegex);
               if (matches) {
@@ -236,6 +241,7 @@ export default class TableChecker {
             // 处理三级内容
             if (second.third) {
               second.third.forEach(third => {
+                this.tableRegex.lastIndex = 0; // 重置正则表达式的lastIndex
                 if (third.con && this.tableRegex.test(third.con)) {
                   const matches = third.con.match(this.tableRegex);
                   if (matches) {
@@ -363,10 +369,9 @@ export default class TableChecker {
 
   // 获取上下文辅助方法
   _getContext(text, match) {
-    return text.substring(
-      Math.max(0, text.indexOf(match) - 20),
-      text.indexOf(match) + match.length + 20
-    );
+    const startPos = Math.max(0, text.indexOf(match) - 30); // 增加上下文长度
+    const endPos = Math.min(text.length, text.indexOf(match) + match.length + 30); // 增加上下文长度
+    return text.substring(startPos, endPos);
   }
 
   // 导出缺失文件列表 - 增强版本，包含更多详情
