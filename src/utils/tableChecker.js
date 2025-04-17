@@ -8,97 +8,271 @@ export default class TableChecker {
     this.checkProgress = 0;
     this.currentCheckingFile = '';
     this.allMaterials = [];
-    // 修改正则表达式，增加对"表x-x"格式的支持
-    this.tableRegex = /(见表|表)\s*\d+[-－]\d+/g; // 匹配"见表x-x"和"表x-x"格式，支持中文破折号
+    // 引用检测正则表达式
+    this.referencePatterns = {
+      table: /(见表|表)\s*\d+[-－]\d+/g, // 匹配"见表x-x"和"表x-x"格式
+      figure: /(见图|图)\s*\d+[-－]\d+/g // 匹配"见图x-x"和"图x-x"格式
+    };
+    // 引用映射记录
+    this.referenceMap = {
+      table: new Map(), // 表格引用映射
+      figure: new Map() // 图表引用映射
+    };
+    // 章节标题映射
+    this.sectionTitles = {
+      'introduce': '合金介绍',
+      'physicalChemistry': '物理、弹性和化学性能',
+      'mechanical': '力学性能',
+      'craft': '工艺性能与要求',
+      'microstructures': '组织结构'
+    };
   }
 
-  // 检查当前加载的材料是否存在表格引用但没有表格数据
+  // 检查材料数据中的引用问题
   checkTableReferences(jsonData) {
     if (!jsonData) return [];
 
-    // 当前文件名从URL中提取
     const currentFileName = this.currentMaterial;
-    let hasTableReference = false;
-    let hasTableData = false;
+    // 清空引用记录
+    this.clearReferenceMaps();
+
+    // 检测状态
+    const status = {
+      tableRef: false, tableData: false,
+      figureRef: false, figureData: false
+    };
 
     // 检查各个部分
-    ['introduce', 'physicalChemistry', 'mechanical', 'craft', 'microstructures'].forEach(section => {
+    Object.keys(this.sectionTitles).forEach(section => {
       if (!jsonData[section]) return;
 
-      const result = this._checkSection(jsonData[section]);
-      if (result.hasReference) hasTableReference = true;
-      if (result.hasTable) hasTableData = true;
+      const result = this._checkItems(jsonData[section]);
+      if (result.tableRef) status.tableRef = true;
+      if (result.tableData) status.tableData = true;
+      if (result.figureRef) status.figureRef = true;
+      if (result.figureData) status.figureData = true;
     });
 
-    // 如果有表格引用但没有表格数据，记录文件名
-    if (hasTableReference && !hasTableData && currentFileName) {
-      console.warn(`文件 ${currentFileName} 中引用了表格但没有相应的表格数据`);
-      if (!this.missingTableFiles.some(item => item.name === currentFileName)) {
-        this.missingTableFiles.push({
-          name: currentFileName,
-          category: this.currentCategory || '未知分类'
-        });
-      }
+    // 记录问题文件
+    if (((status.tableRef && !status.tableData) ||
+         (status.figureRef && !status.figureData)) && currentFileName) {
+      this._recordMissingFile(currentFileName);
     }
 
     return this.missingTableFiles;
   }
 
-  // 检查单个部分是否包含表格引用和表格数据
-  _checkSection(section) {
-    let hasReference = false;
-    let hasTable = false;
+  // 清空引用记录映射
+  clearReferenceMaps() {
+    this.referenceMap.table.clear();
+    this.referenceMap.figure.clear();
+  }
 
-    section.forEach(item => {
-      // 检查一级内容
-      if (item.con && this.tableRegex.test(item.con)) {
-        hasReference = true;
+  // 记录问题文件
+  _recordMissingFile(fileName) {
+    if (!this.missingTableFiles.some(item => item.name === fileName)) {
+      this.missingTableFiles.push({
+        name: fileName,
+        category: this.currentCategory || '未知分类',
+        missingTables: this._hasMissingReferences('table'),
+        missingFigures: this._hasMissingReferences('figure')
+      });
+    }
+  }
+
+  // 检查是否有未匹配引用
+  _hasMissingReferences(type) {
+    let hasMissing = false;
+    this.referenceMap[type].forEach(hasData => {
+      if (!hasData) hasMissing = true;
+    });
+    return hasMissing;
+  }
+
+  // 统一检查项目的方法（适用于任何层级）
+  _checkItems(items) {
+    const status = {
+      tableRef: false, tableData: false,
+      figureRef: false, figureData: false
+    };
+    const refs = { table: [], figure: [] };
+
+    // 遍历所有项
+    items.forEach(item => {
+      // 检查标题中的引用
+      if (item.name) {
+        this._findReferencesInText(item.name, 'table', refs.table);
+        this._findReferencesInText(item.name, 'figure', refs.figure);
       }
+
+      // 检查内容中的引用
+      if (item.con) {
+        this._findReferencesInText(item.con, 'table', refs.table);
+        this._findReferencesInText(item.con, 'figure', refs.figure);
+      }
+
+      // 检查表格数据
       if (item.tableData && item.tableData.length > 0) {
-        hasTable = true;
+        status.tableData = true;
+        refs.table.forEach(ref => this.referenceMap.table.set(ref, true));
+      }
+
+      // 检查图表数据
+      if (item.seriesData && item.echartMsg) {
+        status.figureData = true;
+        refs.figure.forEach(ref => this.referenceMap.figure.set(ref, true));
       }
 
       // 检查二级内容
       if (item.two) {
-        const twoResult = this._checkNestedItems(item.two);
-        if (twoResult.hasReference) hasReference = true;
-        if (twoResult.hasTable) hasTable = true;
-      }
-    });
-
-    return { hasReference, hasTable };
-  }
-
-  // 检查嵌套内容
-  _checkNestedItems(items) {
-    let hasReference = false;
-    let hasTable = false;
-
-    items.forEach(item => {
-      // 每次测试前重置正则表达式的lastIndex
-      this.tableRegex.lastIndex = 0;
-      if (item.con && this.tableRegex.test(item.con)) {
-        hasReference = true;
-      }
-      if (item.tableData && item.tableData.length > 0) {
-        hasTable = true;
+        const twoResult = this._checkItems(item.two);
+        this._mergeStatus(status, twoResult);
       }
 
-      // 检查更深层嵌套
+      // 检查三级内容
       if (item.third) {
-        const thirdResult = this._checkNestedItems(item.third);
-        if (thirdResult.hasReference) hasReference = true;
-        if (thirdResult.hasTable) hasTable = true;
+        const thirdResult = this._checkItems(item.third);
+        this._mergeStatus(status, thirdResult);
       }
     });
 
-    return { hasReference, hasTable };
+    // 更新检测状态
+    if (refs.table.length > 0) status.tableRef = true;
+    if (refs.figure.length > 0) status.figureRef = true;
+
+    return status;
   }
 
-  // 获取缺少表格数据的文件列表
-  getMissingTableFiles() {
-    console.log('缺少表格数据的文件列表:', this.missingTableFiles);
-    return this.missingTableFiles;
+  // 合并状态对象
+  _mergeStatus(target, source) {
+    if (source.tableRef) target.tableRef = true;
+    if (source.tableData) target.tableData = true;
+    if (source.figureRef) target.figureRef = true;
+    if (source.figureData) target.figureData = true;
+  }
+
+  // 在文本中查找引用
+  _findReferencesInText(text, type, refsArray) {
+    const pattern = this.referencePatterns[type];
+    pattern.lastIndex = 0;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      const ref = match[0];
+      refsArray.push(ref);
+      // 记录引用到全局Map
+      if (!this.referenceMap[type].has(ref)) {
+        this.referenceMap[type].set(ref, false);
+      }
+    }
+  }
+
+  // 获取上下文辅助方法
+  _getContext(text, match) {
+    const startPos = Math.max(0, text.indexOf(match) - 30);
+    const endPos = Math.min(text.length, text.indexOf(match) + match.length + 30);
+    return text.substring(startPos, endPos);
+  }
+
+  // 转义CSV中的特殊字符
+  _escapeCSV(str) {
+    if (!str) return '';
+    return str.replace(/"/g, '""');
+  }
+
+  // 收集引用详情 - 精简版
+  _collectReferences(data, materialName) {
+    const referenceDetails = [];
+
+    // 处理每个章节
+    Object.keys(this.sectionTitles).forEach(section => {
+      if (!data[section]) return;
+      this._processItemsForReferences(data[section], referenceDetails, section, 1);
+    });
+
+    return referenceDetails;
+  }
+
+  // 处理项目的引用收集（递归处理多层级）
+  _processItemsForReferences(items, details, section, level, parent = {}) {
+    items.forEach(item => {
+      // 处理标题中的引用
+      if (item.name) {
+        this._collectItemReferences(item.name, details, section, level, item, parent, true);
+      }
+
+      // 处理内容中的引用
+      if (item.con) {
+        this._collectItemReferences(item.con, details, section, level, item, parent, false);
+      }
+
+      // 处理下一级内容
+      if (level === 1 && item.two) {
+        this._processItemsForReferences(item.two, details, section, 2, item);
+      }
+      else if (level === 2 && item.third) {
+        this._processItemsForReferences(item.third, details, section, 3, { ...parent, subtitle: item.name });
+      }
+    });
+  }
+
+  // 收集项目中的引用
+  _collectItemReferences(text, details, section, level, item, parent, inTitle) {
+    // 收集表格引用
+    this._collectReferencesByType(text, details, section, level, item, parent, inTitle, 'table');
+
+    // 收集图表引用
+    this._collectReferencesByType(text, details, section, level, item, parent, inTitle, 'figure');
+  }
+
+  // 按类型收集引用
+  _collectReferencesByType(text, details, section, level, item, parent, inTitle, type) {
+    const pattern = this.referencePatterns[type];
+    pattern.lastIndex = 0;
+    let match;
+
+    while ((match = pattern.exec(text)) !== null) {
+      const ref = match[0];
+      const hasData = this.referenceMap[type].get(ref) || false;
+
+      // 只记录未匹配的引用
+      if (!hasData) {
+        const refDetail = this._createReferenceDetail(ref, section, level, item, parent, inTitle, text, type);
+        details.push(refDetail);
+      }
+    }
+  }
+
+  // 创建引用详情对象
+  _createReferenceDetail(ref, section, level, item, parent, inTitle, text, type) {
+    const detail = {
+      section: this.sectionTitles[section],
+      reference: ref,
+      hasTable: this.referenceMap[type].get(ref) || false,
+      refType: type,
+      level
+    };
+
+    // 根据层级添加相应的标题信息
+    if (level === 1) {
+      detail.title = item.name || '未知标题';
+    } else if (level === 2) {
+      detail.title = parent.name || '未知标题';
+      detail.subtitle = item.name || '未知小标题';
+    } else if (level === 3) {
+      detail.title = parent.name || '未知标题';
+      detail.subtitle = parent.subtitle || '未知小标题';
+      detail.subsubtitle = item.name || '未知小小标题';
+    }
+
+    // 设置上下文
+    if (inTitle) {
+      detail.context = `[${level === 1 ? '标题' : level === 2 ? '子标题' : '子子标题'}中引用] ${text}`;
+      detail.inTitle = true;
+    } else {
+      detail.context = this._getContext(text, ref);
+    }
+
+    return detail;
   }
 
   // 设置当前材料名称和分类
@@ -114,22 +288,33 @@ export default class TableChecker {
     this.checkProgress = 0;
 
     // 收集所有材料
-    if (this.allMaterials.length === 0) {
-      this.allMaterials = [];
-      menuData.forEach(category => {
-        category.list.forEach(material => {
+    this._collectAllMaterials(menuData);
+
+    // 开始顺序检查
+    this.checkMaterialsSequentially(0, callback);
+    return this.missingTableFiles;
+  }
+
+  // 收集所有材料
+  _collectAllMaterials(menuData) {
+    if (!menuData || menuData.length === 0) return;
+
+    this.allMaterials = [];
+    menuData.forEach(category => {
+      if (!category.list) return;
+
+      category.list.forEach(material => {
+        if (material && material.name) {
           this.allMaterials.push({
             name: material.name,
             index: material.index,
             category: category.name
           });
-        });
+        }
       });
-    }
+    });
 
-    // 使用Promise队列依次检查每个材料
-    this.checkMaterialsSequentially(0, callback);
-    return this.missingTableFiles;
+    console.log(`共发现${this.allMaterials.length}个材料需要检查`);
   }
 
   // 顺序检查材料列表
@@ -150,272 +335,131 @@ export default class TableChecker {
     const getJsonUrl = this.baseURL + "/json/" + material.name + ".json";
 
     getJson(getJsonUrl).then(data => {
-      // 设置当前材料和分类
-      this.setCurrentMaterial(material.name, material.category);
-
-      // 检查这个材料是否缺少表格
-      let hasTableReference = false;
-      let hasTableData = false;
-
-      // 检查各个部分
-      ['introduce', 'physicalChemistry', 'mechanical', 'craft', 'microstructures'].forEach(section => {
-        if (!data[section]) return;
-
-        const result = this._checkSection(data[section]);
-        if (result.hasReference) hasTableReference = true;
-        if (result.hasTable) hasTableData = true;
-      });
-
-      // 如果有表格引用但没有表格数据，记录文件名和详细信息
-      if (hasTableReference && !hasTableData) {
-        const materialInfo = {
-          name: material.name,
-          category: material.category,
-          references: this._collectReferences(data, material.name)
-        };
-
-        this.missingTableFiles.push(materialInfo);
-      }
+      this._processMaterialData(material, data, index, callback);
     }).catch(error => {
       console.error(`检查文件 ${material.name} 时出错:`, error);
-    }).finally(() => {
-      // 继续检查下一个材料
-      setTimeout(() => {
-        this.checkMaterialsSequentially(index + 1, callback);
-      }, 100); // 添加一点延迟，避免请求过快
+      this._checkNextMaterial(index, callback);
     });
   }
 
-  // 收集引用详情
-  _collectReferences(data, materialName) {
-    const referenceDetails = [];
-    const sectionTitles = {
-      'introduce': '合金介绍',
-      'physicalChemistry': '物理、弹性和化学性能',
-      'mechanical': '力学性能',
-      'craft': '工艺性能与要求',
-      'microstructures': '组织结构'
+  // 处理材料数据
+  _processMaterialData(material, data, index, callback) {
+    // 设置当前材料和分类
+    this.setCurrentMaterial(material.name, material.category);
+
+    // 清空引用记录
+    this.clearReferenceMaps();
+
+    // 检查状态
+    const status = {
+      tableRef: false, tableData: false,
+      figureRef: false, figureData: false
     };
 
-    Object.keys(sectionTitles).forEach(section => {
+    // 检查各个部分
+    Object.keys(this.sectionTitles).forEach(section => {
       if (!data[section]) return;
 
-      data[section].forEach(item => {
-        // 处理一级内容的引用
-        this.tableRegex.lastIndex = 0; // 重置正则表达式的lastIndex
-        if (item.con && this.tableRegex.test(item.con)) {
-          const matches = item.con.match(this.tableRegex);
-          if (matches) {
-            matches.forEach(match => {
-              referenceDetails.push({
-                section: sectionTitles[section],
-                title: item.name || '未知标题',
-                level: 1,
-                reference: match,
-                context: this._getContext(item.con, match)
-              });
-            });
-          }
-        }
-
-        // 处理二级内容
-        if (item.two) {
-          item.two.forEach(second => {
-            this.tableRegex.lastIndex = 0; // 重置正则表达式的lastIndex
-            if (second.con && this.tableRegex.test(second.con)) {
-              const matches = second.con.match(this.tableRegex);
-              if (matches) {
-                matches.forEach(match => {
-                  referenceDetails.push({
-                    section: sectionTitles[section],
-                    title: item.name || '未知标题',
-                    subtitle: second.name || '未知小标题',
-                    level: 2,
-                    reference: match,
-                    context: this._getContext(second.con, match)
-                  });
-                });
-              }
-            }
-
-            // 处理三级内容
-            if (second.third) {
-              second.third.forEach(third => {
-                this.tableRegex.lastIndex = 0; // 重置正则表达式的lastIndex
-                if (third.con && this.tableRegex.test(third.con)) {
-                  const matches = third.con.match(this.tableRegex);
-                  if (matches) {
-                    matches.forEach(match => {
-                      referenceDetails.push({
-                        section: sectionTitles[section],
-                        title: item.name || '未知标题',
-                        subtitle: second.name || '未知小标题',
-                        subsubtitle: third.name || '未知小小标题',
-                        level: 3,
-                        reference: match,
-                        context: this._getContext(third.con, match)
-                      });
-                    });
-                  }
-                }
-              });
-            }
-          });
-        }
-      });
+      const result = this._checkItems(data[section]);
+      if (result.tableRef) status.tableRef = true;
+      if (result.tableData) status.tableData = true;
+      if (result.figureRef) status.figureRef = true;
+      if (result.figureData) status.figureData = true;
     });
 
-    return referenceDetails;
+    // 判断是否存在问题
+    const hasMissingTableRefs = this._hasMissingReferences('table');
+    const hasMissingFigureRefs = this._hasMissingReferences('figure');
+
+    if ((status.tableRef && !status.tableData) ||
+        (status.figureRef && !status.figureData) ||
+        hasMissingTableRefs || hasMissingFigureRefs) {
+
+      // 收集详细信息
+      const references = this._collectReferences(data, material.name);
+
+      // 添加到问题列表
+      this.missingTableFiles.push({
+        name: material.name,
+        category: material.category,
+        references
+      });
+    }
+
+    // 检查下一个材料
+    this._checkNextMaterial(index, callback);
   }
 
-  // 自动批量检查所有材料
+  // 检查下一个材料
+  _checkNextMaterial(index, callback) {
+    setTimeout(() => {
+      this.checkMaterialsSequentially(index + 1, callback);
+    }, 100);
+  }
+
+  // 获取缺少表格数据的文件列表
+  getMissingTableFiles() {
+    return this.missingTableFiles;
+  }
+
+  // 自动批量检查（使用现有的检查逻辑）
   autoBatchCheckAllMaterials(menuData) {
-    console.log('开始自动检查所有材料是否有表格缺失...');
+    console.log('开始自动检查所有材料是否有表格或图表缺失...');
     this.missingTableFiles = [];
 
-    // 收集所有材料
-    if (!menuData || menuData.length === 0) {
-      console.log('菜单数据尚未加载完成，无法执行检查');
-      return;
-    }
-
-    this.allMaterials = [];
-    menuData.forEach(category => {
-      category.list.forEach(material => {
-        this.allMaterials.push({
-          name: material.name,
-          index: material.index,
-          category: category.name
-        });
-      });
-    });
-
-    console.log(`共发现${this.allMaterials.length}个材料需要检查`);
-
-    // 使用Promise队列依次检查每个材料
-    this.autoCheckMaterialsSequentially(0);
+    this._collectAllMaterials(menuData);
+    this.checkMaterialsSequentially(0);
   }
 
-  // 顺序检查材料列表（自动版本）
-  autoCheckMaterialsSequentially(index) {
-    if (index >= this.allMaterials.length) {
-      // 检查完成
-      console.log('===== 检查完成 =====');
-      console.log(`共发现${this.missingTableFiles.length}个材料存在表格引用但没有表格数据:`);
-      console.table(this.missingTableFiles);
-      return;
-    }
-
-    const material = this.allMaterials[index];
-    const progress = Math.floor((index / this.allMaterials.length) * 100);
-
-    if (index % 10 === 0) {
-      console.log(`检查进度: ${progress}%, 当前检查: ${material.name}`);
-    }
-
-    // 获取当前材料的JSON数据
-    const getJsonUrl = this.baseURL + "/json/" + material.name + ".json";
-
-    getJson(getJsonUrl).then(data => {
-      // 设置当前材料和分类
-      this.setCurrentMaterial(material.name, material.category);
-
-      // 检查这个材料是否缺少表格
-      let hasTableReference = false;
-      let hasTableData = false;
-
-      // 检查各个部分
-      ['introduce', 'physicalChemistry', 'mechanical', 'craft', 'microstructures'].forEach(section => {
-        if (!data[section]) return;
-
-        const result = this._checkSection(data[section]);
-        if (result.hasReference) hasTableReference = true;
-        if (result.hasTable) hasTableData = true;
-      });
-
-      // 如果有表格引用但没有表格数据，收集引用详情
-      if (hasTableReference && !hasTableData) {
-        const referenceDetails = this._collectReferences(data, material.name);
-
-        const materialInfo = {
-          name: material.name,
-          category: material.category,
-          references: referenceDetails
-        };
-
-        // 打印单个材料的详细信息到控制台
-        console.log(`\n发现材料 [${material.name}] 有表格引用但缺少表格数据:`);
-        referenceDetails.forEach((ref, idx) => {
-          console.log(`  ${idx+1}. 章节: ${ref.section}`);
-          console.log(`     标题: ${ref.title}`);
-          if (ref.subtitle) console.log(`     子标题: ${ref.subtitle}`);
-          if (ref.subsubtitle) console.log(`     子子标题: ${ref.subsubtitle}`);
-          console.log(`     引用: ${ref.reference}`);
-          console.log(`     上下文: ${ref.context}`);
-          console.log(`---`);
-        });
-
-        this.missingTableFiles.push(materialInfo);
-      }
-    }).catch(error => {
-      console.error(`检查文件 ${material.name} 时出错:`, error);
-    }).finally(() => {
-      // 继续检查下一个材料
-      setTimeout(() => {
-        this.autoCheckMaterialsSequentially(index + 1);
-      }, 50); // 添加一点延迟，避免请求过快
-    });
-  }
-
-  // 获取上下文辅助方法
-  _getContext(text, match) {
-    const startPos = Math.max(0, text.indexOf(match) - 30); // 增加上下文长度
-    const endPos = Math.min(text.length, text.indexOf(match) + match.length + 30); // 增加上下文长度
-    return text.substring(startPos, endPos);
-  }
-
-  // 导出缺失文件列表 - 增强版本，包含更多详情
+  // 导出缺失文件列表
   exportMissingFiles(customFileName) {
-    // 生成CSV格式，包含更多字段
-    // 添加BOM标记以确保Excel正确识别UTF-8编码的中文
-    let csvContent = '\ufeff';
-    csvContent += "材料牌号,材料类型,章节,标题,子标题,子子标题,引用,上下文\n";
+    let csvContent = '\ufeff'; // 添加BOM
+    csvContent += "材料牌号,材料类型,章节,标题,子标题,子子标题,引用类型,引用,上下文,是否有相应数据,引用位置\n";
 
     this.missingTableFiles.forEach(file => {
       if (file.references && file.references.length > 0) {
         file.references.forEach(ref => {
-          // 处理CSV特殊字符
-          const safeTitle = this._escapeCSV(ref.title || '');
-          const safeSubtitle = this._escapeCSV(ref.subtitle || '');
-          const safeSubsubtitle = this._escapeCSV(ref.subsubtitle || '');
-          const safeContext = this._escapeCSV(ref.context || '');
-          const safeReference = this._escapeCSV(ref.reference || '');
-          const safeSection = this._escapeCSV(ref.section || '');
-
-          csvContent += `"${file.name}","${file.category}","${safeSection}","${safeTitle}",`;
-          csvContent += `"${safeSubtitle}","${safeSubsubtitle}","${safeReference}","${safeContext}"\n`;
+          // 添加CSV行
+          csvContent += this._formatCsvRow(file, ref);
         });
       } else {
-        csvContent += `"${file.name}","${file.category}","","","","","",""\n`;
+        csvContent += `"${file.name}","${file.category}","","","","","未知","","","否",""\n`;
       }
     });
 
-    // 创建下载链接 - 明确指定UTF-8编码
+    // 创建并下载CSV文件
+    this._downloadCsv(csvContent, customFileName);
+  }
+
+  // 格式化CSV行
+  _formatCsvRow(file, ref) {
+    const safeTitle = this._escapeCSV(ref.title || '');
+    const safeSubtitle = this._escapeCSV(ref.subtitle || '');
+    const safeSubsubtitle = this._escapeCSV(ref.subsubtitle || '');
+    const safeContext = this._escapeCSV(ref.context || '');
+    const safeReference = this._escapeCSV(ref.reference || '');
+    const safeSection = this._escapeCSV(ref.section || '');
+    const refType = ref.refType === 'table' ? '表格' : '图表';
+    const hasData = ref.hasTable ? "是" : "否";
+    const refLocation = ref.inTitle ? "标题中" : "内容中";
+
+    return `"${file.name}","${file.category}","${safeSection}","${safeTitle}","${safeSubtitle}","${safeSubsubtitle}","${refType}","${safeReference}","${safeContext}","${hasData}","${refLocation}"\n`;
+  }
+
+  // 下载CSV文件
+  _downloadCsv(csvContent, customFileName) {
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    // 使用自定义文件名或默认文件名
-    link.setAttribute('download', customFileName || '表格缺失材料列表_详细.csv');
+
+    // 设置文件名
+    const fileName = customFileName || `表格图表缺失列表_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.setAttribute('download', fileName);
+
+    // 触发下载
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }
-
-  // 转义CSV中的特殊字符
-  _escapeCSV(str) {
-    if (!str) return '';
-    // 替换双引号为两个双引号(CSV标准转义)
-    return str.replace(/"/g, '""');
   }
 }

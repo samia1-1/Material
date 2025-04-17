@@ -223,10 +223,8 @@ export default {
     this.tableChecker = new TableChecker(this.baseURL);
   },
   mounted() {
-    // 页面挂载后自动执行批量检查
-    setTimeout(() => {
-      this.autoBatchCheckAllMaterials();
-    }, 2000); // 延迟2秒执行，确保菜单数据已加载
+    // 延迟执行自动检查，确保菜单数据加载完成
+    setTimeout(() => this.initAndRunTableChecker(), 3000);
   },
   data() {
     return {
@@ -603,43 +601,24 @@ export default {
       });
     },
 
-    // 表格检查相关方法 - 使用tableChecker
+    // 初始化并运行表格检查器
+    initAndRunTableChecker() {
+      try {
+        if (!this.tableChecker) {
+          this.tableChecker = new TableChecker(this.baseURL);
+        }
 
-    // 批量检查所有材料
-    batchCheckAllMaterials() {
-      this.batchResultVisible = true;
-      this.tableChecker.batchCheckAllMaterials(this.menuData, () => {
-        // 检查完成后的回调
-      });
+        if (this.menuData && this.menuData.length && typeof this.tableChecker.autoBatchCheckAllMaterials === 'function') {
+          this.tableChecker.autoBatchCheckAllMaterials(this.menuData);
+        } else {
+          console.warn('菜单数据未加载完成或表格检查器方法不可用');
+        }
+      } catch (error) {
+        console.error('表格检查器初始化或运行失败:', error);
+      }
     },
 
-    // 导航到指定材料
-    goToFile(material) {
-      // 查找对应的菜单项
-      this.menuData.some((category) => {
-        return category.list.some((item) => {
-          if (item.name === material.name) {
-            this.defaultActive = item.index;
-            this.changeFun(category.name, item);
-            this.batchResultVisible = false;
-            return true;
-          }
-          return false;
-        });
-      });
-    },
-
-    // 导出缺失文件列表
-    exportMissingFiles() {
-      this.tableChecker.exportMissingFiles();
-    },
-
-    // 自动批量检查所有材料
-    autoBatchCheckAllMaterials() {
-      this.tableChecker.autoBatchCheckAllMaterials(this.menuData);
-    },
-
-    // 检查表格缺失并导出结果
+    // 检查表格缺失并导出结果 - 简化版
     checkAndExport() {
       this.exportDialogVisible = true;
       this.exporting = true;
@@ -647,46 +626,53 @@ export default {
       this.exportStatusText = '正在检查当前材料...';
 
       try {
-        // 先检查当前材料
-        if (this.jsonData) {
-          // 确保已经设置了当前材料的名称和分类
+        // 确保设置了当前材料
+        if (this.jsonData && this.name2 && this.name1) {
           this.tableChecker.setCurrentMaterial(this.name2, this.name1);
           this.tableChecker.checkTableReferences(this.jsonData);
-          this.exportProgress = 30;
-          this.exportStatusText = '正在收集错误数据...';
+
+          // 导出文件
+          this.exportProgress = 50;
+          this.exportStatusText = '正在生成导出文件...';
+
+          setTimeout(() => {
+            try {
+              // 生成文件名
+              const fileName = `TableReport_${this.name2}_${new Date().toISOString().replace(/[:.]/g, '_')}.csv`;
+              this.tableChecker.exportMissingFiles(fileName);
+
+              this.exportProgress = 100;
+              this.exportStatusText = '导出完成！';
+              this.exporting = false;
+              setTimeout(() => this.exportDialogVisible = false, 2000);
+            } catch (error) {
+              console.error('导出失败:', error);
+              this.exportStatusText = '导出失败，请重试!';
+              this.exporting = false;
+            }
+          }, 500);
         }
-
-        // 使用已有的导出功能
-        setTimeout(() => {
-          try {
-            this.exportProgress = 70;
-            this.exportStatusText = '正在生成导出文件...';
-
-            // 指定当前日期时间的文件名，避免中文文件名可能导致的问题
-            const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-            const timeStr = new Date().toISOString().slice(11, 19).replace(/:/g, '');
-            const fileName = `TableReport_${this.name2}_${dateStr}_${timeStr}.csv`;
-
-            this.tableChecker.exportMissingFiles(fileName);
-
-            this.exportProgress = 100;
-            this.exportStatusText = '导出完成！';
-            this.exporting = false;
-
-            // 3秒后自动关闭对话框
-            setTimeout(() => {
-              this.exportDialogVisible = false;
-            }, 3000);
-          } catch (error) {
-            console.error('导出错误:', error);
-            this.exportStatusText = '导出失败，请重试!';
-            this.exporting = false;
-          }
-        }, 500);
       } catch (error) {
-        console.error('检查错误:', error);
+        console.error('检查失败:', error);
         this.exportStatusText = '检查失败，请重试!';
         this.exporting = false;
+      }
+    },
+
+    // 添加缺失的exportMissingFiles方法
+    exportMissingFiles() {
+      if (!this.tableChecker) {
+        console.error('表格检查器未初始化');
+        return;
+      }
+
+      try {
+        // 生成带时间戳的文件名
+        const fileName = `TableReport_AllMaterials_${new Date().toISOString().slice(0, 10)}.csv`;
+        this.tableChecker.exportMissingFiles(fileName);
+      } catch (error) {
+        console.error('导出文件失败:', error);
+        this.$message.error('导出文件失败，请重试');
       }
     },
   },
