@@ -618,7 +618,7 @@ export default {
       }
     },
 
-    // 检查表格缺失并导出结果 - 简化版
+    // 检查表格缺失并导出结果 - 使用新的直接扫描功能
     checkAndExport() {
       this.exportDialogVisible = true;
       this.exporting = true;
@@ -628,10 +628,9 @@ export default {
       try {
         // 确保设置了当前材料
         if (this.jsonData && this.name2 && this.name1) {
+          // 使用强制扫描方法
           this.tableChecker.setCurrentMaterial(this.name2, this.name1);
-          this.tableChecker.checkTableReferences(this.jsonData);
 
-          // 导出文件
           this.exportProgress = 50;
           this.exportStatusText = '正在生成导出文件...';
 
@@ -639,10 +638,12 @@ export default {
             try {
               // 生成文件名
               const fileName = `TableReport_${this.name2}_${new Date().toISOString().replace(/[:.]/g, '_')}.csv`;
-              this.tableChecker.exportMissingFiles(fileName);
+
+              // 使用新的直接导出方法
+              const success = this.tableChecker.directExport(this.jsonData, this.name2, this.name1, fileName);
 
               this.exportProgress = 100;
-              this.exportStatusText = '导出完成！';
+              this.exportStatusText = success ? '导出完成！' : '未发现需要导出的引用';
               this.exporting = false;
               setTimeout(() => this.exportDialogVisible = false, 2000);
             } catch (error) {

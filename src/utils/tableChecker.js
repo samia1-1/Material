@@ -8,10 +8,12 @@ export default class TableChecker {
     this.checkProgress = 0;
     this.currentCheckingFile = '';
     this.allMaterials = [];
-    // 引用检测正则表达式
+    // 大幅扩展正则表达式，支持更多格式
     this.referencePatterns = {
-      table: /(见表|表)\s*\d+[-－]\d+/g, // 匹配"见表x-x"和"表x-x"格式
-      figure: /(见图|图)\s*\d+[-－]\d+/g // 匹配"见图x-x"和"图x-x"格式
+      // 表格引用匹配模式 - 支持更多格式和数字范围引用
+      table: /(?:见表|表|如表|表格|表\s*?|见表格|如表格|参见表|(?:如)?表\s*(?:中|内)|附表)\s*?(\d+[-－~～至]\d+|\d+\.\d+|\d+)/g,
+      // 图表引用匹配模式 - 支持更多格式和数字范围引用
+      figure: /(?:见图|图|如图|曲线图|如图所示|曲线见图|性能曲线见图|弹性(?:曲线|变化)(?:见)?图|参见图|附图)\s*?(\d+[-－~～至]\d+|\d+\.\d+|\d+)/g
     };
     // 引用映射记录
     this.referenceMap = {
@@ -157,7 +159,11 @@ export default class TableChecker {
     pattern.lastIndex = 0;
     let match;
     while ((match = pattern.exec(text)) !== null) {
-      const ref = match[0];
+      // 提取完整匹配和引用号
+      const fullMatch = match[0];
+      const refNum = match[1] ? match[1] : fullMatch.match(/\d+[-－~～至]\d+|\d+\.\d+|\d+/)[0];
+      const ref = (type === 'table' ? '表' : '图') + refNum;
+
       refsArray.push(ref);
       // 记录引用到全局Map
       if (!this.referenceMap[type].has(ref)) {
@@ -230,15 +236,30 @@ export default class TableChecker {
     pattern.lastIndex = 0;
     let match;
 
-    while ((match = pattern.exec(text)) !== null) {
-      const ref = match[0];
-      const hasData = this.referenceMap[type].get(ref) || false;
+    try {
+      while ((match = pattern.exec(text)) !== null) {
+        // 提取引用号，统一格式
+        const fullMatch = match[0];
+        let refNum;
 
-      // 只记录未匹配的引用
-      if (!hasData) {
-        const refDetail = this._createReferenceDetail(ref, section, level, item, parent, inTitle, text, type);
-        details.push(refDetail);
+        try {
+          refNum = match[1] ? match[1] : fullMatch.match(/\d+[-－~～至]\d+|\d+\.\d+|\d+/)[0];
+        } catch (e) {
+          console.warn('无法提取引用编号:', fullMatch);
+          refNum = fullMatch.replace(/[^0-9\-－]/g, '');
+        }
+
+        const ref = (type === 'table' ? '表' : '图') + refNum;
+        const hasData = this.referenceMap[type].get(ref) || false;
+
+        // 记录所有缺失的引用
+        if (!hasData) {
+          const refDetail = this._createReferenceDetail(ref, section, level, item, parent, inTitle, text, type);
+          details.push(refDetail);
+        }
       }
+    } catch (error) {
+      console.error('处理引用时出错:', error, text);
     }
   }
 
@@ -342,7 +363,7 @@ export default class TableChecker {
     });
   }
 
-  // 处理材料数据
+  // 处理材料数据 - 改进收集逻辑
   _processMaterialData(material, data, index, callback) {
     // 设置当前材料和分类
     this.setCurrentMaterial(material.name, material.category);
@@ -375,8 +396,43 @@ export default class TableChecker {
         (status.figureRef && !status.figureData) ||
         hasMissingTableRefs || hasMissingFigureRefs) {
 
-      // 收集详细信息
-      const references = this._collectReferences(data, material.name);
+      // 收集详细信息 - 不管有没有引用也进行收集
+      const references = [];
+
+      // 强制收集所有引用，包括有数据和没数据的
+      Object.keys(this.referenceMap.table).forEach(ref => {
+        if (!this.referenceMap.table.get(ref)) {
+          // 查找具体位置，创建引用记录
+          this._findAndAddReferenceDetails(data, references, ref, 'table');
+        }
+      });
+
+      Object.keys(this.referenceMap.figure).forEach(ref => {
+        if (!this.referenceMap.figure.get(ref)) {
+          this._findAndAddReferenceDetails(data, references, ref, 'figure');
+        }
+      });
+
+      // 如果使用Map没有keys方法，需要用迭代器手动收集
+      if (!Object.keys(this.referenceMap.table).length) {
+        this.referenceMap.table.forEach((value, key) => {
+          if (!value) {
+            this._findAndAddReferenceDetails(data, references, key, 'table');
+          }
+        });
+
+        this.referenceMap.figure.forEach((value, key) => {
+          if (!value) {
+            this._findAndAddReferenceDetails(data, references, key, 'figure');
+          }
+        });
+      }
+
+      // 如果还是没有收集到引用，使用老方法收集
+      if (references.length === 0) {
+        const oldReferences = this._collectReferences(data, material.name);
+        references.push(...oldReferences);
+      }
 
       // 添加到问题列表
       this.missingTableFiles.push({
@@ -388,6 +444,70 @@ export default class TableChecker {
 
     // 检查下一个材料
     this._checkNextMaterial(index, callback);
+  }
+
+  // 查找并添加引用详情的新方法
+  _findAndAddReferenceDetails(data, references, refKey, type) {
+    let found = false;
+
+    // 遍历所有章节寻找引用
+    Object.keys(this.sectionTitles).forEach(section => {
+      if (!data[section] || found) return;
+
+      // 查找此引用出现在哪个位置
+      const refDetails = this._searchReferenceInItems(
+        data[section], section, refKey, type, 1
+      );
+
+      if (refDetails) {
+        references.push(refDetails);
+        found = true;
+      }
+    });
+
+    // 如果没找到，创建一个通用的引用记录
+    if (!found) {
+      references.push({
+        section: '未知章节',
+        reference: refKey,
+        hasTable: false,
+        refType: type,
+        level: 0,
+        title: '未知位置',
+        context: `未找到具体位置的引用: ${refKey}`
+      });
+    }
+  }
+
+  // 递归搜索引用在内容中的位置
+  _searchReferenceInItems(items, section, refKey, type, level, parent = {}) {
+    // 遍历所有项目
+    for (let item of items) {
+      // 检查标题中的引用
+      if (item.name && item.name.includes(refKey)) {
+        return this._createReferenceDetail(refKey, section, level, item, parent, true, item.name, type);
+      }
+
+      // 检查内容中的引用
+      if (item.con && item.con.includes(refKey)) {
+        return this._createReferenceDetail(refKey, section, level, item, parent, false, item.con, type);
+      }
+
+      // 检查下一级内容
+      if (level === 1 && item.two) {
+        const result = this._searchReferenceInItems(item.two, section, refKey, type, 2, item);
+        if (result) return result;
+      }
+      else if (level === 2 && item.third) {
+        const result = this._searchReferenceInItems(
+          item.third, section, refKey, type, 3,
+          { ...parent, subtitle: item.name }
+        );
+        if (result) return result;
+      }
+    }
+
+    return null;
   }
 
   // 检查下一个材料
@@ -411,14 +531,449 @@ export default class TableChecker {
     this.checkMaterialsSequentially(0);
   }
 
-  // 导出缺失文件列表
+  // 添加一个全新的强制扫描方法
+  forceFullScan(jsonData, materialName, categoryName) {
+    console.log(`强制完整扫描: ${materialName}`);
+
+    // 清空当前引用记录
+    this.clearReferenceMaps();
+
+    const allReferences = {
+      table: [],
+      figure: []
+    };
+
+    // 提取所有文本内容
+    const allContent = this._extractAllContent(jsonData);
+
+    // 扫描所有可能的引用
+    this._scanAllReferences(allContent, 'table', allReferences.table);
+    this._scanAllReferences(allContent, 'figure', allReferences.figure);
+
+    // 收集所有引用的详情
+    const referenceDetails = [];
+
+    // 为表格和图表处理引用
+    ['table', 'figure'].forEach(type => {
+      allReferences[type].forEach(ref => {
+        // 寻找引用位置的上下文
+        const context = this._findReferenceContext(jsonData, ref);
+
+        const refDetail = {
+          section: context.section || '全文扫描',
+          reference: ref,
+          hasTable: false, // 默认假设没有对应数据
+          refType: type,
+          level: context.level || 0,
+          title: context.title || '自动提取',
+          subtitle: context.subtitle || '',
+          subsubtitle: context.subsubtitle || '',
+          context: context.text || `找到的引用: ${ref}`,
+          inTitle: context.inTitle || false
+        };
+
+        referenceDetails.push(refDetail);
+      });
+    });
+
+    // 添加到问题列表
+    if (referenceDetails.length > 0) {
+      // 查看是否已有此材料的记录
+      const existingIndex = this.missingTableFiles.findIndex(f => f.name === materialName);
+
+      if (existingIndex >= 0) {
+        // 更新已有记录
+        this.missingTableFiles[existingIndex].references = referenceDetails;
+      } else {
+        // 添加新记录
+        this.missingTableFiles.push({
+          name: materialName,
+          category: categoryName,
+          references: referenceDetails
+        });
+      }
+    }
+
+    return referenceDetails;
+  }
+
+  // 提取所有文本内容的辅助方法
+  _extractAllContent(jsonData) {
+    let allText = '';
+
+    // 处理所有章节
+    Object.keys(this.sectionTitles).forEach(section => {
+      if (!jsonData[section]) return;
+
+      // 提取当前章节的所有文本
+      allText += ' ' + this._extractSectionText(jsonData[section]) + ' ';
+    });
+
+    return allText;
+  }
+
+  // 提取章节文本
+  _extractSectionText(items) {
+    let text = '';
+
+    items.forEach(item => {
+      // 提取标题
+      if (item.name) {
+        text += ' ' + item.name + ' ';
+      }
+
+      // 提取内容
+      if (item.con) {
+        text += ' ' + item.con + ' ';
+      }
+
+      // 递归处理二级内容
+      if (item.two) {
+        text += ' ' + this._extractSectionText(item.two) + ' ';
+      }
+
+      // 递归处理三级内容
+      if (item.third) {
+        text += ' ' + this._extractSectionText(item.third) + ' ';
+      }
+    });
+
+    return text;
+  }
+
+  // 扫描所有可能的引用 - 改进提取引用逻辑
+  _scanAllReferences(text, type, refsArray) {
+    const pattern = this.referencePatterns[type];
+    pattern.lastIndex = 0;
+
+    // 使用Set去重
+    const uniqueRefs = new Set();
+    let match;
+
+    // 收集所有匹配项
+    const allMatches = [];
+    while ((match = pattern.exec(text)) !== null) {
+      allMatches.push(match);
+    }
+
+    // 为调试输出所有匹配项
+    console.log(`${type}引用原始匹配数: ${allMatches.length}`);
+    if (allMatches.length > 0) {
+      console.log(`首个匹配: ${allMatches[0][0]}`);
+    }
+
+    // 处理每个匹配
+    allMatches.forEach(match => {
+      try {
+        // 提取完整匹配和引用号
+        const fullMatch = match[0];
+        let refNum = null;
+
+        // 尝试从捕获组提取
+        if (match[1]) {
+          refNum = match[1];
+        }
+        // 尝试从完整匹配中提取数字和连字符
+        else {
+          const numMatch = fullMatch.match(/\d+[-－~～至]\d+|\d+\.\d+|\d+/);
+          if (numMatch) {
+            refNum = numMatch[0];
+          }
+        }
+
+        // 如果找到引用号
+        if (refNum) {
+          // 处理范围引用 (如 3-5)
+          if (refNum.match(/\d+[-－~～至]\d+/)) {
+            const rangeParts = refNum.split(/[-－~～至]/);
+            if (rangeParts.length === 2) {
+              const start = parseInt(rangeParts[0]);
+              const end = parseInt(rangeParts[1]);
+
+              // 为范围内每个数字创建独立引用
+              for (let i = start; i <= end; i++) {
+                const ref = (type === 'table' ? '表' : '图') + i;
+                uniqueRefs.add(ref);
+              }
+            }
+          }
+          // 处理单个引用
+          else {
+            const ref = (type === 'table' ? '表' : '图') + refNum;
+            uniqueRefs.add(ref);
+          }
+        }
+      } catch (error) {
+        console.error('解析引用出错:', error, match[0]);
+      }
+    });
+
+    // 将去重后的引用添加到结果数组
+    uniqueRefs.forEach(ref => refsArray.push(ref));
+
+    console.log(`${type}引用处理后数量: ${refsArray.length}`);
+  }
+
+  // 查找引用的具体位置和上下文
+  _findReferenceContext(jsonData, refKey) {
+    const context = {
+      section: '',
+      level: 0,
+      title: '',
+      subtitle: '',
+      subsubtitle: '',
+      text: '',
+      inTitle: false
+    };
+
+    // 遍历所有章节寻找引用
+    Object.keys(this.sectionTitles).forEach(section => {
+      if (context.text) return; // 如果已找到上下文，则跳过
+
+      // 在此章节中查找
+      if (jsonData[section]) {
+        const sectionName = this.sectionTitles[section];
+        const result = this._searchRefInSection(jsonData[section], refKey, sectionName, 1);
+
+        if (result.found) {
+          Object.assign(context, result);
+        }
+      }
+    });
+
+    return context;
+  }
+
+  // 在章节中搜索引用
+  _searchRefInSection(items, refKey, sectionName, level, parent = {}) {
+    const context = {
+      found: false,
+      section: sectionName,
+      level: level,
+      inTitle: false
+    };
+
+    // 遍历所有项目
+    for (let item of items) {
+      // 检查标题中的引用
+      if (item.name && item.name.includes(refKey)) {
+        context.found = true;
+        context.inTitle = true;
+        context.text = item.name;
+
+        if (level === 1) {
+          context.title = item.name;
+        } else if (level === 2) {
+          context.title = parent.name || '';
+          context.subtitle = item.name;
+        } else if (level === 3) {
+          context.title = parent.title || '';
+          context.subtitle = parent.subtitle || '';
+          context.subsubtitle = item.name;
+        }
+
+        return context;
+      }
+
+      // 检查内容中的引用
+      if (item.con && item.con.includes(refKey)) {
+        context.found = true;
+        context.text = this._getContext(item.con, refKey);
+
+        if (level === 1) {
+          context.title = item.name || '';
+        } else if (level === 2) {
+          context.title = parent.name || '';
+          context.subtitle = item.name || '';
+        } else if (level === 3) {
+          context.title = parent.title || '';
+          context.subtitle = parent.subtitle || '';
+          context.subsubtitle = item.name || '';
+        }
+
+        return context;
+      }
+
+      // 检查下级内容
+      if (level === 1 && item.two) {
+        const result = this._searchRefInSection(
+          item.two,
+          refKey,
+          sectionName,
+          2,
+          { name: item.name }
+        );
+
+        if (result.found) return result;
+      }
+      else if (level === 2 && item.third) {
+        const result = this._searchRefInSection(
+          item.third,
+          refKey,
+          sectionName,
+          3,
+          {
+            title: parent.name,
+            subtitle: item.name
+          }
+        );
+
+        if (result.found) return result;
+      }
+    }
+
+    return context;
+  }
+
+  // 直接检查并导出方法
+  directExport(jsonData, materialName, categoryName, customFileName) {
+    console.log(`开始强制扫描材料: ${materialName}`);
+
+    // 简单文本检查 - 用于调试
+    const allText = this._extractAllContent(jsonData);
+    console.log('文本样本(前200字符):', allText.substring(0, 200));
+
+    // 查找所有可能包含表格和图表引用的文本
+    const tableMatches = allText.match(/表\s*\d+[-－~～至]?\d*/g) || [];
+    const figureMatches = allText.match(/图\s*\d+[-－~～至]?\d*/g) || [];
+
+    console.log(`简单文本匹配发现: ${tableMatches.length}个表格引用, ${figureMatches.length}个图表引用`);
+    if (tableMatches.length > 0) console.log('表格引用样例:', tableMatches.slice(0, 5));
+    if (figureMatches.length > 0) console.log('图表引用样例:', figureMatches.slice(0, 5));
+
+    // 强制完整扫描
+    const refs = this.forceFullScan(jsonData, materialName, categoryName);
+
+    console.log(`扫描到 ${refs.length} 个引用需要导出`);
+
+    // 确保结果有效
+    if (!refs || refs.length === 0) {
+      // 使用备用方法
+      console.log('使用备用方法扫描引用');
+      this._directTextScan(jsonData, materialName, categoryName);
+    }
+
+    // 直接导出结果
+    if (this.missingTableFiles.length > 0) {
+      this.exportMissingFiles(customFileName);
+      return true;
+    } else {
+      console.log('未找到需要导出的引用');
+      return false;
+    }
+  }
+
+  // 添加一个备用的直接文本扫描方法
+  _directTextScan(jsonData, materialName, categoryName) {
+    const allText = this._extractAllContent(jsonData);
+    const tableRefs = [];
+    const figureRefs = [];
+
+    // 简单直接的表格引用匹配
+    const tableRegex = /表\s*(\d+[-－~～至]?\d*)/g;
+    let match;
+    while ((match = tableRegex.exec(allText)) !== null) {
+      if (match[1]) tableRefs.push('表' + match[1]);
+    }
+
+    // 简单直接的图表引用匹配
+    const figureRegex = /图\s*(\d+[-－~～至]?\d*)/g;
+    while ((match = figureRegex.exec(allText)) !== null) {
+      if (match[1]) figureRefs.push('图' + match[1]);
+    }
+
+    // 创建引用详情列表
+    const referenceDetails = [];
+
+    // 添加表格引用
+    [...new Set(tableRefs)].forEach(ref => {
+      referenceDetails.push({
+        section: '直接文本扫描',
+        reference: ref,
+        hasTable: false,
+        refType: 'table',
+        level: 0,
+        title: '备用方法提取',
+        subtitle: '',
+        context: `在文本中找到引用: ${ref}`
+      });
+    });
+
+    // 添加图表引用
+    [...new Set(figureRefs)].forEach(ref => {
+      referenceDetails.push({
+        section: '直接文本扫描',
+        reference: ref,
+        hasTable: false,
+        refType: 'figure',
+        level: 0,
+        title: '备用方法提取',
+        subtitle: '',
+        context: `在文本中找到引用: ${ref}`
+      });
+    });
+
+    // 如果有引用，添加到结果列表
+    if (referenceDetails.length > 0) {
+      // 查看是否已有此材料的记录
+      const existingIndex = this.missingTableFiles.findIndex(f => f.name === materialName);
+
+      if (existingIndex >= 0) {
+        // 更新已有记录
+        const existingRefs = this.missingTableFiles[existingIndex].references || [];
+        this.missingTableFiles[existingIndex].references = [...existingRefs, ...referenceDetails];
+      } else {
+        // 添加新记录
+        this.missingTableFiles.push({
+          name: materialName,
+          category: categoryName,
+          references: referenceDetails
+        });
+      }
+
+      console.log(`备用方法找到 ${referenceDetails.length} 个引用`);
+    }
+
+    return referenceDetails;
+  }
+
+  // 修改导出函数，确保所有引用都被处理
   exportMissingFiles(customFileName) {
     let csvContent = '\ufeff'; // 添加BOM
     csvContent += "材料牌号,材料类型,章节,标题,子标题,子子标题,引用类型,引用,上下文,是否有相应数据,引用位置\n";
 
+    // 调试输出
+    console.log(`准备导出 ${this.missingTableFiles.length} 个文件的引用信息`);
+
+    // 确保有数据可导出
+    if (this.missingTableFiles.length === 0) {
+      console.warn('没有找到需要导出的引用数据');
+      return false;
+    }
+
+    // 记录每个文件的引用数量
+    const refCounts = [];
+    let totalRefs = 0;
+
     this.missingTableFiles.forEach(file => {
-      if (file.references && file.references.length > 0) {
-        file.references.forEach(ref => {
+      const refs = file.references ? file.references.length : 0;
+      refCounts.push(`${file.name}: ${refs}条`);
+      totalRefs += refs;
+    });
+
+    console.log(`各文件引用数: ${refCounts.join(', ')}`);
+    console.log(`总计: ${totalRefs} 条引用`);
+
+    this.missingTableFiles.forEach((file, index) => {
+      const hasReferences = file.references && file.references.length > 0;
+
+      if (hasReferences) {
+        console.log(`处理文件[${index+1}/${this.missingTableFiles.length}]: ${file.name}, 引用数: ${file.references.length}`);
+
+        file.references.forEach((ref, i) => {
+          // 日志输出前几个引用的详情
+          if (i < 3) console.log(`  引用${i+1}: ${ref.reference} (${ref.refType})`);
+
           // 添加CSV行
           csvContent += this._formatCsvRow(file, ref);
         });
@@ -429,6 +984,7 @@ export default class TableChecker {
 
     // 创建并下载CSV文件
     this._downloadCsv(csvContent, customFileName);
+    return true;
   }
 
   // 格式化CSV行
