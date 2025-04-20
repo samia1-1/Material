@@ -349,7 +349,7 @@ export default {
       });
     },
 
-    // 改进自动调整图片大小的逻辑，确保图片完全填满显示区域
+    // 优化自动调整图片大小的逻辑，减少多余间距以最大化利用显示区域
     autoFitImage(imgElement) {
       if (!imgElement || !this.$refs.imageContainer) return;
 
@@ -366,36 +366,37 @@ export default {
 
       let scale = 1;
 
-      // 采用cover模式的缩放策略，确保图片完全填满容器
+      // 采用缩放策略以充分利用空间
       if (imgRatio > containerRatio) {
-        // 图片较宽，以容器高度为准，并添加额外的放大系数
-        scale = (containerHeight / imgHeight) * 1.1; // 额外放大10%确保填满
+        // 图片较宽，以容器宽度为准
+        scale = containerWidth / imgWidth;
+
+        // 如果图像高度在缩放后仍然远小于容器高度，适当增加缩放比例
+        const scaledHeight = imgHeight * scale;
+        if (scaledHeight < containerHeight * 0.8) {
+          // 适当增加缩放比例，但保持宽高比
+          scale = scale * 1.2; // 增加20%的缩放比例
+        }
       } else {
-        // 图片较高，以容器宽度为准，并添加额外的放大系数
-        scale = (containerWidth / imgWidth) * 1.1; // 额外放大10%确保填满
+        // 图片较高，以容器高度为准
+        scale = containerHeight / imgHeight;
+
+        // 如果图像宽度在缩放后仍然远小于容器宽度，适当增加缩放比例
+        const scaledWidth = imgWidth * scale;
+        if (scaledWidth < containerWidth * 0.8) {
+          // 适当增加缩放比例，但保持宽高比
+          scale = scale * 1.2; // 增加20%的缩放比例
+        }
       }
 
       console.log(`容器尺寸: ${containerWidth}x${containerHeight}, 图片尺寸: ${imgWidth}x${imgHeight}, 缩放比: ${scale}`);
 
-      // 检查图片是否显著小于容器，如果是，则额外放大
-      const imgArea = imgWidth * imgHeight;
-      const containerArea = containerWidth * containerHeight;
-      if (imgArea < containerArea * 0.7) {
-        // 如果图片面积小于容器面积的70%，额外放大
-        scale *= 1.2;
-        console.log(`图片较小，额外放大，最终缩放比: ${scale}`);
-      }
+      // 应用缩放，确保不超过合理范围
+      this.imageTransform.scale = Math.min(Math.max(scale, 0.5), 5);
 
-      // 应用缩放，不设置上限
-      this.imageTransform.scale = scale;
-
-      // 确保图片居中显示
-      this.$nextTick(() => {
-        // 只保留最小缩放限制
-        if (scale < 0.5) {
-          this.imageTransform.scale = 0.5;
-        }
-      });
+      // 重置平移状态，确保图片居中显示
+      this.imageTransform.translateX = 0;
+      this.imageTransform.translateY = 0;
     }
   }
 };
@@ -781,11 +782,12 @@ export default {
   align-items: center;
 }
 
-/* 图片容器优化 */
+/* 图片容器优化 - 确保无边距 */
 .image-container {
   width: 100%;
-  height: 100%; /* 修改为100%适应父容器 */
+  height: 100%;
   padding: 0;
+  margin: 30px 0;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -794,13 +796,15 @@ export default {
   background-color: #030303;
 }
 
-/* 显示图片样式优化 - 修改为完全填充模式 */
+/* 显示图片样式优化 - 确保无边距最大化显示 */
 .showed-image {
-  width: 100%; /* 设置为100%宽度以填充容器 */
-  height: 100%; /* 设置为100%高度以填充容器 */
-  object-fit: cover; /* 改为cover模式以完全填充 */
-  will-change: transform; /* 优化渲染性能 */
-  object-position: center; /* 确保居中裁剪 */
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  will-change: transform;
+  object-position: center;
+  padding: 0;
+  margin: 0;
 }
 
 /* 上传区域样式优化 */

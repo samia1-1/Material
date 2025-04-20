@@ -228,7 +228,7 @@ export default {
       });
     },
 
-    // 修改：加载示例图片 - 重新组织TIFF处理逻辑，添加静默重置
+    // 修改：加载示例图片 - 优化显示适配
     loadExampleImage(item) {
       // 只有当已有图片时才执行重置，但不显示提示信息
       if (this.image_src) {
@@ -253,6 +253,11 @@ export default {
       // 标记为示例图片
       sessionStorage.setItem("isExampleImage", "true");
       sessionStorage.setItem("exampleCategory", item.categoryId || "0");
+
+      // 重置图片变换状态，确保新图片以合适尺寸显示
+      if (typeof this.resetImageTransform === 'function') {
+        this.resetImageTransform();
+      }
 
       // 检查是否为TIFF格式
       if (isTiff) {
