@@ -152,12 +152,9 @@ export default {
   data() {
     return {
       // 主要状态
-      image_src: "",
       form_data: undefined,
-      isLoading: false,
       isShowStatistic: false,
       statisticData: null,
-      originalImageSrc: "",
       apiReturnedUrl: "",
       processingFile: false,
 
@@ -174,38 +171,6 @@ export default {
         { label: 'Category', value: '', placeholder: '点击查询后显示' },
       ],
 
-      // 图片变换状态
-      imageTransform: {
-        scale: 1,
-        translateX: 0,
-        translateY: 0,
-        minScale: 0.5,
-        maxScale: 5
-      },
-
-      // 拖拽状态
-      dragState: {
-        isDragging: false,
-        wasDragged: false,
-        startX: 0,
-        startY: 0,
-        lastTranslateX: 0,
-        lastTranslateY: 0,
-        distance: 0,
-        threshold: 10,
-        dragStartTime: 0,
-        dragEndTime: 0
-      },
-
-      // 触摸状态
-      touchState: {
-        isTouching: false,
-        startX: 0,
-        startY: 0,
-        startDistance: 0,
-        lastScale: 1
-      },
-
       // 分类数据
       categories: categoryConfig,
       activeCategory: '0', // 默认选中"所有分类"
@@ -213,25 +178,6 @@ export default {
   },
 
   computed: {
-    // 计算图片的变换样式
-    imageTransformStyle() {
-      const { scale, translateX, translateY } = this.imageTransform;
-      return {
-        transform: `translate(${translateX}px, ${translateY}px) scale(${scale})`,
-        // 拖拽时完全禁用过渡效果，确保立即响应
-        transition: this.dragState.isDragging ? 'none' : 'transform 0.1s ease-out',
-        // 根据拖拽状态更改鼠标样式
-        cursor: this.dragState.isDragging ? 'grabbing' : 'grab',
-        // 提高GPU硬件加速
-        willChange: this.dragState.isDragging ? 'transform' : 'auto'
-      };
-    },
-
-    // 拖拽状态
-    isDragging() {
-      return this.dragState.isDragging;
-    },
-
     // 操作按钮配置
     operationButtons() {
       return [
@@ -264,146 +210,15 @@ export default {
     this.loadImagesForAllCategories();
   },
 
-  watch: {
-    // 监听加载状态变化，更新视觉样式
-    isLoading(newVal) {
-      this.updateLoadingState();
-    }
-  },
-
   mounted() {
     // 初始化加载状态
     this.updateLoadingState();
-  },
-
-  beforeDestroy() {
-    // 清理可能的内存泄漏
-    if (this.image_src && this.image_src.startsWith('blob:')) {
-      URL.revokeObjectURL(this.image_src);
-    }
-
-    // 清理文件输入框的事件监听
-    const fileInput = document.getElementById('select_files');
-    if (fileInput && this._handleInputChange) {
-      fileInput.removeEventListener('change', this._handleInputChange);
-    }
-  },
-
-  methods: {
-    // 改进中心图片区域点击处理，防止重复触发
-    handleCenterPicClick(event) {
-      // 阻止事件冒泡
-      event.stopPropagation();
-
-      // 加载状态下不允许操作
-      if (this.isLoading) {
-        return;
-      }
-
-      // 如果标记为拖动，或距离上次拖动结束时间很短，则不触发上传
-      const timeSinceDragEnd = Date.now() - this.dragState.dragEndTime;
-      if (this.dragState.wasDragged || timeSinceDragEnd < 300) {
-        return;
-      }
-
-      // 检查是否在短时间内重复触发
-      const now = Date.now();
-      if (now - this.lastUploadTime < 500) {
-        console.log('忽略重复的上传触发');
-        return;
-      }
-
-      // 只有在未上传图片时才触发文件选择
-      if (!this.image_src) {
-        this.triggerUpload();
-      }
-    },
-
-    // 更新加载状态 - 修复DOM选择错误
-    updateLoadingState() {
-      // 确保DOM已经挂载并且能正确获取到元素
-      if (this.$el && typeof this.$el.querySelector === 'function') {
-        const centerPic = this.$el.querySelector('.center-pic');
-        if (centerPic) {
-          // 根据加载状态设置属性
-          if (this.isLoading) {
-            centerPic.setAttribute('loading', 'true');
-          } else {
-            centerPic.removeAttribute('loading');
-          }
-        }
-      }
-    },
-
-    // 修改图片加载完成后的处理函数
-    onImageLoad(e) {
-      // 重置变换状态
-      this.imageTransform.scale = 1;
-      this.imageTransform.translateX = 0;
-      this.imageTransform.translateY = 0;
-
-      // 延迟执行以确保DOM已更新
-      this.$nextTick(() => {
-        // 自动调整图片大小以填充容器
-        this.autoFitImage(e.target);
-      });
-    },
-
-    // 优化自动调整图片大小的逻辑，减少多余间距以最大化利用显示区域
-    autoFitImage(imgElement) {
-      if (!imgElement || !this.$refs.imageContainer) return;
-
-      const container = this.$refs.imageContainer;
-      const containerWidth = container.clientWidth;
-      const containerHeight = container.clientHeight;
-
-      const imgWidth = imgElement.naturalWidth;
-      const imgHeight = imgElement.naturalHeight;
-
-      // 计算宽高比
-      const containerRatio = containerWidth / containerHeight;
-      const imgRatio = imgWidth / imgHeight;
-
-      let scale = 1;
-
-      // 采用缩放策略以充分利用空间
-      if (imgRatio > containerRatio) {
-        // 图片较宽，以容器宽度为准
-        scale = containerWidth / imgWidth;
-
-        // 如果图像高度在缩放后仍然远小于容器高度，适当增加缩放比例
-        const scaledHeight = imgHeight * scale;
-        if (scaledHeight < containerHeight * 0.8) {
-          // 适当增加缩放比例，但保持宽高比
-          scale = scale * 1.2; // 增加20%的缩放比例
-        }
-      } else {
-        // 图片较高，以容器高度为准
-        scale = containerHeight / imgHeight;
-
-        // 如果图像宽度在缩放后仍然远小于容器宽度，适当增加缩放比例
-        const scaledWidth = imgWidth * scale;
-        if (scaledWidth < containerWidth * 0.8) {
-          // 适当增加缩放比例，但保持宽高比
-          scale = scale * 1.2; // 增加20%的缩放比例
-        }
-      }
-
-      console.log(`容器尺寸: ${containerWidth}x${containerHeight}, 图片尺寸: ${imgWidth}x${imgHeight}, 缩放比: ${scale}`);
-
-      // 应用缩放，确保不超过合理范围
-      this.imageTransform.scale = Math.min(Math.max(scale, 0.5), 5);
-
-      // 重置平移状态，确保图片居中显示
-      this.imageTransform.translateX = 0;
-      this.imageTransform.translateY = 0;
-    }
   }
 };
 </script>
 
 <style scoped>
-/* 页面整体布局优化 */
+/* 基础布局 */
 .image-content {
   width: 95%;
   position: relative;
@@ -411,46 +226,49 @@ export default {
   flex-direction: column;
   margin: 8px 15px 8px 60px;
   min-height: calc(100vh - 90px);
-  overflow: visible;
 }
 
-/* 整体布局优化 */
 .main-container {
   display: flex;
-  margin: 10px 0 0 0;
-  margin-left: 0 !important;
+  margin: 10px 0 0 !important;
   padding: 0;
   width: 100%;
 }
 
-/* 左侧边栏优化 */
+/* 左侧边栏和主内容区域 */
 .left-sidebar {
-  background-color: #000000;
+  background-color: #000;
   border-right: 1px solid #0f0f0f;
   padding: 8px;
   display: flex;
   flex-direction: column;
   box-shadow: 1px 0 3px rgba(0, 0, 0, 0.5);
-  width: 540px !important;
+  width: 440px !important;
   flex: 0 0 440px;
-  height: auto;
 }
 
-/* 卡片通用样式优化 */
-.combined-card,
-.image-card,
-.example-card {
+.main-content {
+  padding: 0;
+  background-color: #050505;
+  flex: 1;
+  display: flex;
+  width: calc(100% - 540px);
+  min-width: 380px;
+  height: calc(100vh - 50px);
+  overflow: hidden;
+}
+
+/* 卡片通用样式 */
+.combined-card, .image-card, .example-card {
   margin-bottom: 12px;
   border-radius: 2px;
   background-color: #050505;
   border: 1px solid #101010;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
-  height: auto;
   display: flex;
   flex-direction: column;
 }
 
-/* 卡片头部样式优化 */
 .card-header {
   display: flex;
   justify-content: space-between;
@@ -463,12 +281,13 @@ export default {
 .card-header span {
   font-weight: bold;
   font-size: 14px;
-  color: #d0e0f0;
+  color: #fff;
   text-transform: uppercase;
   letter-spacing: 0.7px;
+  text-shadow: 0 0 5px rgba(58, 123, 189, 0.5);
 }
 
-/* 面板区域样式优化 */
+/* 内容面板通用样式 */
 .panel-section {
   padding: 8px 5px;
 }
@@ -476,21 +295,53 @@ export default {
 .section-title {
   font-size: 14px;
   font-weight: 600;
-  color: #d0e0f0;
+  color: #fff;
   margin-bottom: 10px;
   padding-bottom: 6px;
   border-bottom: 1px dashed #151515;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   position: relative;
-  overflow: hidden;
+  text-shadow: 0 0 8px rgba(58, 123, 189, 0.6);
 }
 
 .section-title i {
   margin-right: 5px;
-  color: #3a7cbd;
+  color: #56a9ff;
 }
 
+/* 动画关键帧定义 */
+@keyframes line-glow {
+  0% { width: 30px; opacity: 0.5; }
+  100% { width: 80px; opacity: 0.8; }
+}
+
+@keyframes divider-flow {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+@keyframes button-shine {
+  0% { left: -100%; }
+  10%, 100% { left: 200%; }
+}
+
+@keyframes rotate-border {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes corner-pulse {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.8); opacity: 0.8; }
+}
+
+@keyframes icon-glow {
+  0% { text-shadow: 0 0 5px rgba(58, 123, 189, 0.5); color: #3a7cbd; }
+  100% { text-shadow: 0 0 15px rgba(58, 123, 189, 0.8); color: #56a9ff; }
+}
+
+/* 发光线和分隔线 */
 .glow-line {
   position: absolute;
   bottom: 0;
@@ -502,18 +353,6 @@ export default {
   animation: line-glow 3s infinite alternate;
 }
 
-@keyframes line-glow {
-  0% {
-    width: 30px;
-    opacity: 0.5;
-  }
-  100% {
-    width: 80px;
-    opacity: 0.8;
-  }
-}
-
-/* 面板分隔线优化 */
 .panel-divider {
   height: 2px;
   margin: 12px 0;
@@ -523,25 +362,17 @@ export default {
   overflow: hidden;
 }
 
-.panel-divider .flowing-light {
+.flowing-light {
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg,
-    rgba(255,255,255,0) 0%,
-    rgba(255,255,255,0.5) 50%,
-    rgba(255,255,255,0) 100%);
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%);
   animation: divider-flow 4s infinite;
 }
 
-@keyframes divider-flow {
-  0% { left: -100%; }
-  100% { left: 100%; }
-}
-
-/* 操作按钮区域优化 */
+/* 操作按钮区域 */
 .operation-section {
   width: 100%;
   margin-bottom: 15px;
@@ -555,8 +386,8 @@ export default {
   padding: 0 2px;
 }
 
-/* 统一按钮样式优化 */
-.op-button {
+/* 按钮样式 */
+.op-button, .analysis-button {
   width: 100% !important;
   height: 38px;
   display: flex;
@@ -567,27 +398,40 @@ export default {
   font-size: 13px;
   border-radius: 2px;
   font-weight: 500;
-  background-color: #080808;
-  color: #b8c7d9;
-  border: 1px solid #151515;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
   transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
+  color: #fff;
+}
+
+.op-button {
+  background-color: #080808;
+  border: 1px solid #151515;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 .op-button:hover {
   background-color: #101010;
   border-color: #1e1e1e;
-  color: #ffffff;
 }
 
 .op-button i {
   margin-right: 6px;
   font-size: 16px;
-  color: #3a7cbd;
+  color: #56a9ff;
 }
 
+.special-button, .analysis-button {
+  background-color: #071525;
+  border-color: #0e2740;
+}
+
+.special-button:hover {
+  background-color: #0a2235;
+  border-color: #15304d;
+}
+
+/* 发光按钮效果 */
 .glow-button {
   position: relative;
   overflow: hidden;
@@ -600,54 +444,13 @@ export default {
   left: -100%;
   width: 60%;
   height: 200%;
-  background: linear-gradient(
-    to right,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.1) 50%,
-    rgba(255, 255, 255, 0) 100%
-  );
+  background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
   transform: rotate(45deg);
   animation: button-shine 6s infinite;
   z-index: 1;
 }
 
-@keyframes button-shine {
-  0% {
-    left: -100%;
-  }
-  10%, 100% {
-    left: 200%;
-  }
-}
-
-/* 特殊按钮样式优化 */
-.special-button {
-  background-color: #071525;
-  border-color: #0e2740;
-  color: #c0d0e0;
-}
-
-.special-button:hover {
-  background-color: #0a2235;
-  border-color: #15304d;
-  color: #ffffff;
-}
-
-/* 分析按钮优化 */
-.analysis-button {
-  width: 100%;
-  height: 38px;
-  background-color: #071525;
-  color: #c0d0e0;
-  border-color: #0e2740;
-  border-radius: 2px;
-  text-align: center;
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-/* 数据分析区域样式优化 */
+/* 数据区域 */
 .data-section {
   width: 100%;
   background-color: #030303;
@@ -657,11 +460,11 @@ export default {
   margin: 0 3px;
 }
 
-/* 表单样式优化 */
 .data-form {
   margin-bottom: 12px;
 }
 
+/* 表单元素样式 */
 .data-form>>>.el-form-item {
   margin-bottom: 10px;
   display: flex;
@@ -670,7 +473,7 @@ export default {
 }
 
 .data-form>>>.el-form-item__label {
-  color: #d0e0f0 !important;
+  color: #fff !important;
   font-size: 13px;
   line-height: 32px;
   font-weight: 500;
@@ -682,6 +485,7 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .data-form>>>.el-form-item__content {
@@ -691,27 +495,31 @@ export default {
 }
 
 .data-form>>>.el-input__inner {
-  background-color: #050505 !important;
-  border-color: #151515 !important;
-  color: #c0d0e0 !important;
+  background-color: #071525 !important;
+  border-color: #0e2740 !important;
+  color: #fff !important;
   height: 32px;
   font-size: 13px;
   border-radius: 2px;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4), 0 0 5px rgba(58, 123, 189, 0.2);
   padding: 0 10px;
   width: 100%;
-  box-sizing: border-box;
+  letter-spacing: 0.5px;
+  font-weight: 500;
   text-align: left;
 }
 
-/* 图表操作区域 */
+.data-form>>>.el-input__inner::placeholder {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
 .chart-action {
   margin-top: 12px;
   text-align: center;
   padding: 0 5px;
 }
 
-/* 统计信息显示区域优化 */
+/* 统计信息显示 */
 .show-statistic {
   position: absolute;
   bottom: 15px;
@@ -722,92 +530,62 @@ export default {
   backdrop-filter: blur(3px);
   border-radius: 3px;
   border: 1px solid #151515;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
 }
 
 .show-statistic>>>.el-tag {
-  background-color: #071525 !important;
-  color: #d0e0f0 !important;
+  background-color: #0a2040 !important;
+  color: #fff !important;
   border-color: #0e2740 !important;
   padding: 4px 8px;
   height: auto;
   line-height: 1.4;
   font-weight: 500;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  font-size: 13px;
 }
 
-/* 主内容区优化 */
-.main-content {
-  padding: 0px;
-  background-color: #050505;
-  flex: 1 1 auto;
-  display: flex;
-  width: calc(100% - 540px);
-  min-width: 380px;
-  height: calc(100vh - 50px);
-  overflow: hidden;
-}
-
-/* 图片卡片优化 */
+/* 图片显示区域 */
 .image-card {
   flex: 1;
   margin: 0;
   padding: 0;
   width: 150%;
   height: 100%;
-  justify-content: center;
-  align-items: center;
   border-radius: 0;
   border: none;
 }
 
-/* 图片卡片内容区域优化 */
 .image-card >>> .el-card__body {
   padding: 0 !important;
   height: 100%;
   width: 100%;
 }
 
-/* 中央图片区域优化 */
-.center-pic {
+.center-pic, .image-container {
   width: 100%;
   height: 100%;
-  border: none;
-  border-radius: 0;
-  position: relative;
-  overflow: hidden;
-  background-color: #030303;
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
+  overflow: hidden;
+  background-color: #030303;
 }
 
-/* 图片容器优化 - 确保无边距 */
 .image-container {
-  width: 100%;
-  height: 100%;
-  padding: 0;
   margin: 30px 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  overflow: hidden;
-  background-color: #030303;
 }
 
-/* 显示图片样式优化 - 确保无边距最大化显示 */
 .showed-image {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
   will-change: transform;
   object-position: center;
-  padding: 0;
-  margin: 0;
 }
 
-/* 上传区域样式优化 */
+/* 上传区域 */
 .upload-placeholder {
   width: 100%;
   height: 100%;
@@ -815,7 +593,6 @@ export default {
   align-items: center;
   justify-content: center;
   background-color: #030303;
-  padding: 0;
 }
 
 .upload-area {
@@ -843,65 +620,53 @@ export default {
   align-items: center;
   justify-content: center;
   padding: 0 20px;
-  position: relative;
   z-index: 2;
+  position: relative;
 }
 
 .upload-area i {
   font-size: 60px;
-  color: #3a7cbd;  /* 修改为与主题一致的颜色 */
+  color: #3a7cbd;
   margin-bottom: 20px;
-  transition: all 0.3s;
   filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5));
+}
+
+/* 上传文本元素共享样式 */
+.upload-text, .upload-tip {
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  margin-bottom: 15px;
 }
 
 .upload-text {
   font-size: 20px;
-  color: #ffffff;
-  margin-bottom: 15px;
-  text-align: center;
-  width: 100%;
   font-weight: 500;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .upload-tip {
   font-size: 16px;
   color: #a0c0e0;
-  text-align: center;
-  width: 100%;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  margin-bottom: 0;
 }
 
-/* 动态边框效果 */
+/* 动态边框效果 - 简化 */
 .dynamic-border {
   position: absolute;
-  top: -50%;
-  left: -50%;
+  inset: -50%;
   width: 200%;
   height: 200%;
   background: conic-gradient(
     transparent,
-    rgba(58, 123, 189, 0.3),
-    rgba(58, 123, 189, 0.5),
-    rgba(58, 123, 189, 0.3),
+    rgba(58, 123, 189, 0.3) 25%,
+    rgba(58, 123, 189, 0.5) 50%,
+    rgba(58, 123, 189, 0.3) 75%,
     transparent
   );
   animation: rotate-border 8s linear infinite;
   opacity: 0.3;
-  z-index: -1;
 }
 
-@keyframes rotate-border {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-/* 添加角落灯光效果 */
+/* 角落灯光效果 */
 .corner-lights {
   position: absolute;
   top: 0;
@@ -922,59 +687,17 @@ export default {
   animation: corner-pulse 4s infinite alternate;
 }
 
-.top-left {
-  top: -2px;
-  left: -2px;
-  animation-delay: 0s;
-}
+.top-left { top: -2px; left: -2px; animation-delay: 0s; }
+.top-right { top: -2px; right: -2px; animation-delay: 1s; }
+.bottom-left { bottom: -2px; left: -2px; animation-delay: 2s; }
+.bottom-right { bottom: -2px; right: -2px; animation-delay: 3s; }
 
-.top-right {
-  top: -2px;
-  right: -2px;
-  animation-delay: 1s;
-}
-
-.bottom-left {
-  bottom: -2px;
-  left: -2px;
-  animation-delay: 2s;
-}
-
-.bottom-right {
-  bottom: -2px;
-  right: -2px;
-  animation-delay: 3s;
-}
-
-@keyframes corner-pulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.5;
-  }
-  100% {
-    transform: scale(1.8);
-    opacity: 0.8;
-  }
-}
-
-/* 上传图标脉冲效果 - 修改为只有发光效果，没有放大缩小 */
+/* 上传图标效果 */
 .pulse-icon {
   animation: icon-glow 2s infinite alternate;
-  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5));
 }
 
-@keyframes icon-glow {
-  0% {
-    text-shadow: 0 0 5px rgba(58, 123, 189, 0.5);
-    color: #3a7cbd;
-  }
-  100% {
-    text-shadow: 0 0 15px rgba(58, 123, 189, 0.8);
-    color: #56a9ff;
-  }
-}
-
-/* 拖拽悬停状态优化 */
+/* 拖拽悬停效果 */
 .drag-over {
   border-color: #7a8998;
   background-color: rgba(10, 32, 64, 0.5);
@@ -983,45 +706,38 @@ export default {
 
 .drag-over i {
   transform: scale(1.3);
-  color: #6b7c8d;  /* 修改为主题色的稍亮版本，保持一致性 */
+  color: #6b7c8d;
 }
 
-/* 示例图片区域容器优化 */
+/* 示例图片区域 */
 .footer-examples {
-  margin-top: 10px;
-  margin-bottom: 15px;
-  overflow: visible;
+  margin: 10px 0 15px;
   position: relative;
   z-index: 5;
 }
 
-/* 示例卡片样式优化 */
 .example-card {
   margin-bottom: 0;
   min-height: 220px;
-  display: block;
 }
 
 .example-card >>> .el-card__body {
   padding: 10px;
-  overflow-y: visible;
   min-height: 160px;
 }
 
-/* 标签页内容优化 */
 .example-card >>> .el-tabs__content {
-  overflow-y: visible;
   min-height: 140px;
   display: block;
 }
 
-/* 标签页样式优化 */
+/* 标签页样式 */
 .example-card >>> .el-tabs__item {
   height: 36px;
   line-height: 36px;
   font-size: 14px;
   font-weight: 600;
-  color: #d0e0f0 !important;
+  color: #fff !important;
   background-color: #050505;
   border: 1px solid #151515;
   border-bottom: none;
@@ -1030,18 +746,41 @@ export default {
 }
 
 .example-card >>> .el-tabs__item:hover {
-  color: #ffffff !important;
-  background-color: #0a1625;
+  background-color: #0a2040;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
 }
 
 .example-card >>> .el-tabs__item.is-active {
-  color: #ffffff !important;
   background-color: #0a2040;
-  border-bottom-color: #3a7cbd;
+  border-bottom-color: #56a9ff;
   font-weight: 700;
+  text-shadow: 0 0 8px rgba(86, 169, 255, 0.6);
 }
 
-/* 预览图容器优化 */
+/* 示例图片列表 */
+.show-img-list {
+  padding: 5px 0;
+}
+
+.img-item-card {
+  margin-bottom: 8px;
+  background-color: #030303;
+  border: 1px solid #101010;
+  border-radius: 2px;
+  transition: all 0.25s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  height: 160px;
+  cursor: pointer;
+  transform: translateY(0);
+}
+
+.img-item-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  border-color: #3a7cbd;
+}
+
+/* 图片预览容器 */
 .img-preview-container {
   width: 100%;
   flex: 1;
@@ -1056,18 +795,14 @@ export default {
   position: relative;
 }
 
+/* 悬停光效 */
 .hover-shine {
   position: absolute;
   top: 0;
   left: 0;
   width: 200%;
   height: 200%;
-  background: linear-gradient(
-    to right,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.15) 50%,
-    rgba(255, 255, 255, 0) 100%
-  );
+  background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 100%);
   transform: rotate(30deg) translateY(-100%) translateX(-100%);
   transition: all 0.5s ease-in-out;
   pointer-events: none;
@@ -1077,49 +812,21 @@ export default {
   transform: rotate(30deg) translateY(-50%) translateX(-50%);
 }
 
-/* 示例图片列表优化 */
-.show-img-list {
-  padding: 5px 0;
-}
-
-/* 示例图片卡片优化 */
-.img-item-card {
-  margin-bottom: 8px;
-  background-color: #030303;
-  border: 1px solid #101010;
-  border-radius: 2px;
-  transform: translateY(0);
-  transition: all 0.25s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  display: flex;
-  flex-direction: column;
-  height: 160px;
-  overflow: visible;
-  cursor: pointer;
-}
-
-.img-item-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-  border-color: #3a7cbd;
-}
-
-/* 图片底部信息栏优化 */
+/* 图片底部信息 */
 .img-item-footer {
   padding: 5px 8px;
-  color: #ffffff;
+  color: #fff;
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 13px;
   font-weight: 600;
   border-top: 1px solid #1e1e1e;
-  background-color: #0a1b30;
+  background-color: #0a2040;
   height: 30px;
-  box-sizing: border-box;
   position: relative;
   z-index: 2;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 5px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 0 8px rgba(58, 123, 189, 0.7);
   letter-spacing: 0.3px;
 }
 
@@ -1133,34 +840,26 @@ export default {
 .img-item-footer i {
   color: #56a9ff;
   font-size: 14px;
-  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.8));
+  filter: drop-shadow(0 0 3px rgba(86, 169, 255, 0.8));
 }
 
-/* 示例图片内部卡片样式优化 */
-.img-item-card >>> .el-card__body {
+/* 内部元素样式 */
+.img-item-card >>> .el-card__body,
+.show-img {
   padding: 0 !important;
   display: flex;
   flex-direction: column;
   height: 100%;
-  overflow: visible;
 }
 
-/* 显示图片样式优化 */
 .show-img {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
 }
 
-/* 卡片内容全局优化 */
 .el-card__body {
   height: 100%;
   padding: 10px !important;
-}
-
-/* 清除多余的滚动设置 */
-.operation-section,
-.data-section {
-  overflow: visible;
 }
 </style>

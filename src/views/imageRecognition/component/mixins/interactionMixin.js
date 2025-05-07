@@ -1,266 +1,202 @@
 /**
  * 交互相关功能
- * 处理缩放、拖拽等用户交互
  */
 
-export default {
-  mounted() {
-    // 使用bind确保this上下文正确
-    this.handleGlobalMouseUpBound = this.handleGlobalMouseUp.bind(this);
-    this.handleGlobalMouseMoveBound = this.handleGlobalMouseMove.bind(this);
+export const interactionMixin = {
+  data() {
+    return {
+      // 拖拽状态
+      dragState: {
+        isDragging: false,
+        wasDragged: false,
+        startX: 0,
+        startY: 0,
+        lastTranslateX: 0,
+        lastTranslateY: 0,
+        distance: 0,
+        threshold: 10,
+        dragStartTime: 0,
+        dragEndTime: 0
+      },
 
-    // 添加全局mouseup和mousemove事件监听
-    document.addEventListener('mouseup', this.handleGlobalMouseUpBound, { passive: false, capture: true });
-    document.addEventListener('mousemove', this.handleGlobalMouseMoveBound, { passive: false });
+      // 触摸状态
+      touchState: {
+        isTouching: false,
+        startX: 0,
+        startY: 0,
+        startDistance: 0,
+        lastScale: 1
+      },
 
-    // 记录已添加的监听器
-    this.hasGlobalListeners = true;
+      // 上次上传时间记录，防止重复触发
+      lastUploadTime: 0,
+    };
   },
 
-  beforeDestroy() {
-    // 确保移除全局事件监听器
-    if (this.hasGlobalListeners) {
-      document.removeEventListener('mouseup', this.handleGlobalMouseUpBound, { passive: false, capture: true });
-      document.removeEventListener('mousemove', this.handleGlobalMouseMoveBound, { passive: false });
-      this.hasGlobalListeners = false;
-    }
+  computed: {
+    // 拖拽状态
+    isDragging() {
+      return this.dragState.isDragging;
+    },
   },
 
   methods: {
-    // 处理显示分析按钮
-    handleDisplay() {
-      if (!this.checkBeforeImageOperation()) return;
-
-      if (this.isShowStatistic) {
-        this.isShowStatistic = false;
-        this.showMessage("已隐藏分析数据", "info");
-      } else {
-        this.getStatistic();
-      }
-    },
-
-    // 处理图像分割
-    handleSegmentation() {
-      if (!this.checkBeforeImageOperation()) return;
-
-      // 显示加载状态
-      this.isLoading = true;
-      this.showMessage("开始图像分割处理...", "info");
-
-      // 使用已上传的文件或者会话存储中的URL进行处理
-      const useTiffUrl = !this.form_data && sessionStorage.getItem("url") !== null;
-      this.clickStatistic(useTiffUrl);
-    },
-
-    // 处理降维处理
-    handleReduction() {
-      if (!this.checkBeforeImageOperation()) return;
-
-      this.showMessage("降维处理功能正在开发中", "info");
-      // 这里可以实现降维处理逻辑
-    },
-
-    // 缩放相关方法
-    handleZoomIn() {
-      if (!this.image_src) return;
-
-      const { scale, maxScale } = this.imageTransform;
-      if (scale < maxScale) {
-        this.imageTransform.scale = Math.min(scale * 1.2, maxScale);
-      }
-    },
-
-    handleZoomOut() {
-      if (!this.image_src) return;
-
-      const { scale, minScale } = this.imageTransform;
-      if (scale > minScale) {
-        this.imageTransform.scale = Math.max(scale / 1.2, minScale);
-      }
-    },
-
-    // 处理鼠标滚轮缩放
-    handleWheel(event) {
-      if (!this.image_src) return;
-
-      // 阻止事件默认行为（页面滚动）
-      event.preventDefault();
-
-      // 确定缩放方向
-      const direction = event.deltaY > 0 ? -1 : 1;
-
-      // 当前缩放值
-      const { scale, minScale, maxScale } = this.imageTransform;
-
-      // 计算新的缩放值
-      const zoomFactor = 0.1;
-      const newScale = scale * (1 + direction * zoomFactor);
-
-      // 应用缩放限制
-      if (newScale >= minScale && newScale <= maxScale) {
-        this.imageTransform.scale = newScale;
-      }
-    },
-
-    // 处理拖拽相关方法
-    startDrag(event) {
-      if (!this.image_src) return;
-
-      // 确保只监听左键拖拽
-      if (event.button !== 0) return;
-
-      // 阻止默认行为，避免干扰拖拽
-      event.preventDefault();
+    // 改进中心图片区域点击处理，防止重复触发
+    handleCenterPicClick(event) {
+      // 阻止事件冒泡
       event.stopPropagation();
 
-      // 记录拖拽起始状态
+      // 加载状态下不允许操作
+      if (this.isLoading) {
+        return;
+      }
+
+      // 如果标记为拖动，或距离上次拖动结束时间很短，则不触发上传
+      const timeSinceDragEnd = Date.now() - this.dragState.dragEndTime;
+      if (this.dragState.wasDragged || timeSinceDragEnd < 300) {
+        return;
+      }
+
+      // 检查是否在短时间内重复触发
+      const now = Date.now();
+      if (now - this.lastUploadTime < 500) {
+        console.log('忽略重复的上传触发');
+        return;
+      }
+
+      // 只有在未上传图片时才触发文件选择
+      if (!this.image_src) {
+        this.triggerUpload();
+      }
+    },
+
+    // 开始拖拽
+    startDrag(e) {
+      if (!this.image_src || this.isLoading) return;
+
+      // 记录开始拖拽的状态
       this.dragState.isDragging = true;
       this.dragState.wasDragged = false;
-      this.dragState.startX = event.clientX;
-      this.dragState.startY = event.clientY;
+      this.dragState.startX = e.clientX;
+      this.dragState.startY = e.clientY;
       this.dragState.lastTranslateX = this.imageTransform.translateX;
       this.dragState.lastTranslateY = this.imageTransform.translateY;
       this.dragState.distance = 0;
       this.dragState.dragStartTime = Date.now();
 
-      // 记录当前鼠标按钮状态
-      this.dragState.mouseDown = true;
+      // 添加全局事件监听
+      document.addEventListener('mousemove', this.onDrag);
+      document.addEventListener('mouseup', this.endDrag);
     },
 
-    // 处理全局鼠标移动事件 - 确保即使鼠标移出容器也能继续拖拽
-    handleGlobalMouseMove(event) {
-      // 首先检查鼠标按钮状态
-      if (event.buttons === 0 && this.dragState.isDragging) {
-        // 如果鼠标按钮已释放但拖拽状态仍为true，立即结束拖拽
-        this.handleGlobalMouseUp(event);
-        return;
-      }
-
-      if (this.dragState.isDragging) {
-        // 使用requestAnimationFrame确保平滑渲染
-        window.requestAnimationFrame(() => {
-          this.onDrag(event);
-        });
-      }
-    },
-
-    onDrag(event) {
+    // 拖拽中
+    onDrag(e) {
       if (!this.dragState.isDragging) return;
 
-      // 再次检查鼠标按钮状态
-      if (event.buttons === 0) {
-        this.handleGlobalMouseUp(event);
-        return;
-      }
-
-      // 计算拖拽距离
-      const deltaX = event.clientX - this.dragState.startX;
-      const deltaY = event.clientY - this.dragState.startY;
-
-      // 实时更新图像位置，不使用过渡效果确保图像跟随鼠标移动
-      this.imageTransform.translateX = this.dragState.lastTranslateX + deltaX;
-      this.imageTransform.translateY = this.dragState.lastTranslateY + deltaY;
-
-      // 计算拖拽距离（用于判断是否为点击事件）
+      const deltaX = e.clientX - this.dragState.startX;
+      const deltaY = e.clientY - this.dragState.startY;
       this.dragState.distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
-      // 如果拖拽距离超过阈值，标记为已拖拽
+      // 如果移动距离超过阈值，标记为拖拽
       if (this.dragState.distance > this.dragState.threshold) {
         this.dragState.wasDragged = true;
       }
+
+      // 更新图片位置
+      this.imageTransform.translateX = this.dragState.lastTranslateX + deltaX;
+      this.imageTransform.translateY = this.dragState.lastTranslateY + deltaY;
     },
 
-    // 处理全局鼠标释放事件 - 确保在任何位置松开鼠标都能结束拖拽
-    handleGlobalMouseUp(event) {
-      if (this.dragState.isDragging) {
-        // 阻止其他事件处理程序
-        if (event) {
-          event.preventDefault();
-          event.stopPropagation();
-        }
-
-        this.endDrag(event);
-      }
-
-      // 重置鼠标按钮状态
-      this.dragState.mouseDown = false;
-    },
-
-    endDrag(event) {
-      // 立即重置所有拖拽状态
+    // 结束拖拽
+    endDrag() {
       this.dragState.isDragging = false;
-      this.dragState.mouseDown = false;
       this.dragState.dragEndTime = Date.now();
 
-      // 强制刷新视图状态，确保UI立即反应
-      this.$forceUpdate();
+      // 移除全局事件监听
+      document.removeEventListener('mousemove', this.onDrag);
+      document.removeEventListener('mouseup', this.endDrag);
     },
 
-    // 触摸相关方法
-    startTouch(event) {
-      if (!this.image_src) return;
+    // 鼠标滚轮缩放
+    handleWheel(e) {
+      if (!this.image_src || this.isLoading) return;
 
-      if (event.touches.length === 1) {
-        // 单指触摸 - 等同于开始拖拽
+      e.preventDefault();
+
+      // 确定缩放方向和比例
+      const delta = e.deltaY || e.detail || e.wheelDelta;
+      const scaleFactor = delta > 0 ? 0.9 : 1.1;
+
+      // 计算新的缩放比例
+      let newScale = this.imageTransform.scale * scaleFactor;
+      newScale = Math.min(Math.max(newScale, this.imageTransform.minScale), this.imageTransform.maxScale);
+
+      // 应用缩放
+      this.imageTransform.scale = newScale;
+    },
+
+    // 触摸事件处理
+    startTouch(e) {
+      if (!this.image_src || this.isLoading) return;
+
+      // 单指触摸，处理拖拽
+      if (e.touches.length === 1) {
         this.touchState.isTouching = true;
-        this.touchState.startX = event.touches[0].clientX;
-        this.touchState.startY = event.touches[0].clientY;
-
-        // 保存当前位置
-        this.dragState.lastTranslateX = this.imageTransform.translateX;
-        this.dragState.lastTranslateY = this.imageTransform.translateY;
-      } else if (event.touches.length === 2) {
-        // 双指触摸 - 准备缩放
-        this.touchState.startDistance = Math.hypot(
-          event.touches[0].clientX - event.touches[1].clientX,
-          event.touches[0].clientY - event.touches[1].clientY
-        );
+        this.touchState.startX = e.touches[0].clientX;
+        this.touchState.startY = e.touches[0].clientY;
+        this.touchState.lastTranslateX = this.imageTransform.translateX;
+        this.touchState.lastTranslateY = this.imageTransform.translateY;
+      }
+      // 双指触摸，处理缩放
+      else if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        this.touchState.startDistance = Math.sqrt(dx * dx + dy * dy);
         this.touchState.lastScale = this.imageTransform.scale;
       }
     },
 
-    onTouch(event) {
+    // 触摸移动
+    onTouch(e) {
       if (!this.touchState.isTouching) return;
 
-      if (event.touches.length === 1) {
-        // 单指移动 - 拖拽图像
-        const deltaX = event.touches[0].clientX - this.touchState.startX;
-        const deltaY = event.touches[0].clientY - this.touchState.startY;
+      // 单指移动，处理拖拽
+      if (e.touches.length === 1) {
+        const deltaX = e.touches[0].clientX - this.touchState.startX;
+        const deltaY = e.touches[0].clientY - this.touchState.startY;
 
-        this.imageTransform.translateX = this.dragState.lastTranslateX + deltaX;
-        this.imageTransform.translateY = this.dragState.lastTranslateY + deltaY;
-      } else if (event.touches.length === 2) {
-        // 双指移动 - 缩放图像
-        const currentDistance = Math.hypot(
-          event.touches[0].clientX - event.touches[1].clientX,
-          event.touches[0].clientY - event.touches[1].clientY
-        );
+        this.imageTransform.translateX = this.touchState.lastTranslateX + deltaX;
+        this.imageTransform.translateY = this.touchState.lastTranslateY + deltaY;
+      }
+      // 双指移动，处理缩放
+      else if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
 
         // 计算缩放比例
-        const ratio = currentDistance / this.touchState.startDistance;
-        const newScale = this.touchState.lastScale * ratio;
+        const scaleFactor = distance / this.touchState.startDistance;
+        let newScale = this.touchState.lastScale * scaleFactor;
 
-        // 应用缩放限制
-        const { minScale, maxScale } = this.imageTransform;
-        if (newScale >= minScale && newScale <= maxScale) {
-          this.imageTransform.scale = newScale;
-        }
+        // 限制缩放范围
+        newScale = Math.min(Math.max(newScale, this.imageTransform.minScale), this.imageTransform.maxScale);
+        this.imageTransform.scale = newScale;
       }
     },
 
+    // 触摸结束
     endTouch() {
       this.touchState.isTouching = false;
-    },
-
-    // 重置图像变换
-    resetImageTransform() {
-      this.imageTransform = {
-        scale: 1,
-        translateX: 0,
-        translateY: 0,
-        minScale: 0.5,
-        maxScale: 5
-      };
     }
+  },
+
+  mounted() {
+    // 可以添加全局事件监听等初始化逻辑
+  },
+
+  beforeDestroy() {
+    // 清理全局事件监听
+    document.removeEventListener('mousemove', this.onDrag);
+    document.removeEventListener('mouseup', this.endDrag);
   }
 };

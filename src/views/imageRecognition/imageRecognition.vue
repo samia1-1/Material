@@ -38,7 +38,7 @@
           <div class="decoration-line">
             <div class="line-pulse"></div>
           </div>
-          <div class="decoration-dot pulse-dot"></div>
+          <div class="decoration-dot"></div>
         </div>
       </div>
     </div>
@@ -444,15 +444,13 @@ export default {
   50% { opacity: 1; height: 100%; top: 0; }
 }
 
+/* 合并.decoration-dot和.pulse-dot为一个选择器 */
 .decoration-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background-color: #5a9bd5;
   box-shadow: 0 0 5px #5a9bd5;
-}
-
-.pulse-dot {
   animation: dot-pulse 2s infinite;
 }
 
