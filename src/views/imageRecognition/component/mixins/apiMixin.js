@@ -18,19 +18,19 @@ const API = {
 
 export default {
   methods: {
-    // 统一API请求方法
+    // 统一API请求方法 - 精简实现
     makeApiRequest(endpoint, formData) {
       this.isLoading = true;
+
+      const headers = getToken() ? { 'Authorization': `Bearer ${getToken()}` } : {};
 
       return fetch(API.getUrl(endpoint), {
         method: 'POST',
         body: formData,
-        headers: getToken() ? { 'Authorization': `Bearer ${getToken()}` } : {}
+        headers
       })
       .then(response => {
-        if (!response.ok) {
-          throw new Error(`服务器返回错误: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`服务器返回错误: ${response.status}`);
         return response.json();
       })
       .then(data => this.processApiResponse(data))
@@ -42,9 +42,9 @@ export default {
       });
     },
 
-    // 统一处理API响应
+    // 处理API响应 - 优化数据提取
     processApiResponse(data) {
-      // 处理错误响应
+      // 错误处理
       if (!data || data.code === 500 || data.base64 === "预测出错：(str(e)") {
         this.showMessage("图像处理失败，请重试", "error");
         this.isLoading = false;
@@ -52,22 +52,20 @@ export default {
       }
 
       try {
-        // 保存API返回的URL
+        // 更新常用数据
         if (data.image_url) {
           this.apiReturnedUrl = data.image_url;
           sessionStorage.setItem("apiUrl", this.apiReturnedUrl);
         }
 
         // 更新图片
-        const base64Data = data.base64?.replace(/[\r\n]/g, "") || '';
+        const base64Data = data.base64?.replace(/[\r\n]/g, "");
         if (base64Data) {
-          this.image_src = "data:image/png;base64," + base64Data;
+          this.image_src = `data:image/png;base64,${base64Data}`;
         }
 
-        // 显示统计数据
+        // 更新统计信息
         this.isShowStatistic = true;
-
-        // 处理面积比例
         if (data.are_sum_bfb !== undefined) {
           this.statisticData = (data.are_sum_bfb * 100).toFixed(2);
         }
@@ -87,7 +85,7 @@ export default {
       }
     },
 
-    // 处理图片上传 - 统一入口
+    // 处理图片上传 - 简化参数处理
     uploadImage(file, options = {}) {
       if (!file) {
         this.showMessage('没有选择图片', 'error');
@@ -95,35 +93,31 @@ export default {
       }
 
       const formData = new FormData();
-
-      // 添加文件数据
       formData.append("image", file, file.name);
 
-      // 添加额外参数
+      // 添加元数据
       if (options.metadata) {
         Object.entries(options.metadata).forEach(([key, value]) => {
           formData.append(key, value);
         });
       }
 
-      // 选择API端点
-      const endpoint = options.useUrlApi ? 'URL' : 'FILE';
-
-      // 发送请求
-      return this.makeApiRequest(endpoint, formData);
+      return this.makeApiRequest(options.useUrlApi ? 'URL' : 'FILE', formData);
     },
 
-    // 获取统计数据 - 简化入口
+    // 获取统计数据 - 统一路径
     getStatistic() {
-      if (!this.checkImageExists()) return;
+      if (!this.checkBeforeImageOperation?.()) return;
 
-      // 获取会话中的URL或使用上传的文件
-      const tiff_url = sessionStorage.getItem("url");
+      // 获取会话中的URL
+      const tiffUrl = sessionStorage.getItem("url");
 
-      if (tiff_url) {
+      if (tiffUrl) {
         // 使用URL API
         const formData = new FormData();
-        formData.append("image", tiff_url.replace(/\/images\/(\d+)\/(\w+)\/(.+)/, '$1\\$2\\$3'));
+        const formattedUrl = tiffUrl.replace(/\/images\/(\d+)\/(\w+)\/(.+)/, '$1\\$2\\$3');
+        formData.append("image", formattedUrl);
+
         this.makeApiRequest('URL', formData);
       } else if (this.form_data) {
         // 使用文件API
@@ -133,27 +127,27 @@ export default {
       }
     },
 
-    // 简化的文件上传处理
+    // 文件上传处理 - 重构为更简洁的实现
     uploadFileToServer(file) {
-      // 保存文件引用
+      // 保存引用
       this.form_data = file;
 
-      // 判断文件格式和处理方式
-      const isTiff = file.name.match(/\.(tif|tiff)$/i) || ['image/tiff', 'image/tif'].includes(file.type);
+      // 检测文件类型
+      const isTiff = file.name.match(/\.(tif|tiff)$/i) ||
+                    ['image/tiff', 'image/tif'].includes(file.type);
 
-      // TIFF和普通图片处理流程统一，减少代码分支
+      // 创建预览
       this.createImagePreview(file, isTiff)
         .then(previewUrl => {
           this.image_src = previewUrl;
 
-          // 构建元数据
+          // 设置元数据并上传
           const metadata = {
             format: file.type || 'application/octet-stream',
             filename: file.name,
             isTiff: isTiff ? "true" : "false"
           };
 
-          // 上传文件
           return this.uploadImage(file, { metadata });
         })
         .catch(error => {
@@ -163,30 +157,33 @@ export default {
         });
     },
 
-    // 创建图片预览 - 统一TIFF和普通图片处理
+    // 创建图片预览 - 简化逻辑
     createImagePreview(file, isTiff = false) {
+      if (isTiff) {
+        return this.createTiffPreview(file);
+      } else {
+        return this.createStandardPreview(file);
+      }
+    },
+
+    // 分离TIFF和标准预览处理
+    createTiffPreview(file) {
       return new Promise((resolve, reject) => {
-        if (isTiff) {
-          // 处理TIFF预览 - 使用二进制方式读取
-          const reader = new FileReader();
-          reader.onload = e => {
-            try {
-              this.processTiffArrayBuffer(e.target.result)
-                .then(resolve)
-                .catch(reject);
-            } catch (error) {
-              reject(error);
-            }
-          };
-          reader.onerror = reject;
-          reader.readAsArrayBuffer(file);
-        } else {
-          // 处理普通图片预览 - 使用Data URL方式读取
-          const reader = new FileReader();
-          reader.onload = e => resolve(e.target.result);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        }
+        const reader = new FileReader();
+        reader.onload = e => this.processTiffArrayBuffer?.(e.target.result)
+                                .then(resolve)
+                                .catch(reject);
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+      });
+    },
+
+    createStandardPreview(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
       });
     },
 
@@ -211,5 +208,19 @@ export default {
         }
       });
     },
+
+    // 检查图片是否存在
+    checkImageExists() {
+      return this.checkBeforeImageOperation?.() || false;
+    },
+
+    // 重置数据字段
+    resetDataFields() {
+      if (this.dataFields) {
+        this.dataFields.forEach(field => {
+          field.value = '';
+        });
+      }
+    }
   }
 }

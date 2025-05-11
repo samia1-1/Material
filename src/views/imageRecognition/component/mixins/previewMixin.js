@@ -7,32 +7,44 @@ import Tiff from "tiff.js";
 export default {
   data() {
     return {
-      previewCache: new Map(),
-      categoryImages: {},
-      allImages: [],
+      previewCache: new Map(),  // 缓存已生成的预览
+      categoryImages: {},       // 分类图片集合
+      allImages: [],            // 所有图片
+      processingPreviews: new Set(), // 正在处理的预览
     };
   },
 
   methods: {
-    // 获取图片预览URL - 带缓存
+    // 获取图片预览URL - 缓存优化
     getImagePreviewUrl(item) {
-      const cacheKey = `${item.categoryId}_${item.name}`;
-      if (this.previewCache.has(cacheKey)) return this.previewCache.get(cacheKey);
+      if (!item) return '';
 
-      // 获取原始URL
+      // 生成缓存键
+      const cacheKey = `${item.categoryId}_${item.name}`;
+
+      // 检查缓存
+      if (this.previewCache.has(cacheKey)) {
+        return this.previewCache.get(cacheKey);
+      }
+
+      // 获取默认URL
       const originalUrl = this.getUrlFromItem(item);
 
-      // 异步生成TIFF预览
-      if (item.isTiff) this.$nextTick(() => this.generateTiffPreview(item, cacheKey));
+      // 异步生成TIFF预览，避免阻塞UI
+      if (item.isTiff && !this.processingPreviews.has(cacheKey)) {
+        this.$nextTick(() => this.generateTiffPreview(item, cacheKey));
+      }
 
       return originalUrl;
     },
 
-    // 生成TIFF预览
+    // 生成TIFF预览 - 优化加载流程
     generateTiffPreview(item, cacheKey) {
-      if (this.previewCache.has(`${cacheKey}_processing`)) return;
+      // 防止重复处理
+      if (this.processingPreviews.has(cacheKey)) return;
+      this.processingPreviews.add(cacheKey);
 
-      this.previewCache.set(`${cacheKey}_processing`, true);
+      // 获取资源
       const imageUrl = this.getUrlFromItem(item);
       const fileName = item.name || 'unknown';
 
@@ -40,14 +52,14 @@ export default {
       fetch(imageUrl)
         .then(response => response.ok ? response.arrayBuffer() : Promise.reject('图片加载失败'))
         .then(arrayBuffer => {
-          // 检查是否为TIFF格式
+          // 根据头部判断处理方式
           const header = new Uint8Array(arrayBuffer.slice(0, 4));
-          const isTiff = this.isTiffCheckHeader(header);
-
-          return isTiff ? this.processTiffPreview(arrayBuffer, fileName) :
-                         this.createImageThumbnail(imageUrl, fileName);
+          return this.isTiffCheckHeader(header) ?
+                 this.processTiffPreview(arrayBuffer, fileName) :
+                 this.createImageThumbnail(imageUrl, fileName);
         })
         .then(dataUrl => {
+          // 更新缓存和视图
           this.previewCache.set(cacheKey, dataUrl);
           this.$forceUpdate();
         })
@@ -56,27 +68,27 @@ export default {
           this.previewCache.set(cacheKey, imageUrl);
         })
         .finally(() => {
-          this.previewCache.delete(`${cacheKey}_processing`);
+          this.processingPreviews.delete(cacheKey);
         });
     },
 
-    // 处理TIFF数据生成预览
+    // 处理TIFF预览 - 简化实现
     processTiffPreview(arrayBuffer, fileName) {
       try {
+        // 确保Tiff库可用
         if (!window.Tiff) window.Tiff = Tiff;
         window.Tiff.initialize({TOTAL_MEMORY: 100000000});
 
+        // 创建TIFF实例
         const tiff = new window.Tiff({buffer: arrayBuffer});
-        const width = tiff.width();
-        const height = tiff.height();
 
-        // 获取Canvas
-        const canvas = typeof tiff.toCanvas === 'function' ? tiff.toCanvas() :
-                      typeof tiff.getCanvas === 'function' ? tiff.getCanvas() :
-                      this.createManualTiffCanvas(tiff, width, height);
+        // 获取Canvas - 使用函数链优先尝试可用方法
+        const canvas = this.getTiffCanvas(tiff);
 
         // 创建缩略图
         const result = this.createThumbnailFromCanvas(canvas, fileName);
+
+        // 清理资源
         tiff.close();
         return result;
       } catch (error) {
@@ -85,25 +97,39 @@ export default {
       }
     },
 
+    // 获取TIFF画布的不同方法
+    getTiffCanvas(tiff) {
+      if (typeof tiff.toCanvas === 'function') {
+        return tiff.toCanvas();
+      }
+
+      if (typeof tiff.getCanvas === 'function') {
+        return tiff.getCanvas();
+      }
+
+      return this.createManualTiffCanvas(tiff, tiff.width(), tiff.height());
+    },
+
     // TIFF格式检测 - 简化版
     isTiffCheckHeader(header) {
       if (!header || header.length < 4) return false;
 
-      // 标准TIFF头部检查 (II*\0 或 MM\0*)
-      return (header[0] === 73 && header[1] === 73 && header[2] === 42 && header[3] === 0) || // LE
-             (header[0] === 77 && header[1] === 77 && header[2] === 0 && header[3] === 42);   // BE
+      // 标准TIFF头部检查: II*\0 (小端) 或 MM\0* (大端)
+      return (header[0] === 73 && header[1] === 73 && header[2] === 42 && header[3] === 0) ||
+             (header[0] === 77 && header[1] === 77 && header[2] === 0 && header[3] === 42);
     },
 
-    // 手动创建TIFF Canvas
+    // 手动创建TIFF Canvas - 简化实现
     createManualTiffCanvas(tiff, width, height) {
       const canvas = document.createElement('canvas');
       canvas.width = width;
       canvas.height = height;
+      const ctx = canvas.getContext('2d');
 
       try {
+        // 读取RGBA数据并渲染
         if (typeof tiff.readRGBAImage === 'function') {
           const rgba = tiff.readRGBAImage();
-          const ctx = canvas.getContext('2d');
           const imgData = ctx.createImageData(width, height);
           imgData.data.set(rgba);
           ctx.putImageData(imgData, 0, 0);
@@ -117,21 +143,21 @@ export default {
       return canvas;
     },
 
-    // 从Canvas创建缩略图
+    // Canvas缩略图创建 - 简化错误处理
     createThumbnailFromCanvas(canvas, fileName) {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         try {
-          // 创建缩略图Canvas
+          // 计算适合的缩略图尺寸
           const maxDim = 200;
           const { width: thumbWidth, height: thumbHeight } = this.calculateThumbDimensions(
             canvas.width, canvas.height, maxDim
           );
 
+          // 创建并绘制缩略图
           const thumbCanvas = document.createElement('canvas');
           thumbCanvas.width = thumbWidth;
           thumbCanvas.height = thumbHeight;
 
-          // 绘制缩略图
           const ctx = thumbCanvas.getContext('2d');
           ctx.drawImage(canvas, 0, 0, thumbWidth, thumbHeight);
 
@@ -143,7 +169,7 @@ export default {
       });
     },
 
-    // 计算缩略图尺寸
+    // 缩略图尺寸计算 - 保留算法
     calculateThumbDimensions(srcWidth, srcHeight, maxDim) {
       let thumbWidth = srcWidth;
       let thumbHeight = srcHeight;
@@ -156,33 +182,35 @@ export default {
         thumbWidth = (srcWidth / srcHeight) * maxDim;
       }
 
-      return { width: thumbWidth, height: thumbHeight };
+      return { width: Math.round(thumbWidth), height: Math.round(thumbHeight) };
     },
 
-    // 从图像URL创建缩略图 - 简化超时处理
+    // 标准图像缩略图 - 简化超时逻辑
     createImageThumbnail(imageUrl, fileName) {
       return new Promise(resolve => {
         const img = new Image();
         img.crossOrigin = 'anonymous';
 
-        const timeout = setTimeout(() => {
+        // 添加超时处理
+        const timeoutId = setTimeout(() => {
           resolve(this.createPlaceholderImage(fileName));
-        }, 10000);
+        }, 8000);  // 减少超时时间以提高响应速度
 
+        // 图片加载完成处理
         img.onload = () => {
-          clearTimeout(timeout);
+          clearTimeout(timeoutId);
           try {
-            // 创建缩略图尺寸
+            // 创建缩略图
             const maxDim = 200;
-            const { width: thumbWidth, height: thumbHeight } = this.calculateThumbDimensions(
-              img.width, img.height, maxDim
+            const { width, height } = this.calculateThumbDimensions(
+              img.naturalWidth, img.naturalHeight, maxDim
             );
 
-            // 创建Canvas并绘制
+            // 绘制缩略图
             const canvas = document.createElement('canvas');
-            canvas.width = thumbWidth;
-            canvas.height = thumbHeight;
-            canvas.getContext('2d').drawImage(img, 0, 0, thumbWidth, thumbHeight);
+            canvas.width = width;
+            canvas.height = height;
+            canvas.getContext('2d').drawImage(img, 0, 0, width, height);
 
             resolve(canvas.toDataURL('image/png'));
           } catch (error) {
@@ -190,8 +218,9 @@ export default {
           }
         };
 
+        // 错误处理
         img.onerror = () => {
-          clearTimeout(timeout);
+          clearTimeout(timeoutId);
           resolve(this.createPlaceholderImage(fileName));
         };
 
@@ -199,7 +228,7 @@ export default {
       });
     },
 
-    // 创建占位图像
+    // 占位图像创建 - 简化实现
     createPlaceholderImage(fileName) {
       const canvas = document.createElement('canvas');
       canvas.width = 200;
@@ -208,11 +237,15 @@ export default {
       return canvas.toDataURL('image/png');
     },
 
-    // 绘制占位符
+    // 绘制占位符 - 基本功能
     drawPlaceholder(canvas, message) {
       const ctx = canvas.getContext('2d');
+
+      // 绘制背景
       ctx.fillStyle = '#f0f0f0';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 绘制文本
       ctx.fillStyle = '#888';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -220,23 +253,27 @@ export default {
       ctx.fillText(message, canvas.width/2, canvas.height/2);
     },
 
-    // 工具方法：获取URL
+    // 获取URL - 处理不同类型
     getUrlFromItem(item) {
+      if (!item || !item.imgUrl) return '';
       return typeof item.imgUrl === 'object' && item.imgUrl.__esModule ?
              item.imgUrl.default : item.imgUrl;
     },
 
-    // 加载分类图片
+    // 分类图片加载 - 统一入口
     loadImagesForAllCategories() {
       this.allImages = [];
-      this.categories.forEach(category => {
+      this.categories?.forEach(category => {
         if (category.id !== 0) this.loadImagesForCategory(category);
       });
     },
 
+    // 加载分类图片 - 错误处理
     loadImagesForCategory(category) {
       try {
-        if (category.id === 0) return;
+        if (category.id === 0) return;  // 跳过"全部"分类
+
+        // 加载图片并更新状态
         const images = getImagesByCategory(category.folder);
         this.$set(this.categoryImages, category.id, images);
         this.allImages.push(...images);
@@ -246,9 +283,16 @@ export default {
       }
     },
 
-    // 获取分类图片
+    // 获取分类图片 - 简化逻辑
     getCategoryImages(categoryId) {
-      return categoryId === 0 ? (this.allImages || []) : (this.categoryImages[categoryId] || []);
+      return categoryId === 0 ? this.allImages : (this.categoryImages[categoryId] || []);
+    },
+
+    // 加载特定示例图片 - 转发到image mixin
+    loadExampleImage(item) {
+      if (typeof this.loadExampleImage === 'function' && this !== this.loadExampleImage) {
+        this.loadExampleImage(item);
+      }
     }
   }
 };

@@ -166,19 +166,24 @@ export default {
   background-size: cover;
 }
 .title {
-  margin: 0px auto 30px auto;
+  margin: 10px auto 30px auto; /* 减少顶部间距 */
   text-align: center;
   color: #707070;
   font-size: 18px;
 }
 
 .login-form {
+  margin-bottom: 30px;
+  padding: 20px 20px 10px 20px;
   border-radius: 6px;
   background: #ffffff;
   box-shadow: 0 0 30px rgb(183, 195, 224);
   width: 30vw;
-  height:50vh;
-  padding: 60px 60px 20px 60px;
+  min-height: 320px; /* 最小高度，确保小屏幕下内容不挤压 */
+  max-height: 90vh; /* 最大高度，防止超出屏幕 */
+  padding: 40px 40px 20px 40px; /* 减少内边距 */
+  margin-bottom: 50px; /* 为底部版权添加间距 */
+
   .el-input {
     height: 38px;
     input {
@@ -191,6 +196,7 @@ export default {
     margin-left: 2px;
   }
 }
+
 .login-tip {
   font-size: 13px;
   text-align: center;
@@ -219,5 +225,24 @@ export default {
 }
 .login-code-img {
   height: 38px;
+  width:160px;
+}
+
+/* 添加响应式设计 */
+@media screen and (max-width: 768px) {
+  .login-form {
+    width: 80vw;
+    padding: 30px 20px 15px 20px;
+  }
+}
+
+@media screen and (max-height: 600px) {
+  .login-form {
+    margin-bottom: 30px;
+    padding: 20px 20px 10px 20px;
+  }
+  .title {
+    margin-bottom: 15px;
+  }
 }
 </style>

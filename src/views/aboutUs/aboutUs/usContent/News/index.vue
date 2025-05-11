@@ -83,6 +83,14 @@ export default {
   border-bottom: 1px solid rgb(204, 204, 204);
   padding: 30px 0;
   position: relative;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.us-news-list .us-news-item:hover {
+  background-color: rgba(245, 245, 250, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 .us-news-list .us-news-item a {
   font-size: 16px;
@@ -91,16 +99,41 @@ export default {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  padding-left: 5px;
 }
+
 .us-news-list .us-news-item a:hover {
-  color: rgb(42, 42, 255);
-  text-decoration: underline;
+  color: #2a42ff;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 16.5px;
+  transform: translateX(4px);
 }
+
+.us-news-list .us-news-item a:hover::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10%;
+  height: 80%;
+  width: 3px;
+  background-color: #2a42ff;
+  border-radius: 2px;
+}
+
 .news-author {
   display: block;
   position: absolute;
   right: 30px;
   color: rgb(181, 181, 181);
   top: 30px;
+  transition: all 0.3s ease;
+}
+
+.us-news-item:hover .news-author {
+  color: #888;
+  transform: translateX(-5px);
 }
 </style>

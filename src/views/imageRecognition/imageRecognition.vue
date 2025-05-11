@@ -1,6 +1,6 @@
 <template>
   <div class="image-recognition">
-    <!-- 背景动态元素 - 修改为只执行一次 -->
+    <!-- 背景动态元素 -->
     <div class="dynamic-background">
       <div class="light-beam beam-1 once-animation"></div>
       <div class="light-beam beam-2 once-animation"></div>
@@ -45,7 +45,7 @@
 
     <!-- 内容容器 -->
     <div class="content-container">
-      <image-content></image-content>
+      <ImageContent />
     </div>
   </div>
 </template>
@@ -156,12 +156,15 @@ export default {
     opacity: 0;
     transform: translateX(-100px) rotate(45deg);
   }
+
   20% {
     opacity: 0.3;
   }
+
   80% {
     opacity: 0.3;
   }
+
   100% {
     opacity: 0;
     transform: translateX(calc(100vw + 200px)) rotate(45deg);
@@ -191,9 +194,11 @@ export default {
     transform: translateY(100vh) scale(1);
     opacity: 0.5;
   }
+
   70% {
     opacity: 0.3;
   }
+
   100% {
     transform: translateY(-100px) scale(0);
     opacity: 0;
@@ -210,7 +215,8 @@ export default {
   height: 60px;
   background-color: #000000;
   z-index: 9;
-  will-change: transform; /* 性能优化 */
+  will-change: transform;
+  /* 性能优化 */
 }
 
 .nav-container {
@@ -225,32 +231,32 @@ export default {
 }
 
 /* 导航菜单覆盖样式优化 */
-.nav-container >>> .el-menu {
+.nav-container>>>.el-menu {
   background-color: #000000 !important;
   border-bottom: 1px solid #101010 !important;
 }
 
-.nav-container >>> .el-menu-item {
+.nav-container>>>.el-menu-item {
   color: #d0e0f0 !important;
   background-color: #000000 !important;
   height: 50px;
   line-height: 50px;
 }
 
-.nav-container >>> .el-menu-item:hover,
-.nav-container >>> .el-menu-item:focus {
+.nav-container>>>.el-menu-item:hover,
+.nav-container>>>.el-menu-item:focus {
   background-color: #080808 !important;
   color: #ffffff !important;
 }
 
-.nav-container >>> .el-menu-item.is-active {
+.nav-container>>>.el-menu-item.is-active {
   color: #3a7cbd !important;
   border-bottom-color: #3a7cbd !important;
   font-weight: 500;
 }
 
 /* smallNav组件覆盖样式 */
-.nav-container >>> .datasearch-nav {
+.nav-container>>>.datasearch-nav {
   width: 100% !important;
   background-color: #000000 !important;
   color: #d0e0f0 !important;
@@ -306,8 +312,17 @@ export default {
 }
 
 @keyframes icon-pulse {
-  0%, 100% { opacity: 0; transform: scale(0.5); }
-  50% { opacity: 0.5; transform: scale(1.2); }
+
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
 }
 
 .title-icon i {
@@ -357,13 +372,29 @@ export default {
 }
 
 @keyframes text-glow {
-  0%, 100% { text-shadow: 0 0 5px rgba(58, 123, 189, 0.3), 0 0 10px rgba(14, 58, 109, 0.2); }
-  50% { text-shadow: 0 0 15px rgba(58, 123, 189, 0.5), 0 0 25px rgba(14, 58, 109, 0.4); }
+
+  0%,
+  100% {
+    text-shadow: 0 0 5px rgba(58, 123, 189, 0.3), 0 0 10px rgba(14, 58, 109, 0.2);
+  }
+
+  50% {
+    text-shadow: 0 0 15px rgba(58, 123, 189, 0.5), 0 0 25px rgba(14, 58, 109, 0.4);
+  }
 }
 
 @keyframes text-flow {
-  0%, 100% { opacity: 0; filter: blur(4px); }
-  50% { opacity: 1; filter: blur(1px); }
+
+  0%,
+  100% {
+    opacity: 0;
+    filter: blur(4px);
+  }
+
+  50% {
+    opacity: 1;
+    filter: blur(1px);
+  }
 }
 
 /* 优化的分隔线，保留流动光效 */
@@ -383,15 +414,20 @@ export default {
   width: 100%;
   height: 100%;
   background: linear-gradient(90deg,
-    rgba(255,255,255,0) 0%,
-    rgba(255,255,255,0.8) 50%,
-    rgba(255,255,255,0) 100%);
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.8) 50%,
+      rgba(255, 255, 255, 0) 100%);
   animation: light-flow 3s infinite;
 }
 
 @keyframes light-flow {
-  0% { left: -100%; }
-  100% { left: 100%; }
+  0% {
+    left: -100%;
+  }
+
+  100% {
+    left: 100%;
+  }
 }
 
 /* 副标题优化 - 保留动画 */
@@ -407,8 +443,13 @@ export default {
 }
 
 @keyframes subtitle-fade {
-  0% { opacity: 0.7; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 0.7;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
 
 /* 右侧装饰元素优化，保留脉冲动画 */
@@ -440,8 +481,19 @@ export default {
 }
 
 @keyframes line-pulse {
-  0%, 100% { opacity: 0.3; height: 50%; top: 25%; }
-  50% { opacity: 1; height: 100%; top: 0; }
+
+  0%,
+  100% {
+    opacity: 0.3;
+    height: 50%;
+    top: 25%;
+  }
+
+  50% {
+    opacity: 1;
+    height: 100%;
+    top: 0;
+  }
 }
 
 /* 合并.decoration-dot和.pulse-dot为一个选择器 */
@@ -455,8 +507,17 @@ export default {
 }
 
 @keyframes dot-pulse {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 5px #5a9bd5; }
-  50% { transform: scale(1.5); box-shadow: 0 0 15px #5a9bd5, 0 0 25px rgba(58, 123, 189, 0.5); }
+
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 5px #5a9bd5;
+  }
+
+  50% {
+    transform: scale(1.5);
+    box-shadow: 0 0 15px #5a9bd5, 0 0 25px rgba(58, 123, 189, 0.5);
+  }
 }
 
 /* 内容容器优化 */

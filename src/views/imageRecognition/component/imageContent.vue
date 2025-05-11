@@ -152,9 +152,12 @@ export default {
   data() {
     return {
       // 主要状态
+      image_src: "",
       form_data: undefined,
+      isLoading: false,
       isShowStatistic: false,
       statisticData: null,
+      originalImageSrc: "",
       apiReturnedUrl: "",
       processingFile: false,
 
@@ -171,6 +174,38 @@ export default {
         { label: 'Category', value: '', placeholder: '点击查询后显示' },
       ],
 
+      // 图片变换状态
+      imageTransform: {
+        scale: 1,
+        translateX: 0,
+        translateY: 0,
+        minScale: 0.5,
+        maxScale: 5
+      },
+
+      // 拖拽状态
+      dragState: {
+        isDragging: false,
+        wasDragged: false,
+        startX: 0,
+        startY: 0,
+        lastTranslateX: 0,
+        lastTranslateY: 0,
+        distance: 0,
+        threshold: 10,
+        dragStartTime: 0,
+        dragEndTime: 0
+      },
+
+      // 触摸状态
+      touchState: {
+        isTouching: false,
+        startX: 0,
+        startY: 0,
+        startDistance: 0,
+        lastScale: 1
+      },
+
       // 分类数据
       categories: categoryConfig,
       activeCategory: '0', // 默认选中"所有分类"
@@ -178,6 +213,22 @@ export default {
   },
 
   computed: {
+    // 计算图片的变换样式
+    imageTransformStyle() {
+      const { scale, translateX, translateY } = this.imageTransform;
+      return {
+        transform: `translate(${translateX}px, ${translateY}px) scale(${scale})`,
+        transition: this.dragState.isDragging ? 'none' : 'transform 0.1s ease-out',
+        cursor: this.dragState.isDragging ? 'grabbing' : 'grab',
+        willChange: this.dragState.isDragging ? 'transform' : 'auto'
+      };
+    },
+
+    // 拖拽状态
+    isDragging() {
+      return this.dragState.isDragging;
+    },
+
     // 操作按钮配置
     operationButtons() {
       return [
@@ -201,7 +252,6 @@ export default {
       this.isLoading = true;
       // 获取TIFF图片并转换
       this.getTiffDataUrlHandler(tempUrl);
-
       // 直接处理保存的图片，无需确认对话框
       this.clickStatistic(true);
     }
@@ -210,9 +260,29 @@ export default {
     this.loadImagesForAllCategories();
   },
 
+  watch: {
+    // 监听加载状态变化，更新视觉样式
+    isLoading(newVal) {
+      this.updateLoadingState();
+    }
+  },
+
   mounted() {
     // 初始化加载状态
     this.updateLoadingState();
+  },
+
+  beforeDestroy() {
+    // 清理可能的内存泄漏
+    if (this.image_src && this.image_src.startsWith('blob:')) {
+      URL.revokeObjectURL(this.image_src);
+    }
+
+    // 清理文件输入框的事件监听
+    const fileInput = document.getElementById('select_files');
+    if (fileInput && this._handleInputChange) {
+      fileInput.removeEventListener('change', this._handleInputChange);
+    }
   }
 };
 </script>

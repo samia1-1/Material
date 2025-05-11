@@ -2,11 +2,8 @@
  * 图片处理相关功能
  */
 import Tiff from "tiff.js";
-import { imageMixin } from "@/views/imageRecognition/component/mixins/imageMixin";
 
 export default {
-  mixins: [imageMixin],
-
   created() {
     // 初始化Tiff.js
     window.Tiff = Tiff;
@@ -18,6 +15,36 @@ export default {
     imgUpload(event) {
       event?.stopPropagation?.();
       this.triggerUpload?.();
+    },
+
+    // 重置图片 - 整合所有清理操作
+    resetImage(showNotification = true) {
+      if (!this.image_src) {
+        showNotification && this.showMessage("没有图片需要重置", "info");
+        return;
+      }
+
+      // 清理资源
+      this.image_src?.startsWith('blob:') && URL.revokeObjectURL(this.image_src);
+
+      // 重置状态
+      Object.assign(this, {
+        image_src: "",
+        form_data: undefined,
+        isShowStatistic: false,
+        statisticData: null,
+        apiReturnedUrl: ""
+      });
+
+      // 重置函数调用
+      this.resetDataFields?.();
+      this.resetImageTransform?.();
+
+      // 清除会话存储
+      ["url", "apiUrl"].forEach(key => sessionStorage.removeItem(key));
+
+      // 通知
+      showNotification && this.showMessage("图片已重置", "success");
     },
 
     // 加载示例图片 - 简化处理流程
@@ -211,6 +238,77 @@ export default {
       if (this.form_data || sessionStorage.getItem("url")) return true;
       this.showMessage("请先上传图片", "warning");
       return false;
+    },
+
+    // 更新加载状态
+    updateLoadingState() {
+      if (this.$el && typeof this.$el.querySelector === 'function') {
+        const centerPic = this.$el.querySelector('.center-pic');
+        if (centerPic) {
+          if (this.isLoading) {
+            centerPic.setAttribute('loading', 'true');
+          } else {
+            centerPic.removeAttribute('loading');
+          }
+        }
+      }
+    },
+
+    // 图片加载完成后的处理函数
+    onImageLoad(e) {
+      // 重置变换状态
+      this.imageTransform.scale = 1;
+      this.imageTransform.translateX = 0;
+      this.imageTransform.translateY = 0;
+
+      this.$nextTick(() => {
+        this.autoFitImage(e.target);
+      });
+    },
+
+    // 自动调整图片大小以填充容器
+    autoFitImage(imgElement) {
+      if (!imgElement || !this.$refs.imageContainer) return;
+
+      const container = this.$refs.imageContainer;
+      const containerWidth = container.clientWidth;
+      const containerHeight = container.clientHeight;
+      const imgWidth = imgElement.naturalWidth;
+      const imgHeight = imgElement.naturalHeight;
+
+      // 计算宽高比
+      const containerRatio = containerWidth / containerHeight;
+      const imgRatio = imgWidth / imgHeight;
+
+      let scale = 1;
+
+      // 采用缩放策略以充分利用空间
+      if (imgRatio > containerRatio) {
+        // 图片较宽，以容器宽度为准
+        scale = containerWidth / imgWidth;
+
+        // 适当增加缩放比例
+        const scaledHeight = imgHeight * scale;
+        if (scaledHeight < containerHeight * 0.8) {
+          scale = scale * 1.2;
+        }
+      } else {
+        // 图片较高，以容器高度为准
+        scale = containerHeight / imgHeight;
+
+        // 适当增加缩放比例
+        const scaledWidth = imgWidth * scale;
+        if (scaledWidth < containerWidth * 0.8) {
+          scale = scale * 1.2;
+        }
+      }
+
+      // 应用缩放，确保不超过合理范围
+      this.imageTransform.scale = Math.min(Math.max(scale, 0.5), 5);
+
+      // 重置平移状态，确保图片居中显示
+      this.imageTransform.translateX = 0;
+      this.imageTransform.translateY = 0;
     }
   }
 }

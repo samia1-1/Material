@@ -34,12 +34,12 @@
                   <el-tab-pane label="组织结构" name="4"></el-tab-pane>
                 </el-tabs>
                 <!-- 添加检查并导出按钮 -->
-                <el-button
+                <!-- <el-button
                   type="primary"
                   size="small"
                   icon="el-icon-download"
                   class="export-btn"
-                  @click="checkAndExport">检查表格缺失并导出</el-button>
+                  @click="checkAndExport">检查表格缺失并导出</el-button> -->
               </div>
               <div class="nr">
                 <div v-if="introduce.length>0" v-for="(item,index) in introduce" :key="index">
