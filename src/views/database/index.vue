@@ -6,7 +6,8 @@
       <el-container style="height:88vh">
         <el-aside width="240px">
           <div class="search_box">
-            <el-button type="primary" @click="asJson">导入表格数据</el-button>
+
+            <!-- <el-button type="primary" @click="asJson">导入表格数据</el-button> -->
 
             <el-input placeholder="请输入合金名称" v-model="searchValue" size="mini">
               <el-button slot="append" @click="searchFun" icon="el-icon-search"></el-button>
@@ -1067,7 +1068,7 @@ export default {
 .content .nr {
   height: 73vh;
   overflow-y: auto;
-  overflow-x: hidden; /* 禁用内容区域的横向滚动 */
+  overflow-x: hidden;
 }
 
 .content .nr .tit1 {
@@ -1148,6 +1149,5 @@ export default {
   object-fit: contain;
   border-radius: 2px;
   margin: 0;
-  box-shadow: none;
 }
 </style>
