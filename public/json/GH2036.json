@@ -1715,9 +1715,9 @@
                     "con": "",
                     "xAxisData": [],
                     "echartMsg": {
-                        "echartId": "372",
-                        "xName": "",
-                        "yName": "",
+                        "echartId": 568,
+                        "xName": "ε轴",
+                        "yName": "值",
                         "minX": 0,
                         "minY": 0
                     },
@@ -2234,9 +2234,9 @@
                     "con": "",
                     "xAxisData": [],
                     "echartMsg": {
-                        "echartId": "382",
-                        "xName": "",
-                        "yName": "",
+                        "echartId": 707,
+                        "xName": "700℃-t轴",
+                        "yName": "值",
                         "minX": 17.0799,
                         "minY": 228.3523
                     },
@@ -3255,9 +3255,9 @@
                     "con": "",
                     "xAxisData": [],
                     "echartMsg": {
-                        "echartId": "392",
-                        "xName": "",
-                        "yName": "",
+                        "echartId": 396,
+                        "xName": "147MPa-t轴",
+                        "yName": "值",
                         "minX": 0,
                         "minY": 0.1105
                     },
@@ -4081,9 +4081,9 @@
                             ],
                             "xAxisData": [],
                             "echartMsg": {
-                                "echartId": "31011",
-                                "xName": "",
-                                "yName": "",
+                                "echartId": 525,
+                                "xName": "缺口试样-20℃-Nf轴",
+                                "yName": "值",
                                 "minX": 16961.7013,
                                 "minY": 288.9768
                             },
@@ -4207,9 +4207,9 @@
                             "con": "",
                             "xAxisData": [],
                             "echartMsg": {
-                                "echartId": "31012",
-                                "xName": "",
-                                "yName": "",
+                                "echartId": 17,
+                                "xName": "Nf轴",
+                                "yName": "值",
                                 "minX": 25327.9276,
                                 "minY": 348.0729
                             },
@@ -4902,9 +4902,9 @@
                             "con": "",
                             "xAxisData": [],
                             "echartMsg": {
-                                "echartId": "31024",
-                                "xName": "",
-                                "yName": "",
+                                "echartId": 391,
+                                "xName": "△εt/2轴",
+                                "yName": "值",
                                 "minX": 2.8988,
                                 "minY": 420.1173
                             },
@@ -5231,9 +5231,9 @@
                     ],
                     "xAxisData": [],
                     "echartMsg": {
-                        "echartId": "3122",
-                        "xName": "",
-                        "yName": "",
+                        "echartId": 144,
+                        "xName": "600℃-△a轴",
+                        "yName": "值",
                         "minX": 0.0282,
                         "minY": 22.4699
                     },

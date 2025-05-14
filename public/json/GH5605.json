@@ -126,9 +126,9 @@
             "con": "图2-1",
             "xAxisData": [],
             "echartMsg": {
-                "echartId": "23",
-                "xName": "",
-                "yName": "",
+                "echartId": 808,
+                "xName": "θ轴",
+                "yName": "值",
                 "minX": 45.9717,
                 "minY": 9.1209
             },
@@ -230,9 +230,9 @@
             ],
             "xAxisData": [],
             "echartMsg": {
-                "echartId": "24",
-                "xName": "",
-                "yName": "",
+                "echartId": 9,
+                "xName": "θ轴",
+                "yName": "值",
                 "minX": -273.5746,
                 "minY": 0.837
             },
@@ -516,9 +516,9 @@
                     ],
                     "xAxisData": [],
                     "echartMsg": {
-                        "echartId": "2111",
-                        "xName": "",
-                        "yName": "",
+                        "echartId": 784,
+                        "xName": "760℃-氧化时间轴",
+                        "yName": "值",
                         "minX": 3,
                         "minY": 0.0114
                     },
@@ -1050,9 +1050,9 @@
                     "con": "",
                     "xAxisData": [],
                     "echartMsg": {
-                        "echartId": "2112",
-                        "xName": "",
-                        "yName": "",
+                        "echartId": 712,
+                        "xName": "燃烧装置中-t轴",
+                        "yName": "值",
                         "minX": 0,
                         "minY": -95.2722
                     },
@@ -1198,9 +1198,9 @@
                     "con": "",
                     "xAxisData": [],
                     "echartMsg": {
-                        "echartId": "2114",
-                        "xName": "",
-                        "yName": "",
+                        "echartId": 705,
+                        "xName": "合金损失=表面上转化成氧化皮的金属-θ轴",
+                        "yName": "值",
                         "minX": 868.1176,
                         "minY": 0.0147
                     },
@@ -1250,9 +1250,9 @@
                     "con": "",
                     "xAxisData": [],
                     "echartMsg": {
-                        "echartId": "2115",
-                        "xName": "",
-                        "yName": "",
+                        "echartId": 499,
+                        "xName": "t轴",
+                        "yName": "值",
                         "minX": 53.0991,
                         "minY": 9.0519
                     },
@@ -1310,7 +1310,35 @@
             "two": [
                 {
                     "name": "2.12.1、合金在燃烧装置中，不同温度和时间的动态热腐蚀试验结果见图2-8。",
-                    "con": ""
+                    "con": "",
+                    "seriesData": [
+                        {
+                            "name": "t、h",
+                            "type": "line",
+                            "smooth": "smooth",
+                            "data": [
+                                [
+                                    "870℃、500h",
+                                    "0.1862"
+                                ],
+                                [
+                                    "950℃、1000h",
+                                    "0.3879"
+                                ],
+                                [
+                                    "1040℃、1000h",
+                                    "1.0000"
+                                ]
+                            ]
+                        }
+                    ],
+                    "echartMsg": {
+                        "echartId": 19,
+                        "xName": "t、h轴",
+                        "yName": "值",
+                        "minX": 870,
+                        "minY": 0.1862
+                    }
                 },
                 {
                     "name": "2.12.2、几种合金板材900℃、200h动态热腐蚀试验结果对比见图2-9。",
@@ -1439,9 +1467,9 @@
                     "con": "",
                     "xAxisData": [],
                     "echartMsg": {
-                        "echartId": "321",
-                        "xName": "",
-                        "yName": "",
+                        "echartId": 750,
+                        "xName": "冷变形量轴",
+                        "yName": "值",
                         "minX": 5.8122,
                         "minY": 20
                     },
@@ -1492,9 +1520,9 @@
                     "con": "",
                     "xAxisData": [],
                     "echartMsg": {
-                        "echartId": "322",
-                        "xName": "",
-                        "yName": "",
+                        "echartId": 809,
+                        "xName": "固溶温度轴",
+                        "yName": "值",
                         "minX": 950,
                         "minY": 304.3955
                     },
@@ -1561,9 +1589,9 @@
                     "con": "",
                     "xAxisData": [],
                     "echartMsg": {
-                        "echartId": "324",
-                        "xName": "",
-                        "yName": "",
+                        "echartId": 591,
+                        "xName": "冷加工状态-HV轴",
+                        "yName": "值",
                         "minX": 115.9091,
                         "minY": 557.6552
                     },
@@ -3429,9 +3457,9 @@
             "con": "热轧中厚板不同温度的承载强度和承载屈服强度见图3-14。",
             "xAxisData": [],
             "echartMsg": {
-                "echartId": "37",
-                "xName": "",
-                "yName": "",
+                "echartId": 785,
+                "xName": "e/D=1.5-σbry-θ轴",
+                "yName": "值",
                 "minX": 18.5985,
                 "minY": 308.6675
             },
@@ -4315,9 +4343,9 @@
                     "con": "",
                     "xAxisData": [],
                     "echartMsg": {
-                        "echartId": "384",
-                        "xName": "",
-                        "yName": "",
+                        "echartId": 689,
+                        "xName": "δ₅-冷变形量轴",
+                        "yName": "值",
                         "minX": 20,
                         "minY": 0.2293
                     },
@@ -5905,9 +5933,9 @@
                     "con": "",
                     "xAxisData": [],
                     "echartMsg": {
-                        "echartId": "387",
-                        "xName": "",
-                        "yName": "",
+                        "echartId": 682,
+                        "xName": "1000h时效-δ₅-冷轧压下量轴",
+                        "yName": "值",
                         "minX": 0.2358,
                         "minY": 2.4926
                     },
@@ -6117,9 +6145,9 @@
                     "con": "",
                     "xAxisData": [],
                     "echartMsg": {
-                        "echartId": "388",
-                        "xName": "",
-                        "yName": "",
+                        "echartId": 462,
+                        "xName": "δ1.5mm含w(Si)0.36%板材长期时效-δ₅-θ轴",
+                        "yName": "值",
                         "minX": 36.3654,
                         "minY": 7.762
                     },
@@ -6679,7 +6707,70 @@
                 },
                 {
                     "name": "3.11.2、低周疲劳",
-                    "con": "管材540℃和650℃的低周疲劳ε-N曲线见图3-26。"
+                    "con": "管材540℃和650℃的低周疲劳ε-N曲线见图3-26。",
+                    "seriesData": [
+                        {
+                            "name": "650℃-Nf",
+                            "type": "line",
+                            "smooth": "smooth",
+                            "data": [
+                                [
+                                    "40.8698",
+                                    "21.3729"
+                                ],
+                                [
+                                    "78.0700",
+                                    "17.2028"
+                                ],
+                                [
+                                    "1805.6276",
+                                    "6.9101"
+                                ],
+                                [
+                                    "9145.9562",
+                                    "5.0947"
+                                ]
+                            ]
+                        },
+                        {
+                            "name": "540℃-Nf",
+                            "type": "line",
+                            "smooth": "smooth",
+                            "data": [
+                                [
+                                    "335.9555",
+                                    "22.6032"
+                                ],
+                                [
+                                    "1172.1428",
+                                    "15.0020"
+                                ],
+                                [
+                                    "1000.0641",
+                                    "10.3642"
+                                ],
+                                [
+                                    "2552.1254",
+                                    "12.1666"
+                                ],
+                                [
+                                    "9312.5006",
+                                    "8.6178"
+                                ],
+                                [
+                                    "29493.0417",
+                                    "6.0627"
+                                ]
+                            ]
+                        }
+                    ],
+                    "echartMsg": {
+                        "echartId": 399,
+                        "xName": "650℃-Nf轴",
+                        "yName": "值",
+                        "minX": 40.8698,
+                        "minY": 5.0947
+                    }
                 },
                 {
                     "name": "3.11.3、特种疲劳",

@@ -189,9 +189,9 @@
             "con": "图2-1",
             "xAxisData": [],
             "echartMsg": {
-                "echartId": "23",
-                "xName": "",
-                "yName": "",
+                "echartId": 75,
+                "xName": "θ轴",
+                "yName": "值",
                 "minX": 11.7688,
                 "minY": 9.8979
             },
@@ -254,9 +254,9 @@
             "con": "图2-2",
             "xAxisData": [],
             "echartMsg": {
-                "echartId": "24",
-                "xName": "",
-                "yName": "",
+                "echartId": 468,
+                "xName": "θ轴",
+                "yName": "值",
                 "minX": 15.9284,
                 "minY": 1.2828
             },
@@ -327,9 +327,9 @@
             "con": "图2-3",
             "xAxisData": [],
             "echartMsg": {
-                "echartId": "26",
-                "xName": "",
-                "yName": "",
+                "echartId": 253,
+                "xName": "θ轴",
+                "yName": "值",
                 "minX": 27.3926,
                 "minY": 408.641
             },
@@ -388,9 +388,9 @@
             "con": "图2-4",
             "xAxisData": [],
             "echartMsg": {
-                "echartId": "27",
-                "xName": "",
-                "yName": "",
+                "echartId": 289,
+                "xName": "20℃-θ轴",
+                "yName": "值",
                 "minX": 18.4201,
                 "minY": 12.1256
             },
@@ -1032,9 +1032,9 @@
                     "con": "",
                     "xAxisData": [],
                     "echartMsg": {
-                        "echartId": "332",
-                        "xName": "",
-                        "yName": "",
+                        "echartId": 348,
+                        "xName": "时效时间轴",
+                        "yName": "值",
                         "minX": -2.9228,
                         "minY": 55.4881
                     },
@@ -1079,9 +1079,9 @@
             "con": "棒材不同温度的扭转性能见图3-2。",
             "xAxisData": [],
             "echartMsg": {
-                "echartId": "35",
-                "xName": "",
-                "yName": "",
+                "echartId": 10,
+                "xName": "τb-θ轴",
+                "yName": "值",
                 "minX": 18.3292,
                 "minY": 64.7351
             },
@@ -1201,9 +1201,9 @@
             "con": "棒材不同温度的剪切性能见图3-3。",
             "xAxisData": [],
             "echartMsg": {
-                "echartId": "36",
-                "xName": "",
-                "yName": "",
+                "echartId": 52,
+                "xName": "θ轴",
+                "yName": "值",
                 "minX": 18.8823,
                 "minY": 697.1639
             },
@@ -4743,9 +4743,9 @@
                     ],
                     "xAxisData": [],
                     "echartMsg": {
-                        "echartId": "381",
-                        "xName": "",
-                        "yName": "",
+                        "echartId": 401,
+                        "xName": "550℃-t轴",
+                        "yName": "值",
                         "minX": 10.8857,
                         "minY": 254.1667
                     },
@@ -6928,9 +6928,9 @@
                     "con": "",
                     "xAxisData": [],
                     "echartMsg": {
-                        "echartId": "394",
-                        "xName": "",
-                        "yName": "",
+                        "echartId": 694,
+                        "xName": "a-600℃-t轴",
+                        "yName": "值",
                         "minX": 0.1,
                         "minY": -155.5556
                     },
@@ -9565,9 +9565,9 @@
                             "con": "",
                             "xAxisData": [],
                             "echartMsg": {
-                                "echartId": "31022",
-                                "xName": "",
-                                "yName": "",
+                                "echartId": 35,
+                                "xName": "无Mg、Zr-Nf轴",
+                                "yName": "值",
                                 "minX": 7.3489,
                                 "minY": 256.9542
                             },
@@ -9665,9 +9665,9 @@
                             "con": "",
                             "xAxisData": [],
                             "echartMsg": {
-                                "echartId": "31032",
-                                "xName": "",
-                                "yName": "",
+                                "echartId": 805,
+                                "xName": "N轴",
+                                "yName": "值",
                                 "minX": 196.82,
                                 "minY": 0.0091
                             },

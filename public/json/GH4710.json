@@ -645,9 +645,9 @@
                     "con": "",
                     "xAxisData": [],
                     "echartMsg": {
-                        "echartId": "331",
-                        "xName": "",
-                        "yName": "",
+                        "echartId": 98,
+                        "xName": "d25mm棒材-θ轴",
+                        "yName": "值",
                         "minX": 24.5065,
                         "minY": 93.4135
                     },
@@ -725,9 +725,9 @@
                     "con": "",
                     "xAxisData": [],
                     "echartMsg": {
-                        "echartId": "332",
-                        "xName": "",
-                        "yName": "",
+                        "echartId": 768,
+                        "xName": "750℃-时效时间轴",
+                        "yName": "值",
                         "minX": -5.9172,
                         "minY": 24.7619
                     },
@@ -1474,9 +1474,9 @@
                     ],
                     "xAxisData": [],
                     "echartMsg": {
-                        "echartId": "372",
-                        "xName": "",
-                        "yName": "",
+                        "echartId": 875,
+                        "xName": "20℃拉伸轴",
+                        "yName": "值",
                         "minX": 0,
                         "minY": 5.7722
                     },
@@ -3737,9 +3737,9 @@
                             "con": "",
                             "xAxisData": [],
                             "echartMsg": {
-                                "echartId": "31012",
-                                "xName": "",
-                                "yName": "",
+                                "echartId": 911,
+                                "xName": "850℃时效2000h-Nf轴",
+                                "yName": "值",
                                 "minX": 165800.5828,
                                 "minY": 320.6125
                             },
