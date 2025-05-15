@@ -288,10 +288,27 @@ export default {
       return categoryId === 0 ? this.allImages : (this.categoryImages[categoryId] || []);
     },
 
-    // 加载特定示例图片 - 转发到image mixin
+    // 重构加载示例图片方法，完全避免递归和事件循环
     loadExampleImage(item) {
-      if (typeof this.loadExampleImage === 'function' && this !== this.loadExampleImage) {
-        this.loadExampleImage(item);
+      // 使用更安全的方法检测是否为直接调用
+      if (this.$options && this.$options.name === 'ImageContent') {
+        // 如果是由ImageContent组件直接调用，则执行图片加载逻辑
+        if (typeof this.doLoadExampleImage === 'function') {
+          this.doLoadExampleImage(item);
+        } else {
+          console.error('缺少doLoadExampleImage方法');
+        }
+      } else {
+        // 从mixin调用，查找父组件的方法并直接调用
+        let parent = this.$parent;
+        while (parent) {
+          if (typeof parent.doLoadExampleImage === 'function') {
+            parent.doLoadExampleImage(item);
+            return;
+          }
+          parent = parent.$parent;
+        }
+        console.error('找不到处理示例图片的组件');
       }
     }
   }

@@ -78,11 +78,18 @@ export default {
       // 获取图片URL
       const imageUrl = this.getUrlFromItem(item);
 
+      // 控制台打印URL帮助调试
+      console.log("加载示例图片:", imageUrl, "类型:", fileType, "是否TIFF:", isTiff);
+
       // 统一处理逻辑 - 无论TIFF还是普通图片
       const fetchPromise = fetch(imageUrl)
         .then(response => {
           if (!response.ok) throw new Error('无法获取图片');
           return isTiff ? response.arrayBuffer() : response.blob();
+        })
+        .catch(error => {
+          console.error("获取图片失败:", error, imageUrl);
+          throw error;
         });
 
       // 根据格式处理
@@ -95,7 +102,13 @@ export default {
             return this.processTiffArrayBuffer(arrayBuffer)
               .then(dataUrl => {
                 this.image_src = dataUrl;
-                this.processWithFileUploadAPI?.(originalFile);
+                // 确保processWithFileUploadAPI存在再调用
+                if (typeof this.processWithFileUploadAPI === 'function') {
+                  this.processWithFileUploadAPI(originalFile);
+                } else {
+                  console.error("processWithFileUploadAPI方法未定义");
+                  this.isLoading = false;
+                }
               });
           })
           .catch(this.handleImageError);
@@ -108,7 +121,13 @@ export default {
             const imageFile = new File([blob], fileName, { type: fileType });
             this.form_data = imageFile;
 
-            this.processWithFileUploadAPI?.(imageFile);
+            // 确保processWithFileUploadAPI存在再调用
+            if (typeof this.processWithFileUploadAPI === 'function') {
+              this.processWithFileUploadAPI(imageFile);
+            } else {
+              console.error("processWithFileUploadAPI方法未定义");
+              this.isLoading = false;
+            }
           })
           .catch(this.handleImageError);
       }

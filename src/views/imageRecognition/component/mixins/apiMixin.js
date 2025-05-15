@@ -5,7 +5,7 @@ import { getToken } from "@/utils/auth";
 
 // API配置集中管理
 const API = {
-  BASE_URL: "http://146.56.214.208:8100/image_recognition",
+  BASE_URL: "http://218.199.69.65:8100/image_recognition",
   ENDPOINTS: {
     FILE: "/updateAvatarUrl",
     URL: "/updateAvatarUrl2"
@@ -83,6 +83,44 @@ export default {
         this.isLoading = false;
         return false;
       }
+    },
+
+    // 添加缺失的文件处理和API上传连接方法
+    processWithFileUploadAPI(file) {
+      if (!file) {
+        this.showMessage('无效的文件', 'error');
+        this.isLoading = false;
+        return;
+      }
+
+      // 提取元数据
+      const metadata = {
+        format: file.type || 'application/octet-stream',
+        filename: file.name,
+        isTiff: file.name.match(/\.(tif|tiff)$/i) ? "true" : "false"
+      };
+
+      // 如果是示例图片，添加额外标记
+      if (sessionStorage.getItem("isExampleImage") === "true") {
+        metadata.isExampleImage = "true";
+        metadata.exampleCategory = sessionStorage.getItem("exampleCategory") || "0";
+      }
+
+      // 调用上传图片API
+      this.isLoading = true;
+      this.uploadImage(file, { metadata })
+        .then(success => {
+          if (success) {
+            this.showMessage('图像处理完成', 'success');
+          }
+        })
+        .catch(error => {
+          console.error('图像处理失败:', error);
+          this.showMessage('图像处理失败，请重试', 'error');
+        })
+        .finally(() => {
+          this.isLoading = false;
+        });
     },
 
     // 处理图片上传 - 简化参数处理

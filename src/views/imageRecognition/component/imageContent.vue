@@ -260,19 +260,163 @@ export default {
     this.loadImagesForAllCategories();
   },
 
-  watch: {
-    // 监听加载状态变化，更新视觉样式
-    isLoading(newVal) {
-      this.updateLoadingState();
+  methods: {
+    // 添加新的直接处理示例图片的方法
+    doLoadExampleImage(item) {
+      // 重置并准备状态
+      this.image_src && this.resetImage(false);
+      this.isLoading = true;
+      this.showMessage("正在加载图片...", "info");
+
+      // 获取文件信息
+      const isTiff = this.isTiffImage?.(item.fileName || '') || item.isTiff;
+      const fileType = item.fileType || (isTiff ? 'image/tiff' : 'image/jpeg');
+      const fileName = item.fileName || `example-${Date.now()}${this.getExtensionFromMimeType(fileType)}`;
+
+      // 会话存储
+      const sessionData = {
+        "originalFormat": fileType,
+        "originalFileName": fileName,
+        "isExampleImage": "true",
+        "exampleCategory": item.categoryId || "0"
+      };
+
+      // 批量设置会话存储
+      Object.entries(sessionData).forEach(([key, value]) => {
+        sessionStorage.setItem(key, value);
+      });
+
+      // 重置图片变换
+      this.resetImageTransform?.();
+
+      // 获取图片URL
+      const imageUrl = this.getUrlFromItem(item);
+
+      // 统一处理逻辑 - 无论TIFF还是普通图片
+      this.processExampleImage(imageUrl, fileName, isTiff);
+    },
+
+    // 处理示例图片
+    processExampleImage(imageUrl, fileName, isTiff) {
+      fetch(imageUrl)
+        .then(response => {
+          if (!response.ok) throw new Error('无法获取图片');
+          return isTiff ? response.arrayBuffer() : response.blob();
+        })
+        .then(data => {
+          if (isTiff) {
+            const originalFile = new File([data], fileName, { type: 'image/tiff' });
+            this.form_data = originalFile;
+
+            return this.processTiffArrayBuffer(data)
+              .then(dataUrl => {
+                this.image_src = dataUrl;
+                this.processWithFileUploadAPI(originalFile);
+              });
+          } else {
+            const url = URL.createObjectURL(data);
+            this.image_src = url;
+
+            const imageFile = new File([data], fileName, { type: data.type || 'image/jpeg' });
+            this.form_data = imageFile;
+
+            this.processWithFileUploadAPI(imageFile);
+            return Promise.resolve();
+          }
+        })
+        .catch(error => {
+          console.error('处理图片失败:', error);
+          this.showMessage('无法处理图片: ' + (error.message || '未知错误'), 'error');
+          this.isLoading = false;
+        });
+    },
+
+    // 添加TIFF处理方法
+    getTiffDataUrlHandler(url) {
+      if (!url) return;
+
+      fetch(url)
+        .then(response => {
+          if (!response.ok) throw new Error('获取图片失败');
+          return response.arrayBuffer();
+        })
+        .then(buffer => {
+          return this.processTiffArrayBuffer(buffer);
+        })
+        .then(dataUrl => {
+          this.image_src = dataUrl;
+          this.isLoading = false;
+        })
+        .catch(error => {
+          console.error('处理TIFF图片失败:', error);
+          this.showMessage('无法加载TIFF图片', 'error');
+          this.isLoading = false;
+        });
+    },
+
+    // 处理文件上传API调用
+    processWithFileUploadAPI(file) {
+      if (!file) {
+        this.showMessage('无效的文件', 'error');
+        this.isLoading = false;
+        return;
+      }
+
+      // 提取元数据
+      const metadata = {
+        format: file.type || 'application/octet-stream',
+        filename: file.name,
+        isTiff: file.name.match(/\.(tif|tiff)$/i) ? "true" : "false"
+      };
+
+      // 如果是示例图片，添加额外标记
+      if (sessionStorage.getItem("isExampleImage") === "true") {
+        metadata.isExampleImage = "true";
+        metadata.exampleCategory = sessionStorage.getItem("exampleCategory") || "0";
+      }
+
+      // 调用上传图片API
+      this.isLoading = true;
+      this.uploadImage(file, { metadata })
+        .then(success => {
+          if (success) {
+            this.showMessage('图像处理完成', 'success');
+          }
+        })
+        .catch(error => {
+          console.error('图像处理失败:', error);
+          this.showMessage('图像处理失败，请重试', 'error');
+        })
+        .finally(() => {
+          this.isLoading = false;
+        });
+    },
+
+    // 点击统计处理方法
+    clickStatistic(useTiffUrl = false) {
+      const tiffUrl = sessionStorage.getItem("url");
+
+      if (useTiffUrl && tiffUrl) {
+        // 使用URL API
+        const formData = new FormData();
+        const formattedUrl = tiffUrl.replace(/\/images\/(\d+)\/(\w+)\/(.+)/, '$1\\$2\\$3');
+        formData.append("image", formattedUrl);
+
+        this.makeApiRequest('URL', formData);
+      } else if (this.form_data) {
+        // 使用文件API
+        this.uploadImage(this.form_data);
+      } else {
+        this.isLoading = false;
+        this.showMessage('无法处理图片', 'warning');
+      }
     }
   },
 
-  mounted() {
-    // 初始化加载状态
-    this.updateLoadingState();
-  },
-
   beforeDestroy() {
+    // 移除自定义事件监听
+    this.$off('load-example-image', this.handleExampleImageLoad);
+
     // 清理可能的内存泄漏
     if (this.image_src && this.image_src.startsWith('blob:')) {
       URL.revokeObjectURL(this.image_src);
