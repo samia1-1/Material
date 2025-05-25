@@ -4,81 +4,44 @@
 
 // 图片集合配置
 const imageCollections = {
-  beike: {
-    type: 'jpg',
-    files: {
-      'beike_1.jpg': require('@/assets/test/beike/0001.jpg'),
-      'beike_2.jpg': require('@/assets/test/beike/0002.jpg'),
-    }
-  },
-
-  fenmo: {
-    type: 'tif',
-    files: {
-      'fenmo_1.TIF': require('@/assets/test/fenmo/1.TIF'),
-      'fenmo_3.TIF': require('@/assets/test/fenmo/3.TIF'),
-    }
-  },
-
-  huake: {
-    type: 'jpg',
-    files: {
-      'huake_1.jpg': require('@/assets/test/huake/1.jpg'),
-      'huake_2.jpg': require('@/assets/test/huake/2.jpg'),
-    }
-  },
-
-  w800: {
-    type: 'tif',
-    files: {
-      'w800_1.tif': require('@/assets/test/w800/0001.tif'),
-      'w800_2.tif': require('@/assets/test/w800/0002.tif'),
-    }
-  },
-
-  w900: {
-    type: 'tif',
-    files: {
-      'w900_1.tif': require('@/assets/test/w900/0001.tif'),
-      'w900_2.tif': require('@/assets/test/w900/0002.tif'),
-    }
-  },
-
-  w1000: {
-    type: 'tif',
-    files: {
-      'w1000_1.tif': require('@/assets/test/w1000/0001.tif'),
-      'w1000_2.tif': require('@/assets/test/w1000/0002.tif'),
-    }
-  },
-
-  yantai: {
-    type: 'tif',
-    files: {
-      'yantai_1.tif': require('@/assets/test/yantai/0001.tif'),
-      'yantai_2.tif': require('@/assets/test/yantai/0002.tif'),
-    }
-  },
-
-  zhongnan: {
-    type: 'jpg',
-    files: {
-      'zhongnan_1.jpg': require('@/assets/test/zhongnan/0500_0500_164.jpg'),
-      'zhongnan_2.jpg': require('@/assets/test/zhongnan/0500_0550_164.jpg'),
-    }
-  }
+  beike: { type: 'jpg', files: {
+    'beike_1.jpg': require('@/assets/test/beike/0001.jpg'),
+    'beike_2.jpg': require('@/assets/test/beike/0002.jpg'),
+  }},
+  fenmo: { type: 'tif', files: {
+    'fenmo_1.TIF': require('@/assets/test/fenmo/1.TIF'),
+    'fenmo_3.TIF': require('@/assets/test/fenmo/3.TIF'),
+  }},
+  huake: { type: 'jpg', files: {
+    'huake_1.jpg': require('@/assets/test/huake/1.jpg'),
+    'huake_2.jpg': require('@/assets/test/huake/2.jpg'),
+  }},
+  w800: { type: 'tif', files: {
+    'w800_1.tif': require('@/assets/test/w800/0001.tif'),
+    'w800_2.tif': require('@/assets/test/w800/0002.tif'),
+  }},
+  w900: { type: 'tif', files: {
+    'w900_1.tif': require('@/assets/test/w900/0001.tif'),
+    'w900_2.tif': require('@/assets/test/w900/0002.tif'),
+  }},
+  w1000: { type: 'tif', files: {
+    'w1000_1.tif': require('@/assets/test/w1000/0001.tif'),
+    'w1000_2.tif': require('@/assets/test/w1000/0002.tif'),
+  }},
+  yantai: { type: 'tif', files: {
+    'yantai_1.tif': require('@/assets/test/yantai/0001.tif'),
+    'yantai_2.tif': require('@/assets/test/yantai/0002.tif'),
+  }},
+  zhongnan: { type: 'jpg', files: {
+    'zhongnan_1.jpg': require('@/assets/test/zhongnan/0500_0500_164.jpg'),
+    'zhongnan_2.jpg': require('@/assets/test/zhongnan/0500_0550_164.jpg'),
+  }}
 };
 
 // 文件夹到分类ID的映射
 const folderToId = {
-  'beike': 1,
-  'fenmo': 2,
-  'huake': 3,
-  'w800': 4,
-  'w900': 5,
-  'w1000': 6,
-  'yantai': 7,
-  'zhongnan': 8
+  'beike': 1, 'fenmo': 2, 'huake': 3, 'w800': 4,
+  'w900': 5, 'w1000': 6, 'yantai': 7, 'zhongnan': 8
 };
 
 // 缓存已处理的图片数据
@@ -95,10 +58,8 @@ export function getImagesByCategory(category) {
   if (category === 'all') {
     const allImages = [];
     Object.keys(imageCollections).forEach(folder => {
-      const images = processCollectionImages(folder);
-      allImages.push(...images);
+      allImages.push(...processCollectionImages(folder));
     });
-
     imageCache.set(category, allImages);
     return allImages;
   }
@@ -110,7 +71,6 @@ export function getImagesByCategory(category) {
     return [];
   }
 
-  // 处理并返回指定分类的图片
   const images = processCollectionImages(category);
   imageCache.set(category, images);
   return images;

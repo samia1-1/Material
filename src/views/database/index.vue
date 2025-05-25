@@ -40,49 +40,57 @@
                 <el-tab-pane label="组织结构" name="4"></el-tab-pane>
               </el-tabs>
               <div class="nr">
-                <div v-if="introduce.length > 0" v-for="(item, index) in introduce">
-                  <div class="tit1">{{ item.name }}</div>
-                  <div class="txt" v-html="processImageReferences(item.con)"></div>
-                  <div class="table1" v-if="item.tableData">
-                    <el-table size="mini" :data="item.tableData" style="width: 100%">
-                      <el-table-column v-for="column in item.tableColumns" :key="column.prop" :prop="column.prop"
-                        :label="column.label">
-                      </el-table-column>
-                    </el-table>
-                  </div>
-                  <div class="echartBox" v-if="item.seriesData">
-                    <div :id="`echarts${item.echartMsg.echartId}`" class="echart"></div>
-                  </div>
-                  <div v-for="(self, key) in item.two">
-                    <div class="tit2">{{ self.name }}</div>
-                    <div class="txt" v-html="processImageReferences(self.con)"></div>
-                    <div class="table1" v-if="self.tableData">
-                      <el-table size="mini" :data="self.tableData" style="width: 100%">
-                        <el-table-column v-for="column in self.tableColumns" :key="column.prop" :prop="column.prop"
+                <!-- 使用template包装v-for和v-if，避免警告 -->
+                <template v-if="introduce.length > 0">
+                  <div v-for="(item, index) in introduce" :key="index">
+                    <div class="tit1">{{ item.name }}</div>
+                    <div class="txt" v-html="processImageReferences(item.con)"></div>
+                    <div class="table1" v-if="item.tableData">
+                      <el-table size="mini" :data="item.tableData" style="width: 100%">
+                        <el-table-column v-for="column in item.tableColumns" :key="column.prop" :prop="column.prop"
                           :label="column.label">
                         </el-table-column>
                       </el-table>
                     </div>
-                    <div class="echartBox" v-if="self.seriesData">
-                      <div :id="`echarts${self.echartMsg.echartId}`" class="echart"></div>
+                    <div class="echartBox" v-if="item.seriesData">
+                      <div :id="`echarts${item.echartMsg.echartId}`" class="echart"></div>
                     </div>
-                    <div v-for="(option, num) in self.third">
-                      <div class="tit2">{{ option.name }}</div>
-                      <div class="txt" v-html="processImageReferences(option.con)"></div>
-                      <div class="table1" v-if="option.tableData">
-                        <el-table size="mini" :data="option.tableData" style="width: 100%">
-                          <el-table-column v-for="column in option.tableColumns" :key="column.prop" :prop="column.prop"
-                            :label="column.label">
-                          </el-table-column>
-                        </el-table>
+                    <!-- 修复二级循环的v-if和v-for问题 -->
+                    <template v-if="item.two && item.two.length > 0">
+                      <div v-for="(self, key) in item.two" :key="key">
+                        <div class="tit2">{{ self.name }}</div>
+                        <div class="txt" v-html="processImageReferences(self.con)"></div>
+                        <div class="table1" v-if="self.tableData">
+                          <el-table size="mini" :data="self.tableData" style="width: 100%">
+                            <el-table-column v-for="column in self.tableColumns" :key="column.prop" :prop="column.prop"
+                              :label="column.label">
+                            </el-table-column>
+                          </el-table>
+                        </div>
+                        <div class="echartBox" v-if="self.seriesData">
+                          <div :id="`echarts${self.echartMsg.echartId}`" class="echart"></div>
+                        </div>
+                        <!-- 修复三级循环的v-if和v-for问题 -->
+                        <template v-if="self.third && self.third.length > 0">
+                          <div v-for="(option, num) in self.third" :key="num">
+                            <div class="tit2">{{ option.name }}</div>
+                            <div class="txt" v-html="processImageReferences(option.con)"></div>
+                            <div class="table1" v-if="option.tableData">
+                              <el-table size="mini" :data="option.tableData" style="width: 100%">
+                                <el-table-column v-for="column in option.tableColumns" :key="column.prop" :prop="column.prop"
+                                  :label="column.label">
+                                </el-table-column>
+                              </el-table>
+                            </div>
+                            <div class="echartBox" v-if="option.seriesData">
+                              <div :id="`echarts${option.echartMsg.echartId}`" class="echart"></div>
+                            </div>
+                          </div>
+                        </template>
                       </div>
-                      <div class="echartBox" v-if="option.seriesData">
-                        <div :id="`echarts${option.echartMsg.echartId}`" class="echart"></div>
-                      </div>
-                    </div>
-
+                    </template>
                   </div>
-                </div>
+                </template>
               </div>
             </div>
           </el-main>

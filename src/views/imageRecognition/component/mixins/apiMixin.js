@@ -17,14 +17,52 @@ const API = {
 };
 
 export default {
+  data() {
+    return {
+      requestAbortController: null,
+      requestTimeout: 30000, // 30秒超时
+      lastRequestData: null,
+    };
+  },
+
   methods: {
+    // 创建带超时的fetch请求
+    fetchWithTimeout(url, options = {}, timeout = this.requestTimeout) {
+      // 创建新的AbortController
+      this.requestAbortController = new AbortController();
+
+      // 设置超时
+      const timeoutId = setTimeout(() => {
+        this.requestAbortController.abort();
+      }, timeout);
+
+      // 合并选项
+      const fetchOptions = {
+        ...options,
+        signal: this.requestAbortController.signal
+      };
+
+      return fetch(url, fetchOptions)
+        .then(response => {
+          clearTimeout(timeoutId);
+          return response;
+        })
+        .catch(error => {
+          clearTimeout(timeoutId);
+
+          if (error.name === 'AbortError') {
+            throw new Error('请求超时，请检查网络连接或稍后重试');
+          }
+          throw error;
+        });
+    },
+
     // 统一API请求方法 - 精简实现
     makeApiRequest(endpoint, formData) {
       this.isLoading = true;
-
       const headers = getToken() ? { 'Authorization': `Bearer ${getToken()}` } : {};
 
-      return fetch(API.getUrl(endpoint), {
+      return this.fetchWithTimeout(API.getUrl(endpoint), {
         method: 'POST',
         body: formData,
         headers
@@ -36,10 +74,90 @@ export default {
       .then(data => this.processApiResponse(data))
       .catch(error => {
         console.error('API请求失败:', error);
-        this.showMessage(error.message || '请求失败，请重试', 'error');
-        this.isLoading = false;
+
+        // 自动处理超时和其他错误
+        this.handleRequestFailure(error);
+
         return Promise.reject(error);
       });
+    },
+
+    // 处理请求失败（包括超时）
+    handleRequestFailure(error) {
+      this.isLoading = false;
+
+      // 启用图片交互功能
+      this.enableImageInteraction();
+
+      if (error.message.includes('请求超时')) {
+        // 设置超时模式但不弹出确认框
+        if (this.setTimeoutMode) {
+          this.setTimeoutMode(true);
+        } else {
+          this.isTimeoutMode = true;
+        }
+        this.showMessage('请求超时，已自动中断。图片可正常查看和操作', 'warning');
+      } else {
+        this.showMessage(error.message || '请求失败，已自动中断', 'error');
+      }
+    },
+
+    // 简化启用图片交互功能
+    enableImageInteraction() {
+      // 确保图片变换状态存在
+      if (!this.imageTransform) {
+        this.imageTransform = {
+          scale: 1,
+          translateX: 0,
+          translateY: 0,
+          minScale: 0.5,
+          maxScale: 5
+        };
+      }
+
+      // 重置拖拽状态
+      if (!this.dragState) {
+        this.dragState = {
+          isDragging: false,
+          wasDragged: false,
+          startX: 0,
+          startY: 0,
+          lastTranslateX: 0,
+          lastTranslateY: 0,
+          distance: 0,
+          threshold: 10,
+          dragStartTime: 0,
+          dragEndTime: 0
+        };
+      }
+
+      // 强制更新视图
+      this.$nextTick(() => {
+        this.$forceUpdate();
+      });
+    },
+
+    // 重试请求（用于手动重试按钮）
+    retryLastRequest() {
+      if (this.setTimeoutMode) {
+        this.setTimeoutMode(false);
+      } else {
+        this.isTimeoutMode = false;
+      }
+
+      if (this.lastRequestData) {
+        const { endpoint, formData } = this.lastRequestData;
+        this.makeApiRequest(endpoint, formData);
+      } else if (this.form_data) {
+        this.uploadImage(this.form_data);
+      } else {
+        this.showMessage('无法重试，请重新上传图片', 'warning');
+      }
+    },
+
+    // 保存请求数据以便重试
+    saveRequestForRetry(endpoint, formData) {
+      this.lastRequestData = { endpoint, formData };
     },
 
     // 处理API响应 - 优化数据提取
@@ -85,44 +203,6 @@ export default {
       }
     },
 
-    // 添加缺失的文件处理和API上传连接方法
-    processWithFileUploadAPI(file) {
-      if (!file) {
-        this.showMessage('无效的文件', 'error');
-        this.isLoading = false;
-        return;
-      }
-
-      // 提取元数据
-      const metadata = {
-        format: file.type || 'application/octet-stream',
-        filename: file.name,
-        isTiff: file.name.match(/\.(tif|tiff)$/i) ? "true" : "false"
-      };
-
-      // 如果是示例图片，添加额外标记
-      if (sessionStorage.getItem("isExampleImage") === "true") {
-        metadata.isExampleImage = "true";
-        metadata.exampleCategory = sessionStorage.getItem("exampleCategory") || "0";
-      }
-
-      // 调用上传图片API
-      this.isLoading = true;
-      this.uploadImage(file, { metadata })
-        .then(success => {
-          if (success) {
-            this.showMessage('图像处理完成', 'success');
-          }
-        })
-        .catch(error => {
-          console.error('图像处理失败:', error);
-          this.showMessage('图像处理失败，请重试', 'error');
-        })
-        .finally(() => {
-          this.isLoading = false;
-        });
-    },
-
     // 处理图片上传 - 简化参数处理
     uploadImage(file, options = {}) {
       if (!file) {
@@ -140,7 +220,11 @@ export default {
         });
       }
 
-      return this.makeApiRequest(options.useUrlApi ? 'URL' : 'FILE', formData);
+      const endpoint = options.useUrlApi ? 'URL' : 'FILE';
+      // 保存请求数据以便重试
+      this.saveRequestForRetry(endpoint, formData);
+
+      return this.makeApiRequest(endpoint, formData);
     },
 
     // 获取统计数据 - 统一路径
@@ -156,6 +240,7 @@ export default {
         const formattedUrl = tiffUrl.replace(/\/images\/(\d+)\/(\w+)\/(.+)/, '$1\\$2\\$3');
         formData.append("image", formattedUrl);
 
+        this.saveRequestForRetry('URL', formData);
         this.makeApiRequest('URL', formData);
       } else if (this.form_data) {
         // 使用文件API
@@ -165,67 +250,7 @@ export default {
       }
     },
 
-    // 文件上传处理 - 重构为更简洁的实现
-    uploadFileToServer(file) {
-      // 保存引用
-      this.form_data = file;
-
-      // 检测文件类型
-      const isTiff = file.name.match(/\.(tif|tiff)$/i) ||
-                    ['image/tiff', 'image/tif'].includes(file.type);
-
-      // 创建预览
-      this.createImagePreview(file, isTiff)
-        .then(previewUrl => {
-          this.image_src = previewUrl;
-
-          // 设置元数据并上传
-          const metadata = {
-            format: file.type || 'application/octet-stream',
-            filename: file.name,
-            isTiff: isTiff ? "true" : "false"
-          };
-
-          return this.uploadImage(file, { metadata });
-        })
-        .catch(error => {
-          console.error('处理图片预览失败:', error);
-          this.showMessage('无法创建预览，但将继续上传', 'warning');
-          return this.uploadImage(file);
-        });
-    },
-
-    // 创建图片预览 - 简化逻辑
-    createImagePreview(file, isTiff = false) {
-      if (isTiff) {
-        return this.createTiffPreview(file);
-      } else {
-        return this.createStandardPreview(file);
-      }
-    },
-
-    // 分离TIFF和标准预览处理
-    createTiffPreview(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = e => this.processTiffArrayBuffer?.(e.target.result)
-                                .then(resolve)
-                                .catch(reject);
-        reader.onerror = reject;
-        reader.readAsArrayBuffer(file);
-      });
-    },
-
-    createStandardPreview(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = e => resolve(e.target.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    },
-
-    // 更新数据字段 - 使用简化的映射
+    // 简化数据字段更新
     updateDataFields(data) {
       const fieldMap = [
         ['coordinates', 0],
@@ -239,7 +264,6 @@ export default {
         ['category', 8]
       ];
 
-      // 更新值
       fieldMap.forEach(([key, index, formatter]) => {
         if (data[key] !== undefined) {
           this.dataFields[index].value = formatter ? formatter(data[key]) : data[key];
@@ -254,11 +278,15 @@ export default {
 
     // 重置数据字段
     resetDataFields() {
-      if (this.dataFields) {
-        this.dataFields.forEach(field => {
-          field.value = '';
-        });
-      }
+      this.dataFields?.forEach(field => field.value = '');
+    }
+  },
+
+  beforeDestroy() {
+    // 清理请求控制器
+    if (this.requestAbortController) {
+      this.requestAbortController.abort();
+      this.requestAbortController = null;
     }
   }
 }

@@ -47,30 +47,37 @@ export default {
       showNotification && this.showMessage("图片已重置", "success");
     },
 
-    // 加载示例图片 - 简化处理流程
+    // 添加文件上传API处理方法
+    processWithFileUploadAPI(file) {
+      if (!file) {
+        this.isLoading = false;
+        return Promise.resolve();
+      }
+
+      return this.uploadImage(file).catch(error => {
+        console.error('文件上传API处理失败:', error);
+        this.isLoading = false;
+        return Promise.reject(error);
+      });
+    },
+
+    // 简化示例图片加载
     loadExampleImage(item) {
-      // 重置并准备状态
       this.image_src && this.resetImage(false);
       this.isLoading = true;
       this.showMessage("正在加载图片...", "info");
 
-      // 获取文件信息
-      const isTiff = this.isTiffImage(item.fileName || '');
+      const isTiff = this.isTiffImage?.(item.fileName || '') || item.isTiff;
       const fileType = item.fileType || (isTiff ? 'image/tiff' : 'image/jpeg');
       const fileName = item.fileName || `example-${Date.now()}${this.getExtensionFromMimeType(fileType)}`;
 
-      // 会话存储
-      const sessionData = {
+      // 批量设置会话存储
+      Object.entries({
         "originalFormat": fileType,
         "originalFileName": fileName,
         "isExampleImage": "true",
         "exampleCategory": item.categoryId || "0"
-      };
-
-      // 批量设置会话存储
-      Object.entries(sessionData).forEach(([key, value]) => {
-        sessionStorage.setItem(key, value);
-      });
+      }).forEach(([key, value]) => sessionStorage.setItem(key, value));
 
       // 重置图片变换
       this.resetImageTransform?.();
@@ -102,13 +109,7 @@ export default {
             return this.processTiffArrayBuffer(arrayBuffer)
               .then(dataUrl => {
                 this.image_src = dataUrl;
-                // 确保processWithFileUploadAPI存在再调用
-                if (typeof this.processWithFileUploadAPI === 'function') {
-                  this.processWithFileUploadAPI(originalFile);
-                } else {
-                  console.error("processWithFileUploadAPI方法未定义");
-                  this.isLoading = false;
-                }
+                return this.processWithFileUploadAPI(originalFile);
               });
           })
           .catch(this.handleImageError);
@@ -121,19 +122,13 @@ export default {
             const imageFile = new File([blob], fileName, { type: fileType });
             this.form_data = imageFile;
 
-            // 确保processWithFileUploadAPI存在再调用
-            if (typeof this.processWithFileUploadAPI === 'function') {
-              this.processWithFileUploadAPI(imageFile);
-            } else {
-              console.error("processWithFileUploadAPI方法未定义");
-              this.isLoading = false;
-            }
+            return this.processWithFileUploadAPI(imageFile);
           })
           .catch(this.handleImageError);
       }
     },
 
-    // 统一错误处理
+    // 简化错误处理
     handleImageError(error) {
       console.error('处理图片失败:', error);
       this.showMessage('无法处理图片: ' + error.message, 'error');
@@ -237,14 +232,15 @@ export default {
              (header[0] === 77 && header[1] === 77 && header[2] === 0 && header[3] === 42);
     },
 
-    // 其他辅助方法
+    // 简化辅助方法
     getExtensionFromMimeType(mimeType) {
-      return {
+      const extensions = {
         'image/jpeg': '.jpg',
         'image/png': '.png',
         'image/tiff': '.tif',
         'image/tif': '.tif'
-      }[mimeType] || '.jpg';
+      };
+      return extensions[mimeType] || '.jpg';
     },
 
     showMessage(message, type) {
@@ -257,20 +253,6 @@ export default {
       if (this.form_data || sessionStorage.getItem("url")) return true;
       this.showMessage("请先上传图片", "warning");
       return false;
-    },
-
-    // 更新加载状态
-    updateLoadingState() {
-      if (this.$el && typeof this.$el.querySelector === 'function') {
-        const centerPic = this.$el.querySelector('.center-pic');
-        if (centerPic) {
-          if (this.isLoading) {
-            centerPic.setAttribute('loading', 'true');
-          } else {
-            centerPic.removeAttribute('loading');
-          }
-        }
-      }
     },
 
     // 图片加载完成后的处理函数
@@ -328,6 +310,6 @@ export default {
       // 重置平移状态，确保图片居中显示
       this.imageTransform.translateX = 0;
       this.imageTransform.translateY = 0;
-    }
+    },
   }
 }

@@ -1,15 +1,22 @@
 <template>
   <div class="home-button">
-    <el-button
+    <!-- <el-button
       title="上传数据"
       icon="el-icon-upload"
       circle
-    ></el-button>
+    ></el-button> -->
     <el-button
       title="回到顶部"
       icon="el-icon-caret-top"
       circle
       @click="scrollToTop"
+    ></el-button>
+    <!-- 到底部 -->
+    <el-button
+      title="回到底部"
+      icon="el-icon-caret-bottom"
+      circle
+      @click="scrollToBottom"
     ></el-button>
   </div>
 </template>
@@ -21,6 +28,13 @@ export default {
       // 使用原生的scrollTo方法将页面滚动到顶部
       window.scrollTo({
         top: 0,
+        behavior: "smooth", // 平滑滚动
+      });
+    },
+    scrollToBottom() {
+      // 使用原生的scrollTo方法将页面滚动到底部
+      window.scrollTo({
+        top: document.body.scrollHeight,
         behavior: "smooth", // 平滑滚动
       });
     },

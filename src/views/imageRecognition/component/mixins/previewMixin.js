@@ -5,14 +5,12 @@ import { getImagesByCategory } from '../config/preloadImages';
 import Tiff from "tiff.js";
 
 export default {
-  data() {
-    return {
-      previewCache: new Map(),  // 缓存已生成的预览
-      categoryImages: {},       // 分类图片集合
-      allImages: [],            // 所有图片
-      processingPreviews: new Set(), // 正在处理的预览
-    };
-  },
+  data: () => ({
+    previewCache: new Map(),
+    categoryImages: {},
+    allImages: [],
+    processingPreviews: new Set(),
+  }),
 
   methods: {
     // 获取图片预览URL - 缓存优化
@@ -97,17 +95,11 @@ export default {
       }
     },
 
-    // 获取TIFF画布的不同方法
+    // 简化获取Canvas方法
     getTiffCanvas(tiff) {
-      if (typeof tiff.toCanvas === 'function') {
-        return tiff.toCanvas();
-      }
-
-      if (typeof tiff.getCanvas === 'function') {
-        return tiff.getCanvas();
-      }
-
-      return this.createManualTiffCanvas(tiff, tiff.width(), tiff.height());
+      return tiff.toCanvas?.() ||
+             tiff.getCanvas?.() ||
+             this.createManualTiffCanvas(tiff, tiff.width(), tiff.height());
     },
 
     // TIFF格式检测 - 简化版
@@ -291,7 +283,7 @@ export default {
     // 重构加载示例图片方法，完全避免递归和事件循环
     loadExampleImage(item) {
       // 使用更安全的方法检测是否为直接调用
-      if (this.$options && this.$options.name === 'ImageContent') {
+      if (this.$options?.name === 'ImageContent') {
         // 如果是由ImageContent组件直接调用，则执行图片加载逻辑
         if (typeof this.doLoadExampleImage === 'function') {
           this.doLoadExampleImage(item);

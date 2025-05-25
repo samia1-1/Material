@@ -3,14 +3,12 @@
  */
 
 export default {
-  data() {
-    return {
-      // 上次上传时间戳 - 防止重复触发
-      lastUploadTime: 0,
-      // 全局事件注册标记
-      hasGlobalListeners: false
-    };
-  },
+  data: () => ({
+    // 上次上传时间戳 - 防止重复触发
+    lastUploadTime: 0,
+    // 全局事件注册标记
+    hasGlobalListeners: false
+  }),
 
   mounted() {
     // 绑定全局事件处理函数
@@ -33,14 +31,11 @@ export default {
   },
 
   methods: {
-    // 操作按钮处理 - 统一检查与函数调用
+    // 简化操作按钮处理
     handleDisplay() {
       if (!this.checkBeforeImageOperation()) return;
-
       this.isShowStatistic = !this.isShowStatistic;
       this.showMessage(this.isShowStatistic ? "显示分析数据" : "隐藏分析数据", "info");
-
-      // 首次显示时自动获取数据
       if (this.isShowStatistic && !this.statisticData) {
         this.getStatistic();
       }
@@ -48,10 +43,8 @@ export default {
 
     handleSegmentation() {
       if (!this.checkBeforeImageOperation()) return;
-
       this.isLoading = true;
       this.showMessage("开始图像分割处理...", "info");
-
       const useTiffUrl = !this.form_data && sessionStorage.getItem("url") !== null;
       this.clickStatistic?.(useTiffUrl);
     },
@@ -61,7 +54,7 @@ export default {
       this.showMessage("降维处理功能正在开发中", "info");
     },
 
-    // 缩放控制 - 简化实现
+    // 简化缩放控制
     handleZoomIn() {
       if (!this.image_src) return;
       const { scale, maxScale } = this.imageTransform;
@@ -74,29 +67,26 @@ export default {
       this.imageTransform.scale = Math.max(scale / 1.2, minScale);
     },
 
-    // 鼠标滚轮缩放 - 优化实现
     handleWheel(event) {
       if (!this.image_src) return;
       event.preventDefault();
 
       const direction = event.deltaY > 0 ? -1 : 1;
       const { scale, minScale, maxScale } = this.imageTransform;
-      const zoomFactor = 0.1;
-      const newScale = scale * (1 + direction * zoomFactor);
+      const newScale = scale * (1 + direction * 0.1);
 
       if (newScale >= minScale && newScale <= maxScale) {
         this.imageTransform.scale = newScale;
       }
     },
 
-    // 拖拽处理
+    // 简化拖拽处理
     startDrag(event) {
       if (!this.image_src || event.button !== 0) return;
 
       event.preventDefault();
       event.stopPropagation();
 
-      // 设置状态
       Object.assign(this.dragState, {
         isDragging: true,
         wasDragged: false,

@@ -3,17 +3,15 @@
  */
 
 export default {
-  data() {
-    return {
-      isDragOver: false,
-      lastUploadTime: 0,
-      validImageTypes: ['image/jpeg', 'image/png', 'image/tiff', 'image/tif'],
-      maxFileSize: 10 * 1024 * 1024, // 10MB
-      originalFileFormat: null,
-      originalFileName: null,
-      detectedFormat: null,
-    };
-  },
+  data: () => ({
+    isDragOver: false,
+    lastUploadTime: 0,
+    validImageTypes: ['image/jpeg', 'image/png', 'image/tiff', 'image/tif'],
+    maxFileSize: 10 * 1024 * 1024, // 10MB
+    originalFileFormat: null,
+    originalFileName: null,
+    detectedFormat: null,
+  }),
 
   methods: {
     // 触发文件选择对话框 - 防抖处理
@@ -32,7 +30,7 @@ export default {
       event.target.value = ''; // 重置，允许上传相同文件
     },
 
-    // 拖放事件处理 - 合并相关逻辑
+    // 合并拖放事件处理
     handleDrop(event) {
       this.isDragOver = false;
       event.preventDefault();
@@ -51,7 +49,7 @@ export default {
       this.isDragOver = false;
     },
 
-    // 处理上传的文件 - 简化流程
+    // 简化处理流程
     processUploadedFile(file) {
       // 验证文件基本属性
       if (!this.validateFile(file)) return;
@@ -60,15 +58,11 @@ export default {
       this.originalFileFormat = file.type;
       this.originalFileName = file.name;
 
-      // 存储会话数据
-      const sessionData = {
+      // 批量设置会话存储
+      Object.entries({
         "originalFormat": this.originalFileFormat,
         "originalFileName": this.originalFileName
-      };
-
-      Object.entries(sessionData).forEach(([key, value]) => {
-        sessionStorage.setItem(key, value);
-      });
+      }).forEach(([key, value]) => sessionStorage.setItem(key, value));
 
       // 验证文件内容并上传
       this.validateFileContent(file)
@@ -102,16 +96,14 @@ export default {
       return true;
     },
 
-    // 深度验证文件内容 - 优化实现
+    // 简化文件内容验证
     validateFileContent(file) {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         // 创建文件读取器
         const reader = new FileReader();
 
         reader.onloadend = (e) => {
-          if (!e.target?.result) {
-            return resolve(false);
-          }
+          if (!e.target?.result) return resolve(false);
 
           try {
             // 读取文件头部以验证真实格式
@@ -146,7 +138,7 @@ export default {
           }
         };
 
-        reader.onerror = () => reject(new Error('无法读取文件'));
+        reader.onerror = () => resolve(false);
         reader.readAsArrayBuffer(file.slice(0, 50));
       });
     },
