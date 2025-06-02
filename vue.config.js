@@ -33,8 +33,7 @@ module.exports = {
     // 原地址：124.221.104.7
     proxy: {
       [process.env.VUE_APP_BASE_API]: {
-        // target: `http://146.56.214.208:8100`,
-        target: `http://218.199.69.65:8100`,
+        target: `http://146.56.214.208:8100`,
         changeOrigin: true,
         pathRewrite: {
           ['^' + process.env.VUE_APP_BASE_API]: ''
