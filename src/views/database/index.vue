@@ -5,71 +5,199 @@
       <el-container style="height:88vh">
         <el-aside width="240px">
           <div class="search_box">
-            <el-button type="primary" @click="asJson">导入表格数据</el-button>
-            <el-button type="success" @click="showFolderUpload" icon="el-icon-folder-opened">上传文件夹</el-button>
             <el-input placeholder="请输入合金名称" v-model="searchValue" size="mini">
               <el-button slot="append" @click="searchFun" icon="el-icon-search"></el-button>
               <el-button slot="append" @click="searchMoreFun" icon="el-icon-menu"></el-button>
             </el-input>
+            <div style="margin-top: 10px;">
+              <el-button size="mini" type="primary" @click="showFolderUpload">
+                <i class="el-icon-upload"></i> 上传文件夹
+              </el-button>
+            </div>
           </div>
+
           <el-menu :default-active="defaultActive" :unique-opened="true">
-            <el-submenu :index="item.index" v-for="(item, index) in menuData" :key="index">
+            <el-submenu :index="item.index" v-for="(item,index) in menuData" :key="index">
               <template slot="title">{{ item.name }}</template>
-              <el-menu-item @click="changeFun(item.name, self)" v-for="(self, key) in item.list" :key="key" :index="self.index">
-                {{ self.name }}
-              </el-menu-item>
+              <el-menu-item @click="changeFun(item.name,self)" v-for="(self,key) in item.list" :key="key" :index="self.index">{{self.name }}</el-menu-item>
             </el-submenu>
           </el-menu>
         </el-aside>
+
         <el-container>
           <el-main>
             <el-breadcrumb separator-class="el-icon-arrow-right">
-              <el-breadcrumb-item>{{ name1 }}</el-breadcrumb-item>
-              <el-breadcrumb-item>{{ name2 }}</el-breadcrumb-item>
+              <el-breadcrumb-item>{{materialType}}</el-breadcrumb-item>
+              <el-breadcrumb-item>{{ materialName }}</el-breadcrumb-item>
             </el-breadcrumb>
+
             <div class="content">
               <el-tabs v-model="activeName" @tab-click="tabClick" type="card">
-                <el-tab-pane v-for="(tab, index) in tabs" :key="index" :label="tab.label" :name="index.toString()"></el-tab-pane>
+                <el-tab-pane v-for="(tab, index) in tabs" :key="index" :label="tab.label" :name="index.toString()">
+                </el-tab-pane>
               </el-tabs>
+
               <div class="nr">
-                <template v-if="introduce.length > 0">
-                  <div v-for="(item, index) in introduce" :key="index">
-                    <div class="tit1">{{ item.name }}</div>
-                    <div class="txt" v-html="processImageReferences(item.con)"></div>
-                    <el-table v-if="item.tableData" size="mini" :data="item.tableData" style="width: 100%" class="table1">
-                      <el-table-column v-for="column in item.tableColumns" :key="column.prop" :prop="column.prop" :label="column.label"></el-table-column>
+                <div v-if="introduce.length > 0" v-for="(item, index) in introduce" :key="index">
+                  <!-- 一级标题和内容 -->
+                  <div class="tit1" v-if="item.name && item.name.trim()">{{item.name}}</div>
+                  <div class="txt" v-html="processImageReferences(item.con)"></div>
+
+                  <!-- 一级表格 -->
+                  <div class="table1" v-if="item.tableData && item.tableData.length > 0">
+                    <el-table size="mini" :data="item.tableData" style="width: 100%">
+                      <el-table-column
+                        v-for="column in item.tableColumns"
+                        :key="column.prop"
+                        :prop="column.prop"
+                        :label="column.label">
+                      </el-table-column>
                     </el-table>
-                    <div v-if="item.seriesData" class="echartBox">
-                      <div :id="`echarts${item.echartMsg.echartId}`" class="echart"></div>
-                    </div>
-                    <!-- 处理二级数据 -->
-                    <template v-if="item.two && item.two.length > 0">
-                      <div v-for="(subItem, key) in item.two" :key="key">
-                        <div class="tit2">{{ subItem.name }}</div>
-                        <div class="txt" v-html="processImageReferences(subItem.con)"></div>
-                        <el-table v-if="subItem.tableData" size="mini" :data="subItem.tableData" style="width: 100%" class="table1">
-                          <el-table-column v-for="column in subItem.tableColumns" :key="column.prop" :prop="column.prop" :label="column.label"></el-table-column>
-                        </el-table>
-                        <div v-if="subItem.seriesData" class="echartBox">
-                          <div :id="`echarts${subItem.echartMsg.echartId}`" class="echart"></div>
-                        </div>
-                        <!-- 处理三级数据 -->
-                        <template v-if="subItem.third && subItem.third.length > 0">
-                          <div v-for="(thirdItem, num) in subItem.third" :key="num">
-                            <div class="tit2">{{ thirdItem.name }}</div>
-                            <div class="txt" v-html="processImageReferences(thirdItem.con)"></div>
-                            <el-table v-if="thirdItem.tableData" size="mini" :data="thirdItem.tableData" style="width: 100%" class="table1">
-                              <el-table-column v-for="column in thirdItem.tableColumns" :key="column.prop" :prop="column.prop" :label="column.label"></el-table-column>
-                            </el-table>
-                            <div v-if="thirdItem.seriesData" class="echartBox">
-                              <div :id="`echarts${thirdItem.echartMsg.echartId}`" class="echart"></div>
-                            </div>
-                          </div>
-                        </template>
-                      </div>
-                    </template>
                   </div>
-                </template>
+
+                  <!-- 一级图表 -->
+                  <div class="echartBox" v-if="item.seriesData && item.seriesData.length > 0">
+                    <div :id="`echarts${item.echartMsg.echartId}`" class="echart"></div>
+                  </div>
+
+                  <!-- 二级数据 -->
+                  <div v-if="item.two && item.two.length > 0" v-for="(secondItem, secondIndex) in item.two" :key="secondIndex" class="sub-section">
+                    <div class="tit2" v-if="secondItem.name && secondItem.name.trim()">{{secondItem.name}}</div>
+                    <div class="txt" v-html="processImageReferences(secondItem.con)"></div>
+
+                    <!-- 二级表格 -->
+                    <div class="table1" v-if="secondItem.tableData && secondItem.tableData.length > 0">
+                      <el-table size="mini" :data="secondItem.tableData" style="width: 100%">
+                        <el-table-column
+                          v-for="column in secondItem.tableColumns"
+                          :key="column.prop"
+                          :prop="column.prop"
+                          :label="column.label">
+                        </el-table-column>
+                      </el-table>
+                    </div>
+
+                    <!-- 二级图表 -->
+                    <div class="echartBox" v-if="secondItem.seriesData && secondItem.seriesData.length > 0">
+                      <div :id="`echarts${secondItem.echartMsg.echartId}`" class="echart"></div>
+                    </div>
+
+                    <!-- 三级数据（在二级下） -->
+                    <div v-if="secondItem.third && secondItem.third.length > 0" v-for="(thirdItem, thirdIndex) in secondItem.third" :key="thirdIndex" class="sub-sub-section">
+                      <div class="tit3" v-if="thirdItem.name && thirdItem.name.trim()">{{thirdItem.name}}</div>
+                      <div class="txt" v-html="processImageReferences(thirdItem.con)"></div>
+
+                      <!-- 三级表格 -->
+                      <div class="table1" v-if="thirdItem.tableData && thirdItem.tableData.length > 0">
+                        <el-table size="mini" :data="thirdItem.tableData" style="width: 100%">
+                          <el-table-column
+                            v-for="column in thirdItem.tableColumns"
+                            :key="column.prop"
+                            :prop="column.prop"
+                            :label="column.label">
+                          </el-table-column>
+                        </el-table>
+                      </div>
+
+                      <!-- 三级图表 -->
+                      <div class="echartBox" v-if="thirdItem.seriesData && thirdItem.seriesData.length > 0">
+                        <div :id="`echarts${thirdItem.echartMsg.echartId}`" class="echart"></div>
+                      </div>
+
+                      <!-- 四级数据（在三级下） -->
+                      <div v-if="thirdItem.fourth && thirdItem.fourth.length > 0" v-for="(fourthItem, fourthIndex) in thirdItem.fourth" :key="fourthIndex" class="sub-sub-sub-section">
+                        <div class="tit4" v-if="fourthItem.name && fourthItem.name.trim()">{{fourthItem.name}}</div>
+                        <div class="txt" v-html="processImageReferences(fourthItem.con)"></div>
+
+                        <!-- 四级表格 -->
+                        <div class="table1" v-if="fourthItem.tableData && fourthItem.tableData.length > 0">
+                          <el-table size="mini" :data="fourthItem.tableData" style="width: 100%">
+                            <el-table-column
+                              v-for="column in fourthItem.tableColumns"
+                              :key="column.prop"
+                              :prop="column.prop"
+                              :label="column.label">
+                            </el-table-column>
+                          </el-table>
+                        </div>
+
+                        <!-- 四级图表 -->
+                        <div class="echartBox" v-if="fourthItem.seriesData && fourthItem.seriesData.length > 0">
+                          <div :id="`echarts${fourthItem.echartMsg.echartId}`" class="echart"></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- 四级数据（直接在二级下） -->
+                    <div v-if="secondItem.fourth && secondItem.fourth.length > 0" v-for="(fourthItem, fourthIndex) in secondItem.fourth" :key="`second-fourth-${fourthIndex}`" class="sub-sub-section">
+                      <div class="tit3" v-if="fourthItem.name && fourthItem.name.trim()">{{fourthItem.name}}</div>
+                      <div class="txt" v-html="processImageReferences(fourthItem.con)"></div>
+
+                      <!-- 四级表格 -->
+                      <div class="table1" v-if="fourthItem.tableData && fourthItem.tableData.length > 0">
+                        <el-table size="mini" :data="fourthItem.tableData" style="width: 100%">
+                          <el-table-column
+                            v-for="column in fourthItem.tableColumns"
+                            :key="column.prop"
+                            :prop="column.prop"
+                            :label="column.label">
+                        </el-table-column>
+                        </el-table>
+                      </div>
+
+                      <!-- 四级图表 -->
+                      <div class="echartBox" v-if="fourthItem.seriesData && fourthItem.seriesData.length > 0">
+                        <div :id="`echarts${fourthItem.echartMsg.echartId}`" class="echart"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 三级数据（直接在一级下） -->
+                  <div v-if="item.third && item.third.length > 0" v-for="(thirdItem, thirdIndex) in item.third" :key="`first-third-${thirdIndex}`" class="sub-section">
+                    <div class="tit2" v-if="thirdItem.name && thirdItem.name.trim()">{{thirdItem.name}}</div>
+                    <div class="txt" v-html="processImageReferences(thirdItem.con)"></div>
+
+                    <!-- 三级表格 -->
+                    <div class="table1" v-if="thirdItem.tableData && thirdItem.tableData.length > 0">
+                      <el-table size="mini" :data="thirdItem.tableData" style="width: 100%">
+                        <el-table-column
+                          v-for="column in thirdItem.tableColumns"
+                          :key="column.prop"
+                          :prop="column.prop"
+                          :label="column.label">
+                        </el-table-column>
+                      </el-table>
+                    </div>
+
+                    <!-- 三级图表 -->
+                    <div class="echartBox" v-if="thirdItem.seriesData && thirdItem.seriesData.length > 0">
+                      <div :id="`echarts${thirdItem.echartMsg.echartId}`" class="echart"></div>
+                    </div>
+
+                    <!-- 四级数据（在直接三级下） -->
+                    <div v-if="thirdItem.fourth && thirdItem.fourth.length > 0" v-for="(fourthItem, fourthIndex) in thirdItem.fourth" :key="`first-third-fourth-${fourthIndex}`" class="sub-sub-section">
+                      <div class="tit3" v-if="fourthItem.name && fourthItem.name.trim()">{{fourthItem.name}}</div>
+                      <div class="txt" v-html="processImageReferences(fourthItem.con)"></div>
+
+                      <!-- 四级表格 -->
+                      <div class="table1" v-if="fourthItem.tableData && fourthItem.tableData.length > 0">
+                        <el-table size="mini" :data="fourthItem.tableData" style="width: 100%">
+                          <el-table-column
+                            v-for="column in fourthItem.tableColumns"
+                            :key="column.prop"
+                            :prop="column.prop"
+                            :label="column.label">
+                          </el-table-column>
+                        </el-table>
+                      </div>
+
+                      <!-- 四级图表 -->
+                      <div class="echartBox" v-if="fourthItem.seriesData && fourthItem.seriesData.length > 0">
+                        <div :id="`echarts${fourthItem.echartMsg.echartId}`" class="echart"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </el-main>
@@ -111,38 +239,61 @@
     <el-dialog title="上传材料数据文件夹" :visible.sync="folderUploadVisible" width="600px" :close-on-click-modal="false">
       <div class="folder-upload-container">
         <div class="upload-area"
-             @dragover.prevent
+             :class="{ dragover: isDragOver }"
+             @dragover.prevent="isDragOver = true"
+             @dragleave.prevent="isDragOver = false"
              @drop="handleFolderDrop"
-             @click="triggerFolderSelect"
-             :class="{ 'dragover': isDragOver }"
-             @dragenter="isDragOver = true"
-             @dragleave="isDragOver = false">
-          <i class="el-icon-folder-add" style="font-size: 48px; color: #409EFF;"></i>
-          <p>点击选择文件夹或拖拽文件夹到此处</p>
-          <p class="upload-tip">支持包含 JSON、Excel 文件的材料数据文件夹</p>
+             @click="triggerFolderSelect">
+          <i class="el-icon-upload"></i>
+          <div class="upload-text">
+            <p>点击选择文件夹或拖拽文件夹到此处</p>
+            <p class="upload-tip">支持 JSON 和 Excel 文件，将处理文件夹中的所有材料</p>
+          </div>
         </div>
 
         <input ref="folderInput" type="file" webkitdirectory directory multiple style="display: none;" @change="handleFolderSelect" />
 
         <div v-if="uploadedFiles.length > 0" class="file-list">
-          <h4>已选择的文件:</h4>
-          <div class="file-item" v-for="file in uploadedFiles" :key="file.name">
-            <i :class="getFileIcon(file.name)"></i>
-            <span class="file-name">{{ file.name }}</span>
-            <span class="file-size">({{ formatFileSize(file.size) }})</span>
+          <h4>已选择的文件 ({{ uploadedFiles.length }} 个):</h4>
+
+          <!-- 显示检测到的材料列表 -->
+          <div v-if="detectedMaterials.length > 0" class="materials-display">
+            <div class="materials-info">
+              <i class="el-icon-info"></i>
+              <span class="materials-label">检测到的材料:</span>
+              <div class="materials-list">
+                <span v-for="material in detectedMaterials" :key="material" class="material-tag">
+                  {{ material }}
+                </span>
+              </div>
+            </div>
           </div>
 
-          <div class="material-code-input" style="margin-top: 20px;">
-            <label>材料编号:</label>
-            <el-input v-model="materialCodeFromFolder" placeholder="例如: GH1139" style="width: 200px; margin-left: 10px;"></el-input>
+          <!-- 如果没有检测到任何材料，显示警告 -->
+          <div v-else class="materials-warning">
+            <div class="warning-info">
+              <i class="el-icon-warning"></i>
+              <span class="warning-text">未能检测到标准的材料编号格式，将处理所有文件</span>
+            </div>
+          </div>
+
+          <div style="max-height: 200px; overflow-y: auto; margin-top: 10px;">
+            <div v-for="file in uploadedFiles.slice(0, 10)" :key="file.name" class="file-item">
+              <i :class="getFileIcon(file.name)"></i>
+              <span class="file-name">{{ file.name }}</span>
+              <span class="file-size">{{ formatFileSize(file.size) }}</span>
+            </div>
+            <div v-if="uploadedFiles.length > 10" class="file-item">
+              <span style="color: #999;">... 还有 {{ uploadedFiles.length - 10 }} 个文件</span>
+            </div>
           </div>
         </div>
       </div>
 
       <div slot="footer" class="dialog-footer">
         <el-button @click="folderUploadVisible = false">取消</el-button>
-        <el-button type="primary" @click="processUploadedFolder" :disabled="uploadedFiles.length === 0 || !materialCodeFromFolder">
-          开始处理
+        <el-button type="primary" @click="processUploadedFolder" :disabled="uploadedFiles.length === 0">
+          处理文件夹 ({{ detectedMaterials.length || '所有' }} 个材料)
         </el-button>
       </div>
     </el-dialog>
@@ -160,9 +311,7 @@ export default {
   components: { smallNav },
 
   created() {
-    this.getMsg(`${baseUrl}/json/GH1015.json`);
-    this.getMenu();
-    this.initProcessors();
+    this.initApp();
   },
 
   data() {
@@ -172,8 +321,8 @@ export default {
       tableList: [],
       tableData: [],
       jsonData: [],
-      name1: "固溶强化型变形高温合金",
-      name2: "GH1015",
+      materialType: "固溶强化型变形高温合金",
+      materialName: "GH1015",
       defaultActive: "1-1",
       activeName: "0",
       introduce: [],
@@ -201,9 +350,9 @@ export default {
       ],
 
       tableColumns: [
-        { prop: "name", label: "材料牌号", width: "180" },
-        { prop: "name", label: "材料类型", width: "180" },
-        { prop: "address", label: "材料概述" }
+        { prop: "materialCode", label: "材料牌号", width: "180" },
+        { prop: "materialType", label: "材料类型", width: "180" },
+        { prop: "materialDesc", label: "材料概述" }
       ],
 
       filterFields: [
@@ -248,13 +397,28 @@ export default {
       // 文件夹上传相关
       folderUploadVisible: false,
       uploadedFiles: [],
-      materialCodeFromFolder: '',
+      detectedMaterials: [],
       isDragOver: false,
     };
   },
 
   methods: {
-    // 搜索相关
+    // 应用初始化
+    async initApp() {
+      this.initProcessors();
+      await Promise.all([
+        this.getMsg(`${baseUrl}/json/GH1015.json`),
+        this.getMenu()
+      ]);
+    },
+
+    initProcessors() {
+      this.dataProcessor = new DataProcessor(baseUrl);
+      this.fileUploadProcessor = new FileUploadProcessor(baseUrl);
+      this.networkDataProcessor = new NetworkDataProcessor(baseUrl);
+    },
+
+    // 搜索和筛选逻辑
     searchFun() {
       if (!this.searchValue) return;
       this.menuData.some(item => item.list.some(self => {
@@ -301,7 +465,7 @@ export default {
       [this.form.regionVal1, this.form.regionVal2] = this.form.region;
     },
 
-    // 页面切换
+    // 页面切换和数据处理
     tabClick() {
       const tabKey = this.tabs[this.activeName]?.key;
       if (tabKey && this.jsonData[tabKey]) {
@@ -310,14 +474,16 @@ export default {
       }
     },
 
-    changeFun(name, data) {
+    changeFun(categoryName, data) {
       this.activeName = "0";
-      [this.name1, this.name2] = [name, data.name];
+      this.materialType = categoryName;
+      this.materialName = data.name;
       this.currentMaterialCode = data.name;
       this.defaultActive = data.index;
       this.getMsg(`${baseUrl}/json/${data.name}.json`);
     },
 
+    // 补充完整的processImageReferences方法
     processImageReferences(text) {
       if (!text) return '';
       let processedText = text.replace(/@@/g, "\n");
@@ -355,6 +521,7 @@ export default {
       return processedText;
     },
 
+    // 补充完整的preloadMicrostructureImages方法
     preloadMicrostructureImages(microstructures) {
       if (!Array.isArray(microstructures)) return;
       const processItem = (item) => {
@@ -372,523 +539,395 @@ export default {
         }
         if (item?.two) item.two.forEach(processItem);
         if (item?.third) item.third.forEach(processItem);
+        if (item?.fourth) item.fourth.forEach(processItem);
       };
       microstructures.forEach(processItem);
     },
 
-    getMsg(getJsonUrl) {
-      getJson(getJsonUrl).then(data => {
-        this.jsonData = data;
-        this.introduce = data.introduce || [];
+    // 补充完整的processItems方法
+    processItems(items) {
+      if (!items || !Array.isArray(items)) return;
 
-        // 预加载图片
-        if (data.microstructures) {
-          this.preloadMicrostructureImages(data.microstructures);
-        }
-
-        // 确保数据结构完整
-        this.jsonData = this.dataProcessor?.ensureRenderingCompatibility(this.jsonData) || this.jsonData;
-
-        this.drawFun();
-      }).catch(error => {
-        console.error('获取数据失败:', error);
-        this.$message.error('获取材料数据失败');
-      });
-    },
-
-    getMenu() {
-      getJson(`${baseUrl}/json/menu.json`).then(data => {
-        this.menuData = data.menu;
-        this.tableList = data.menu.flatMap(item => item.list);
-      });
-    },
-
-    drawFun() {
-      this.$nextTick(() => {
-        const processItems = (items) => {
-          if (!items || !Array.isArray(items)) return;
-
-          items.forEach(item => {
-            // 处理当前级别的图表
-            if (item.seriesData && item.echartMsg && item.echartMsg.echartId) {
-              const chartElement = document.getElementById("echarts" + item.echartMsg.echartId);
-              if (chartElement) {
-                // 确保容器已经在DOM中
-                setTimeout(() => {
-                  const chartObj = this.$echarts.init(chartElement);
-                  this.initChart1(chartObj, item.xAxisData, item.seriesData, item.echartMsg);
-                }, 100);
+      const processItem = (item) => {
+        // 处理图表渲染
+        if (item.seriesData && item.echartMsg && item.echartMsg.echartId) {
+          this.$nextTick(() => {
+            const chartElement = document.getElementById(`echarts${item.echartMsg.echartId}`);
+            if (chartElement) {
+              try {
+                const chartObj = this.$echarts.init(chartElement);
+                this.initChart1(chartObj, item.xAxisData, item.seriesData, item.echartMsg);
+              } catch (error) {
+                console.error(`图表渲染失败 (ID: ${item.echartMsg.echartId}):`, error);
               }
             }
-
-            // 处理二级数据
-            if (item.two && Array.isArray(item.two)) {
-              processItems(item.two);
-            }
-
-            // 处理三级数据
-            if (item.third && Array.isArray(item.third)) {
-              processItems(item.third);
-            }
           });
-        };
+        }
 
-        processItems(this.introduce);
-      });
+        // 递归处理二级数据
+        if (item.two && Array.isArray(item.two)) {
+          item.two.forEach(processItem);
+        }
+
+        // 递归处理三级数据
+        if (item.third && Array.isArray(item.third)) {
+          item.third.forEach(processItem);
+        }
+
+        // 递归处理四级数据
+        if (item.fourth && Array.isArray(item.fourth)) {
+          item.fourth.forEach(processItem);
+        }
+      };
+
+      items.forEach(processItem);
     },
 
+    // 增强的图表初始化方法 - 支持您的数据格式
     initChart1(Chart, xAxisData, seriesData, echartMsg) {
       if (!Chart || !seriesData || !Array.isArray(seriesData)) {
-        console.warn('图表初始化失败：缺少必要数据');
+        console.warn('图表初始化参数不完整');
         return;
       }
 
-      // 验证系列数据的完整性
+      // 过滤有效的系列数据
       const validSeriesData = seriesData.filter(series =>
         series && series.data && Array.isArray(series.data) && series.data.length > 0
       );
 
       if (validSeriesData.length === 0) {
-        console.warn('图表数据为空或格式不正确');
+        console.warn('没有有效的系列数据');
         return;
       }
+
+      // 确保每个系列都有正确的格式
+      const processedSeriesData = validSeriesData.map(series => ({
+        name: series.name || '数据系列',
+        type: series.type || 'line',
+        smooth: series.smooth === 'smooth' || series.smooth === true,
+        data: Array.isArray(series.data) ? series.data : [],
+        lineStyle: {
+          width: 2
+        },
+        symbol: 'circle',
+        symbolSize: 4
+      }));
 
       const option = {
         color: ['#43b1fd', '#1bddb5', '#fe708d', '#e7e734', '#1fdaeb', '#cf48c9', '#ffb129', '#1b11fe'],
         tooltip: {
           trigger: "axis",
+          axisPointer: {
+            type: 'cross'
+          },
           formatter: function(params) {
-            let result = '';
+            let result = `${echartMsg.xName || 'X轴'}: ${params[0].axisValue}<br/>`;
             params.forEach(param => {
-              // 确保数据格式正确
-              const value = Array.isArray(param.value) ? param.value[1] : param.value;
-              const xValue = Array.isArray(param.value) ? param.value[0] : param.axisValue;
-              result += `${param.seriesName}: ${value}<br/>`;
-              if (params.length === 1) {
-                result = `${echartMsg.xName || 'X'}: ${xValue}<br/>${result}`;
-              }
+              result += `${param.seriesName}: ${param.value[1]}<br/>`;
             });
             return result;
           }
         },
-        grid: { top: "14%", left: "5%", right: "17%", bottom: "8%", containLabel: true },
+        grid: {
+          top: "14%",
+          left: "8%",
+          right: "8%",
+          bottom: "12%",
+          containLabel: true,
+        },
         legend: {
           top: "5%",
           orient: "horizontal",
-          right: 100,
-          left: 100,
+          right: 50,
+          left: 50,
           icon: "rect",
           itemWidth: 10,
           itemHeight: 10,
-          textStyle: { fontSize: 10 },
-          data: validSeriesData.map(series => series.name)
+          textStyle: {
+            fontSize: 10
+          },
+          data: processedSeriesData.map(series => series.name)
         },
         xAxis: [{
-          name: echartMsg.xName || '数据点',
+          name: echartMsg.xName || 'X轴',
           type: "value",
           boundaryGap: false,
-          axisLabel: { color: "rgba(0, 0, 0, 1)", fontSize: 14 },
-          axisLine: { show: true },
-          min: echartMsg.minX !== undefined ? Math.floor(echartMsg.minX) : 'dataMin',
-          axisTick: { show: false }
+          axisLabel: {
+            color: "rgba(0, 0, 0, 1)",
+            fontSize: 12,
+          },
+          axisLine: {
+            show: true,
+            lineStyle: {
+              color: '#333'
+            }
+          },
+          min: echartMsg.minX !== undefined ? echartMsg.minX : 'dataMin',
+          axisTick: {
+            show: true,
+          },
+          splitLine: {
+            show: true,
+            lineStyle: {
+              color: '#f0f0f0',
+              type: 'dashed'
+            }
+          }
         }],
         yAxis: [{
           type: "value",
-          name: echartMsg.yName || '数值',
-          nameGap: 10,
-          nameTextStyle: { fontSize: 14, color: "#000", padding: [0, 0, 0, 10] },
-          min: echartMsg.minY !== undefined ? Math.floor(echartMsg.minY) : 'dataMin',
-          axisLabel: { color: "rgba(0, 0, 0, 1)", fontSize: 14 },
-          splitLine: { show: false },
-          axisLine: { show: true }
+          name: echartMsg.yName || 'Y轴',
+          nameGap: 15,
+          nameTextStyle: {
+            fontSize: 12,
+            color: "#333",
+            padding: [0, 0, 0, 5],
+          },
+          min: echartMsg.minY !== undefined ? echartMsg.minY : 'dataMin',
+          axisLabel: {
+            color: "rgba(0, 0, 0, 1)",
+            fontSize: 12,
+          },
+          splitLine: {
+            show: true,
+            lineStyle: {
+              color: '#f0f0f0',
+              type: 'dashed'
+            }
+          },
+          axisLine: {
+            show: true,
+            lineStyle: {
+              color: '#333'
+            }
+          },
         }],
-        series: validSeriesData
+        series: processedSeriesData
       };
 
       try {
-        if (Chart) Chart.clear();
+        Chart.clear();
         Chart.setOption(option, true);
-
-        // 确保图表正确渲染
         Chart.resize();
 
-        console.log(`图表渲染成功: ${validSeriesData.length}个系列, X轴: ${echartMsg.xName}, Y轴: ${echartMsg.yName}`);
+        console.log(`✓ 图表渲染成功 (ID: ${echartMsg.echartId})`);
       } catch (error) {
         console.error('图表渲染错误:', error);
       }
     },
 
-    // 数据导入
-    async asJson() {
-      let loading = null;
-      try {
-        const folderInfo = await this.selectDataFolder();
-        if (!folderInfo) return;
-
-        loading = this.$loading({
-          lock: true,
-          text: `正在处理文件夹 ${folderInfo.folderName} 中的材料数据...`,
-          spinner: 'el-icon-loading',
-          background: 'rgba(0, 0, 0, 0.7)'
-        });
-
-        const data = await this.loadSourceDataFromFolder(folderInfo);
-        if (!data) return;
-
-        const results = await this.processAllDataSourcesFromFolder(folderInfo, data, loading);
-        if (loading) loading.close();
-
-        showProcessingResults(results, this.$message);
-        await this.validateAndSave(data, folderInfo.materialCode);
-      } catch (error) {
-        if (loading) loading.close();
-        this.$message.error(`处理失败: ${error.message || '未知错误'}`);
-      }
-    },
-
-    async selectDataFolder() {
-      return new Promise((resolve) => {
-        this.$msgbox({
-          title: '选择数据文件夹',
-          message: `
-            <div style="padding: 20px;">
-              <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 8px; font-weight: bold;">文件夹路径:</label>
-                <input id="folderPathInput" type="text" placeholder="例如: source/GH1139"
-                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" value="source/" />
-                <small style="color: #666; margin-top: 4px; display: block;">相对于 ${baseUrl}/json/ 的路径，或完整的URL路径</small>
-              </div>
-              <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 8px; font-weight: bold;">材料编号:</label>
-                <input id="materialCodeInput" type="text" placeholder="例如: GH1139"
-                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" value="GH1139" />
-              </div>
-              <div style="background: #f5f5f5; padding: 15px; border-radius: 4px;">
-                <h4 style="margin: 0 0 10px 0;">期望的文件结构:</h4>
-                <div style="font-family: monospace; font-size: 12px; color: #666;">
-                  📁 选择的文件夹/<br/>├── 材料编号.json (可选，原始数据)<br/>├── 文本材料编号.json (文本内容)<br/>
-                  ├── 表格材料编号.xlsx (表格数据)<br/>└── 材料编号.xlsx (图表数据)
-                </div>
-              </div>
-            </div>
-          `,
-          dangerouslyUseHTMLString: true,
-          showCancelButton: true,
-          confirmButtonText: '开始处理',
-          cancelButtonText: '取消',
-          beforeClose: (action, instance, done) => {
-            if (action === 'confirm') {
-              const folderPath = document.getElementById('folderPathInput')?.value?.trim();
-              const materialCode = document.getElementById('materialCodeInput')?.value?.trim();
-
-              if (!folderPath || !materialCode) {
-                this.$message.warning('请输入文件夹路径和材料编号');
-                return;
-              }
-
-              resolve({
-                folderPath: folderPath,
-                materialCode: materialCode,
-                folderName: folderPath.split(/[/\\]/).pop() || folderPath
-              });
-            } else {
-              resolve(null);
-            }
-            done();
-          }
-        });
+    // 增强的绘图方法
+    drawFun() {
+      this.$nextTick(() => {
+        this.processItems(this.introduce);
       });
     },
 
-    initProcessors() {
-      this.dataProcessor = new DataProcessor(baseUrl);
-      this.fileUploadProcessor = new FileUploadProcessor(baseUrl);
-      this.networkDataProcessor = new NetworkDataProcessor(baseUrl);
+    // 改进的数据获取方法
+    async getMsg(getJsonUrl) {
+      try {
+        const data = await getJson(getJsonUrl);
+        this.jsonData = data;
+
+        // 根据当前tab显示对应数据
+        const tabKey = this.tabs[this.activeName]?.key;
+        if (tabKey && data[tabKey] && Array.isArray(data[tabKey]) && data[tabKey].length > 0) {
+          this.introduce = data[tabKey];
+        } else {
+          this.introduce = [];
+        }
+
+        // 预加载组织结构图片
+        if (data.microstructures) {
+          this.preloadMicrostructureImages(data.microstructures);
+        }
+
+        this.drawFun();
+      } catch (error) {
+        console.error('获取数据失败:', error);
+        this.$message.error('获取材料数据失败');
+        this.introduce = [];
+      }
     },
 
-    // 文件夹上传相关方法
+    // 补充缺失的 getMenu 方法
+    async getMenu() {
+      try {
+        const data = await getJson(`${baseUrl}/json/menu.json`);
+        this.menuData = data.menu || [];
+        this.tableList = data.menu ? data.menu.flatMap(item => item.list || []) : [];
+      } catch (error) {
+        console.error('获取菜单失败:', error);
+        this.menuData = [];
+        this.tableList = [];
+      }
+    },
+
+    // 修改：处理上传的文件夹 - 生成ZIP下载
+    async processUploadedFolder() {
+      if (this.uploadedFiles.length === 0) {
+        this.$message.warning('请先选择文件夹');
+        return;
+      }
+
+      try {
+        const materialCount = this.detectedMaterials.length || 1;
+        this.$message.info(`开始处理文件夹中的 ${materialCount} 个材料数据...`);
+
+        // 创建文件上传处理器
+        const fileProcessor = new FileUploadProcessor(baseUrl);
+        fileProcessor.uploadedFiles = this.uploadedFiles;
+
+        // 加载现有菜单数据
+        let existingMenu = null;
+        try {
+          const menuData = await getJson(`${baseUrl}/json/menu.json`);
+          existingMenu = menuData;
+        } catch (error) {
+          console.warn('无法加载现有菜单数据，将创建新的菜单');
+        }
+
+        // 处理所有材料
+        const allResults = await fileProcessor.processAllMaterialsInUploadedFiles(existingMenu);
+
+        // 显示处理结果并下载ZIP
+        if (allResults.success) {
+          this.$message.success(allResults.message);
+
+          // 触发ZIP文件下载
+          if (allResults.zipData) {
+            fileProcessor.downloadZipFile(allResults.zipData);
+            this.$message.success('数据处理完成，ZIP文件下载已开始！');
+          }
+
+          // 如果当前显示的材料在处理列表中，刷新显示
+          if (this.detectedMaterials.includes(this.currentMaterialCode)) {
+            const updatedData = allResults.materialsData[this.currentMaterialCode];
+            if (updatedData) {
+              this.jsonData = updatedData;
+              const tabKey = this.tabs[this.activeName]?.key;
+              if (tabKey && updatedData[tabKey] && updatedData[tabKey].length > 0) {
+                this.introduce = updatedData[tabKey];
+                this.drawFun();
+              } else {
+                this.introduce = [];
+              }
+            }
+          }
+
+        } else {
+          this.$message.error(allResults.message);
+        }
+
+        // 关闭对话框
+        this.folderUploadVisible = false;
+        this.uploadedFiles = [];
+        this.detectedMaterials = [];
+
+      } catch (error) {
+        console.error('处理文件夹失败:', error);
+        this.$message.error(`处理失败: ${error.message}`);
+      }
+    },
+
+    // 新增：获取文件图标
+    getFileIcon(fileName) {
+      if (fileName.endsWith('.json')) {
+        return 'el-icon-document';
+      } else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+        return 'el-icon-s-grid';
+      }
+      return 'el-icon-document';
+    },
+
+    // 新增：格式化文件大小
+    formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    },
+
+    // 修改：从文件中提取所有材料编号
+    extractAllMaterialsFromFiles() {
+      if (!this.uploadedFiles || this.uploadedFiles.length === 0) {
+        this.detectedMaterials = [];
+        return;
+      }
+
+      // 使用FileUploadProcessor提取所有材料编号
+      const processor = new FileUploadProcessor(baseUrl);
+      const result = processor.processAllMaterialsInFolder(this.uploadedFiles);
+
+      if (result.success && result.materials.length > 0) {
+        this.detectedMaterials = result.materials;
+        console.log('检测到的材料编号:', this.detectedMaterials);
+        this.$message.success(`检测到 ${this.detectedMaterials.length} 个材料: ${this.detectedMaterials.join(', ')}`);
+      } else {
+        this.detectedMaterials = [];
+        console.log('未能检测到材料编号，将处理所有文件');
+        this.$message.info('未能检测到标准材料编号，将处理文件夹中的所有文件');
+      }
+    },
+
+    // 新增：显示文件夹上传对话框
     showFolderUpload() {
       this.folderUploadVisible = true;
       this.uploadedFiles = [];
-      this.materialCodeFromFolder = '';
+      this.detectedMaterials = [];
       this.isDragOver = false;
     },
 
+    // 新增：触发文件夹选择
     triggerFolderSelect() {
       this.$refs.folderInput.click();
     },
 
-    handleFolderSelect(event) {
-      this.processSelectedFiles(Array.from(event.target.files));
-    },
-
+    // 新增：处理文件夹拖拽
     handleFolderDrop(event) {
       event.preventDefault();
       this.isDragOver = false;
-      const files = Array.from(event.dataTransfer.items)
-        .filter(item => item.kind === 'file')
-        .map(item => item.getAsFile())
-        .filter(Boolean);
-      this.processSelectedFiles(files);
-    },
 
-    processSelectedFiles(files) {
-      const result = this.fileUploadProcessor.processSelectedFiles(files);
-      if (!result.success) {
-        this.$message.warning(result.message);
-        return;
-      }
-      this.uploadedFiles = result.files;
-      this.materialCodeFromFolder = result.materialCode || '';
-      this.$message.success(result.message);
-    },
+      const items = event.dataTransfer.items;
+      const files = [];
 
-    getFileIcon(filename) {
-      const iconMap = { 'json': 'el-icon-document', 'xlsx': 'el-icon-s-grid', 'xls': 'el-icon-s-grid' };
-      const ext = filename.toLowerCase().split('.').pop();
-      return iconMap[ext] || 'el-icon-document';
-    },
-
-    formatFileSize(bytes) {
-      if (bytes === 0) return '0 Bytes';
-      const k = 1024;
-      const sizes = ['Bytes', 'KB', 'MB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
-    },
-
-    async validateAndSave(data, materialCode, isFromUpload = false) {
-      // 确保数据结构完整性
-      data = this.dataProcessor.ensureRenderingCompatibility(data);
-
-      const validationResult = this.dataProcessor.validateJsonStructure(data);
-      if (!validationResult.isValid) {
-        this.$message.warning(`JSON结构验证发现 ${validationResult.errors.length} 个问题，已自动修复`);
-        console.warn('验证错误:', validationResult.errors);
-      }
-
-      const renderingValidation = this.dataProcessor.validateMergedDataStructure(data);
-      if (!renderingValidation.isValid) {
-        this.$message.error('数据结构不兼容页面渲染，正在尝试修复...');
-        data = this.dataProcessor.ensureRenderingCompatibility(data);
-        this.$message.success('数据结构已修复，现在兼容页面渲染');
-      }
-
-      const hasContent = this.dataProcessor.checkJsonHasContent(data);
-      if (!hasContent) {
-        this.$message.warning('生成的JSON文件中内容较少，可能是因为部分源数据文件缺失。');
-      } else {
-        this.$message.success('数据合并完成，包含完整的内容');
-      }
-
-      // 获取现有menu数据并传递给保存方法
-      const existingMenu = isFromUpload ?
-        this.fileUploadProcessor.existingMenu :
-        this.networkDataProcessor.existingMenu;
-
-      if (isFromUpload) {
-        await this.handleUploadedDataSave(data, materialCode, existingMenu);
-      } else {
-        await this.handleNetworkDataSave(data, materialCode, existingMenu);
-      }
-    },
-
-    async loadSourceDataFromFolder(folderInfo) {
-      try {
-        const originalJsonUrl = this.buildFileUrl(folderInfo.folderPath, `${folderInfo.materialCode}.json`);
-        const data = await getJson(originalJsonUrl);
-
-        if (!data) throw new Error('原始JSON数据为空');
-
-        const isValidStructure = this.dataProcessor.validateJsonStructure(data);
-        if (isValidStructure.isValid) {
-          this.$message.success('找到原始JSON文件，将在其基础上更新数据 (四类数据模式)');
-          return data;
-        } else {
-          throw new Error('原始JSON结构不完整');
-        }
-      } catch (error) {
-        this.$message.info('未找到原始JSON文件，将从其他数据文件创建新的完整文件 (三类数据模式)');
-        return this.dataProcessor.createBaseJsonStructure();
-      }
-    },
-
-    // 添加缺失的buildFileUrl方法
-    buildFileUrl(folderPath, filename) {
-      return this.dataProcessor.buildFileUrl(folderPath, filename);
-    },
-
-    async processUploadedFolder() {
-      if (!this.materialCodeFromFolder) {
-        this.$message.warning('请输入材料编号');
-        return;
-      }
-
-      this.folderUploadVisible = false;
-      this.fileUploadProcessor.materialCode = this.materialCodeFromFolder;
-
-      const loading = this.$loading({
-        lock: true,
-        text: '正在分析上传的材料数据文件...',
-        spinner: 'el-icon-loading',
-        background: 'rgba(0, 0, 0, 0.7)'
-      });
-
-      try {
-        const hasOriginalJson = this.uploadedFiles.some(file => file.name === `${this.materialCodeFromFolder}.json`);
-        loading.text = hasOriginalJson ? '检测到原始JSON文件，正在处理四类数据...' : '正在处理三类数据文件...';
-
-        const sourceResult = await this.fileUploadProcessor.loadSourceDataFromUploadedFiles();
-        this.$message.info(sourceResult.message);
-
-        const results = await this.fileUploadProcessor.processAllUploadedFiles(sourceResult.data, this.materialCodeFromFolder);
-        showProcessingResults(results, this.$message);
-
-        await this.validateAndSave(sourceResult.data, this.materialCodeFromFolder, true);
-      } catch (error) {
-        this.$message.error(`处理失败: ${error.message || '未知错误'}`);
-      } finally {
-        loading.close();
-      }
-    },
-
-    async processAllDataSourcesFromFolder(folderInfo, data, loading) {
-      const isEmptyStructure = this.dataProcessor.isEmptyJsonStructure(data);
-      const dataMode = isEmptyStructure ? '三类数据' : '四类数据';
-      loading.text = `正在合并处理${dataMode}文件...`;
-      return await this.networkDataProcessor.processAllNetworkFiles(folderInfo, data);
-    },
-
-    async handleUploadedDataSave(data, materialCode, existingMenu = null) {
-      return new Promise((resolve) => {
-        const menuStatus = existingMenu ? '基于现有menu文件更新' : '创建新的menu文件';
-        this.$msgbox({
-          title: '保存数据',
-          message: `请选择保存方式：<br/>1. 下载JSON文件<br/>2. 下载完整数据包（包含menu配置 - ${menuStatus}）`,
-          dangerouslyUseHTMLString: true,
-          showCancelButton: true,
-          confirmButtonText: '下载数据包',
-          cancelButtonText: '仅下载JSON',
-          beforeClose: (action, instance, done) => {
-            if (action === 'confirm') {
-              // 传递现有menu给创建方法
-              this.createAndDownloadFolderWithMenu(data, materialCode, existingMenu);
-            } else if (action === 'cancel') {
-              this.dataProcessor.saveJsonToFile(data, `${materialCode}.json`);
+      if (items) {
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          if (item.kind === 'file') {
+            const file = item.getAsFile();
+            if (file) {
+              files.push(file);
             }
-            done();
-            resolve();
           }
-        });
-      });
-    },
-
-    async createAndDownloadFolderWithMenu(data, materialCode, existingMenu) {
-      try {
-        // 确保数据结构完整性
-        data = this.dataProcessor.ensureRenderingCompatibility(data);
-
-        const validationResult = this.dataProcessor.validateMergedDataStructure(data);
-        if (!validationResult.isValid) {
-          console.warn('数据结构验证失败:', validationResult.errors);
-          data = this.dataProcessor.ensureRenderingCompatibility(data);
         }
+      }
 
-        const JSZip = (await import('jszip')).default;
-        const zip = new JSZip();
-        const folderName = `${materialCode}_merged`;
-        const folder = zip.folder(folderName);
-
-        // 添加合并后的完整JSON文件
-        folder.file(`${materialCode}.json`, JSON.stringify(data, null, 4));
-
-        // 生成并添加menu.json文件（基于现有menu或创建新的）
-        const menuData = this.dataProcessor.generateMenuFile(materialCode, data, existingMenu);
-        folder.file('menu.json', JSON.stringify(menuData, null, 4));
-
-        // 添加README说明文件
-        const readme = this.generateReadmeContent(materialCode, data, existingMenu);
-        folder.file('README.md', readme);
-
-        const zipContent = await zip.generateAsync({ type: 'blob' });
-        this.dataProcessor.downloadBlob(zipContent, `${folderName}.zip`);
-
-        const menuStatus = existingMenu ? '已更新现有menu文件' : '已创建新menu文件';
-        this.$message.success(`数据包下载完成！${menuStatus}`);
-        return true;
-      } catch (error) {
-        console.error('创建文件夹压缩包失败:', error);
-        this.$message.error('创建数据包失败');
-        return false;
+      if (files.length > 0) {
+        this.uploadedFiles = files;
+        this.extractAllMaterialsFromFiles();
       }
     },
 
-    generateReadmeContent(materialCode, data, existingMenu) {
-      const stats = this.generateDataStatistics(data);
-      const menuStatus = existingMenu ? '基于现有menu文件更新' : '新创建menu文件';
-
-      return `# ${materialCode} 材料数据包
-
-## 文件说明
-- \`${materialCode}.json\` - 完整的材料数据文件
-- \`menu.json\` - 系统菜单配置文件（${menuStatus}）
-- \`README.md\` - 本说明文件
-
-## 数据统计
-- 数据部分: ${stats.sections}/5
-- 总条目数: ${stats.totalItems}
-- 文本条目: ${stats.textItems}
-- 表格条目: ${stats.tableItems}
-- 图表条目: ${stats.chartItems}
-
-## 使用说明
-1. 将 \`${materialCode}.json\` 放置到系统的 \`json\` 目录下
-2. 将 \`menu.json\` 与现有菜单文件合并或替换
-3. 重启系统以加载新的材料数据
-
-生成时间: ${new Date().toLocaleString()}
-`;
+    // 新增：处理文件夹选择
+    handleFolderSelect(event) {
+      const files = Array.from(event.target.files);
+      this.uploadedFiles = files;
+      this.extractAllMaterialsFromFiles();
     },
-
-    generateDataStatistics(data) {
-      const stats = { sections: 0, totalItems: 0, textItems: 0, tableItems: 0, chartItems: 0 };
-      const requiredSections = ['introduce', 'physicalChemistry', 'mechanical', 'craft', 'microstructures'];
-
-      const countInItems = (items) => {
-        if (!Array.isArray(items)) return;
-
-        items.forEach(item => {
-          stats.totalItems++;
-          if (item.con) stats.textItems++;
-          if (item.tableData && item.tableColumns) stats.tableItems++;
-          if (item.seriesData && item.echartMsg) stats.chartItems++;
-
-          // 处理嵌套结构
-          if (item.two) countInItems(item.two);
-          if (item.third) countInItems(item.third);
-        });
-      };
-
-      requiredSections.forEach(section => {
-        if (data[section] && Array.isArray(data[section]) && data[section].length > 0) {
-          stats.sections++;
-          countInItems(data[section]);
-        }
-      });
-
-      return stats;
-    },
-
-    async handleNetworkDataSave(data, materialCode, existingMenu = null) {
-      return this.handleUploadedDataSave(data, materialCode, existingMenu);
-    }
   }
 };
 </script>
 
 <style>
-.el-form-item__content { display: flex; }
-.el-form .el-select .el-input__inner { width: 300px; }
+.el-form-item__content {
+  display: flex;
+}
+
+.el-form .el-select .el-input__inner {
+  width: 300px;
+}
 </style>
 
 <style scoped>
@@ -951,6 +990,20 @@ export default {
   margin: 6px 0
 }
 
+.content .nr .tit3 {
+  font-size: 13px;
+  font-weight: bold;
+  margin: 5px 0;
+  color: #666;
+}
+
+.content .nr .tit4 {
+  font-size: 12px;
+  font-weight: bold;
+  margin: 4px 0;
+  color: #888;
+}
+
 .content .nr .txt {
   padding-left: 2em;
   font-size: 14px;
@@ -985,7 +1038,7 @@ export default {
 
 .material-images-container {
   margin-top: 30px;
-  border-top: 1px dashed #eee;
+  border-top: 1px dashed #edeff9;
   padding-top: 5px;
   display: flex;
   flex-wrap: nowrap;
@@ -1045,16 +1098,18 @@ export default {
   background-color: #ecf5ff;
 }
 
+.upload-text p {
+  margin: 5px 0;
+  color: #666;
+}
+
 .upload-tip {
   color: #999;
   font-size: 12px;
-  margin-top: 5px;
 }
 
 .file-list {
   margin-top: 20px;
-  max-height: 300px;
-  overflow-y: auto;
 }
 
 .file-item {
@@ -1090,5 +1145,90 @@ export default {
 .material-code-input label {
   font-weight: bold;
   color: #333;
+}
+
+.sub-section {
+  margin-left: 1em;
+  margin-top: 15px;
+}
+
+.sub-sub-section {
+  margin-left: 2em;
+  margin-top: 10px;
+}
+
+.sub-sub-sub-section {
+  margin-left: 3em;
+  margin-top: 8px;
+}
+
+.materials-display {
+  margin: 15px 0;
+  padding: 12px;
+  background-color: #f0f9ff;
+  border-left: 4px solid #409EFF;
+  border-radius: 4px;
+}
+
+.materials-info {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.materials-info i {
+  color: #409EFF;
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+.materials-label {
+  color: #606266;
+  font-weight: 500;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.materials-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.material-tag {
+  color: #409EFF;
+  font-weight: bold;
+  font-size: 14px;
+  background-color: #fff;
+  padding: 4px 8px;
+  border-radius: 3px;
+  border: 1px solid #409EFF;
+}
+
+.materials-warning {
+  margin: 15px 0;
+  padding: 12px;
+  background-color: #fdf6ec;
+  border-left: 4px solid #E6A23C;
+  border-radius: 4px;
+}
+
+.warning-info {
+  display: flex;
+  align-items: flex-start;
+}
+
+.warning-info i {
+  color: #E6A23C;
+  margin-right: 8px;
+  font-size: 16px;
+  margin-top: 2px;
+}
+
+.warning-text {
+  color: #606266;
+  line-height: 1.4;
+  font-size: 13px;
 }
 </style>
