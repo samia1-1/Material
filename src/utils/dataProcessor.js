@@ -10,6 +10,8 @@ export class DataProcessor {
   constructor(baseUrl) {
     this.baseUrl = baseUrl;
     this.usedSheets = new Set();
+    this.matchingLog = []; // 新增：匹配日志
+    this.strictMode = true; // 新增：严格模式标志
   }
 
   // 基础数据结构操作
@@ -44,11 +46,11 @@ export class DataProcessor {
     });
   }
 
-  // 修复：更新文本数据时不添加任何默认内容
+  // 修复：更新文本数据时采用严格匹配
   updateAllTextData(textData, targetData) {
     if (!textData || !targetData) return;
 
-    console.log('开始更新文本数据...');
+    console.log('开始严格模式文本数据更新...');
 
     // 确保目标数据有必需的部分结构，但绝不添加内容
     this.ensureRequiredSections(targetData);
@@ -57,41 +59,631 @@ export class DataProcessor {
     REQUIRED_SECTIONS.forEach(section => {
       if (textData[section] && Array.isArray(textData[section]) && textData[section].length > 0) {
         if (!targetData[section] || targetData[section].length === 0) {
-          targetData[section] = JSON.parse(JSON.stringify(textData[section]));
+          // 深拷贝以避免引用问题
+          targetData[section] = this.deepClone(textData[section]);
+          console.log(`✓ 新增部分: ${section} (${textData[section].length} 项)`);
         } else {
-          this.mergeTextDataSection(textData[section], targetData[section]);
+          // 使用严格匹配合并
+          this.mergeTextDataSectionStrict(textData[section], targetData[section], section);
         }
       }
     });
 
-    console.log('文本数据更新完成');
+    console.log('严格模式文本数据更新完成');
   }
 
-  // 合并文本数据部分
-  mergeTextDataSection(sourceSection, targetSection) {
-    sourceSection.forEach(sourceItem => {
-      if (!sourceItem || !sourceItem.name) return;
+  // 新增：严格的文本数据部分合并
+  mergeTextDataSectionStrict(sourceSection, targetSection, sectionName) {
+    console.log(`\n--- 严格合并部分: ${sectionName} ---`);
 
-      const existingIndex = targetSection.findIndex(item => item?.name === sourceItem.name);
-      if (existingIndex >= 0) {
-        // 更新现有项目
-        Object.assign(targetSection[existingIndex], sourceItem);
+    let mergedCount = 0;
+    let addedCount = 0;
+    let skippedCount = 0;
+
+    sourceSection.forEach((sourceItem, index) => {
+      if (!this.isValidDataItem(sourceItem)) {
+        console.log(`⚠ 跳过无效源项目 ${index}: 缺少必要字段`);
+        skippedCount++;
+        return;
+      }
+
+      const matchResult = this.findStrictMatch(sourceItem, targetSection);
+
+      if (matchResult.exactMatch) {
+        // 严格合并匹配项
+        this.mergeItemsStrict(sourceItem, matchResult.exactMatch, matchResult.confidence);
+        mergedCount++;
+      } else if (matchResult.possibleMatch && matchResult.confidence > 0.8) {
+        // 高置信度合并
+        console.log(`🔍 高置信度匹配 (${matchResult.confidence.toFixed(2)}): "${sourceItem.name}" -> "${matchResult.possibleMatch.name}"`);
+        this.mergeItemsStrict(sourceItem, matchResult.possibleMatch, matchResult.confidence);
+        mergedCount++;
       } else {
         // 添加新项目
-        targetSection.push(JSON.parse(JSON.stringify(sourceItem)));
+        const clonedItem = this.deepClone(sourceItem);
+        targetSection.push(clonedItem);
+        console.log(`✓ 新增项目: "${sourceItem.name}"`);
+        addedCount++;
+      }
+    });
+
+    console.log(`合并结果: ${mergedCount} 个合并, ${addedCount} 个新增, ${skippedCount} 个跳过`);
+  }
+
+  // 新增：验证数据项有效性
+  isValidDataItem(item) {
+    if (!item || typeof item !== 'object') return false;
+
+    // 必须有名称
+    if (!item.name || typeof item.name !== 'string' || !item.name.trim()) {
+      return false;
+    }
+
+    // 至少要有一种数据类型
+    const hasContent = !!(item.con && item.con.trim());
+    const hasTable = !!(item.tableData && Array.isArray(item.tableData) && item.tableData.length > 0);
+    const hasChart = !!(item.seriesData && Array.isArray(item.seriesData) && item.seriesData.length > 0);
+    const hasSubItems = !!(
+      (item.two && Array.isArray(item.two) && item.two.length > 0) ||
+      (item.third && Array.isArray(item.third) && item.third.length > 0) ||
+      (item.fourth && Array.isArray(item.fourth) && item.fourth.length > 0)
+    );
+
+    return hasContent || hasTable || hasChart || hasSubItems;
+  }
+
+  // 新增：严格匹配查找
+  findStrictMatch(sourceItem, targetArray) {
+    const sourceName = this.normalizeItemName(sourceItem.name);
+    let exactMatch = null;
+    let possibleMatch = null;
+    let maxConfidence = 0;
+
+    for (const targetItem of targetArray) {
+      if (!this.isValidDataItem(targetItem)) continue;
+
+      const targetName = this.normalizeItemName(targetItem.name);
+      const confidence = this.calculateMatchConfidence(sourceName, targetName, sourceItem, targetItem);
+
+      if (confidence === 1.0) {
+        exactMatch = targetItem;
+        break;
+      } else if (confidence > maxConfidence) {
+        maxConfidence = confidence;
+        possibleMatch = targetItem;
+      }
+    }
+
+    return {
+      exactMatch,
+      possibleMatch: maxConfidence > 0.6 ? possibleMatch : null,
+      confidence: exactMatch ? 1.0 : maxConfidence
+    };
+  }
+
+  // 新增：标准化项目名称
+  normalizeItemName(name) {
+    if (!name) return '';
+
+    return name
+      .trim()
+      .toLowerCase()
+      .replace(/^\d+(\.\d+)*[、，,．]\s*/, '') // 移除编号前缀
+      .replace(/[，、。！？；：""''（）【】「」\s]/g, '') // 秼除标点和空格
+      .replace(/第[一二三四五六七八九十]+[章节部分]/, '') // 移除章节标识
+      .trim();
+  }
+
+  // 新增：计算匹配置信度
+  calculateMatchConfidence(sourceName, targetName, sourceItem, targetItem) {
+    if (!sourceName || !targetName) return 0;
+
+    let confidence = 0;
+
+    // 1. 名称完全匹配 (40%)
+    if (sourceName === targetName) {
+      confidence += 0.4;
+    } else {
+      // 相似度匹配
+      const similarity = this.calculateStringSimilarity(sourceName, targetName);
+      confidence += similarity * 0.4;
+    }
+
+    // 2. 数据类型匹配 (30%)
+    const typeScore = this.calculateDataTypeMatch(sourceItem, targetItem);
+    confidence += typeScore * 0.3;
+
+    // 3. 内容相似度 (20%)
+    const contentScore = this.calculateContentSimilarity(sourceItem, targetItem);
+    confidence += contentScore * 0.2;
+
+    // 4. 结构相似度 (10%)
+    const structureScore = this.calculateStructureSimilarity(sourceItem, targetItem);
+    confidence += structureScore * 0.1;
+
+    return Math.min(confidence, 1.0);
+  }
+
+  // 新增：计算字符串相似度
+  calculateStringSimilarity(str1, str2) {
+    if (str1 === str2) return 1;
+    if (!str1 || !str2) return 0;
+
+    const longer = str1.length > str2.length ? str1 : str2;
+    const shorter = str1.length > str2.length ? str2 : str1;
+
+    if (longer.length === 0) return 1;
+
+    // 使用编辑距离算法
+    const editDistance = this.calculateEditDistance(longer, shorter);
+    return (longer.length - editDistance) / longer.length;
+  }
+
+  // 新增：计算编辑距离
+  calculateEditDistance(str1, str2) {
+    const matrix = Array(str2.length + 1).fill(null).map(() => Array(str1.length + 1).fill(null));
+
+    for (let i = 0; i <= str1.length; i++) matrix[0][i] = i;
+    for (let j = 0; j <= str2.length; j++) matrix[j][0] = j;
+
+    for (let j = 1; j <= str2.length; j++) {
+      for (let i = 1; i <= str1.length; i++) {
+        const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
+        matrix[j][i] = Math.min(
+          matrix[j][i - 1] + 1,     // deletion
+          matrix[j - 1][i] + 1,     // insertion
+          matrix[j - 1][i - 1] + indicator  // substitution
+        );
+      }
+    }
+
+    return matrix[str2.length][str1.length];
+  }
+
+  // 新增：计算数据类型匹配度
+  calculateDataTypeMatch(sourceItem, targetItem) {
+    let score = 0;
+    let totalChecks = 0;
+
+    // 检查内容文本
+    const sourceHasContent = !!(sourceItem.con && sourceItem.con.trim());
+    const targetHasContent = !!(targetItem.con && targetItem.con.trim());
+    if (sourceHasContent === targetHasContent) score += 1;
+    totalChecks += 1;
+
+    // 检查表格数据
+    const sourceHasTable = !!(sourceItem.tableData && sourceItem.tableData.length > 0);
+    const targetHasTable = !!(targetItem.tableData && targetItem.tableData.length > 0);
+    if (sourceHasTable === targetHasTable) score += 1;
+    totalChecks += 1;
+
+    // 检查图表数据
+    const sourceHasChart = !!(sourceItem.seriesData && sourceItem.seriesData.length > 0);
+    const targetHasChart = !!(targetItem.seriesData && targetItem.seriesData.length > 0);
+    if (sourceHasChart === targetHasChart) score += 1;
+    totalChecks += 1;
+
+    return totalChecks > 0 ? score / totalChecks : 0;
+  }
+
+  // 新增：计算内容相似度
+  calculateContentSimilarity(sourceItem, targetItem) {
+    const sourceCon = (sourceItem.con || '').trim();
+    const targetCon = (targetItem.con || '').trim();
+
+    if (!sourceCon && !targetCon) return 1; // 都没有内容
+    if (!sourceCon || !targetCon) return 0; // 只有一个有内容
+
+    // 提取关键词进行比较
+    const sourceKeywords = this.extractContentKeywords(sourceCon);
+    const targetKeywords = this.extractContentKeywords(targetCon);
+
+    if (sourceKeywords.length === 0 && targetKeywords.length === 0) return 0.5;
+
+    const commonKeywords = sourceKeywords.filter(kw => targetKeywords.includes(kw));
+    const totalKeywords = new Set([...sourceKeywords, ...targetKeywords]).size;
+
+    return totalKeywords > 0 ? (commonKeywords.length * 2) / (sourceKeywords.length + targetKeywords.length) : 0;
+  }
+
+  // 新增：提取内容关键词
+  extractContentKeywords(content) {
+    if (!content) return [];
+
+    return content
+      .replace(/[，、。！？；：""''（）【】「」]/g, ' ')
+      .split(/\s+/)
+      .filter(word => word.length > 1 && word.length < 10)
+      .slice(0, 20); // 取前20个关键词
+  }
+
+  // 新增：计算结构相似度
+  calculateStructureSimilarity(sourceItem, targetItem) {
+    let score = 0;
+    let totalChecks = 0;
+
+    const structureProps = ['two', 'third', 'fourth'];
+
+    structureProps.forEach(prop => {
+      const sourceHasProp = !!(sourceItem[prop] && Array.isArray(sourceItem[prop]) && sourceItem[prop].length > 0);
+      const targetHasProp = !!(targetItem[prop] && Array.isArray(targetItem[prop]) && targetItem[prop].length > 0);
+
+      if (sourceHasProp === targetHasProp) score += 1;
+      totalChecks += 1;
+    });
+
+    return totalChecks > 0 ? score / totalChecks : 0;
+  }
+
+  // 新增：严格合并项目
+  mergeItemsStrict(sourceItem, targetItem, confidence) {
+    console.log(`🔄 严格合并项目 (置信度: ${confidence.toFixed(2)}): "${sourceItem.name}" -> "${targetItem.name}"`);
+
+    // 只合并高质量的数据
+    if (confidence >= 0.9) {
+      // 高置信度：可以覆盖现有数据
+      if (sourceItem.con && sourceItem.con.trim() && sourceItem.con.length > (targetItem.con || '').length) {
+        targetItem.con = sourceItem.con;
+        console.log(`  ✓ 更新内容文本 (更详细)`);
+      }
+
+      if (sourceItem.tableData && sourceItem.tableData.length > 0) {
+        if (!targetItem.tableData || targetItem.tableData.length === 0) {
+          targetItem.tableData = this.deepClone(sourceItem.tableData);
+          targetItem.tableColumns = this.deepClone(sourceItem.tableColumns);
+          console.log(`  ✓ 添加表格数据`);
+        } else {
+          console.log(`  ⚠ 保留现有表格数据 (避免覆盖)`);
+        }
+      }
+
+      if (sourceItem.seriesData && sourceItem.seriesData.length > 0) {
+        if (!targetItem.seriesData || targetItem.seriesData.length === 0) {
+          targetItem.seriesData = this.deepClone(sourceItem.seriesData);
+          targetItem.xAxisData = this.deepClone(sourceItem.xAxisData);
+          targetItem.echartMsg = this.deepClone(sourceItem.echartMsg);
+          console.log(`  ✓ 添加图表数据`);
+        } else {
+          console.log(`  ⚠ 保留现有图表数据 (避免覆盖)`);
+        }
+      }
+    } else {
+      // 中等置信度：只添加缺失的数据
+      if (sourceItem.con && sourceItem.con.trim() && !targetItem.con) {
+        targetItem.con = sourceItem.con;
+        console.log(`  ✓ 添加缺失的内容文本`);
+      }
+
+      if (sourceItem.tableData && sourceItem.tableData.length > 0 &&
+          (!targetItem.tableData || targetItem.tableData.length === 0)) {
+        targetItem.tableData = this.deepClone(sourceItem.tableData);
+        targetItem.tableColumns = this.deepClone(sourceItem.tableColumns);
+        console.log(`  ✓ 添加缺失的表格数据`);
+      }
+
+      if (sourceItem.seriesData && sourceItem.seriesData.length > 0 &&
+          (!targetItem.seriesData || targetItem.seriesData.length === 0)) {
+        targetItem.seriesData = this.deepClone(sourceItem.seriesData);
+        targetItem.xAxisData = this.deepClone(sourceItem.xAxisData);
+        targetItem.echartMsg = this.deepClone(sourceItem.echartMsg);
+        console.log(`  ✓ 添加缺失的图表数据`);
+      }
+    }
+
+    // 严格合并子级数据
+    this.mergeSubItemsStrict(sourceItem, targetItem, confidence);
+  }
+
+  // 新增：严格合并子项目
+  mergeSubItemsStrict(sourceItem, targetItem, confidence) {
+    const subProps = ['two', 'third', 'fourth'];
+
+    subProps.forEach(prop => {
+      if (sourceItem[prop] && Array.isArray(sourceItem[prop]) && sourceItem[prop].length > 0) {
+        if (!targetItem[prop] || !Array.isArray(targetItem[prop])) {
+          targetItem[prop] = [];
+        }
+
+        // 递归严格合并子项目
+        this.mergeTextDataSectionStrict(sourceItem[prop], targetItem[prop], `${prop}级数据`);
       }
     });
   }
 
-  // 检查JSON是否有内容
-  checkJsonHasContent(data) {
-    if (!data || typeof data !== 'object') return false;
+  // 新增：深度克隆对象
+  deepClone(obj) {
+    if (obj === null || typeof obj !== 'object') return obj;
+    if (obj instanceof Date) return new Date(obj.getTime());
+    if (obj instanceof Array) return obj.map(item => this.deepClone(item));
+    if (typeof obj === 'object') {
+      const clonedObj = {};
+      for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          clonedObj[key] = this.deepClone(obj[key]);
+        }
+      }
+      return clonedObj;
+    }
+  }
 
-    return REQUIRED_SECTIONS.some(section => {
-      const sectionData = data[section];
-      return Array.isArray(sectionData) && sectionData.length > 0 &&
-             sectionData.some(item => item && (item.name || item.con || item.tableData || item.seriesData));
-    });
+  // 修复：更严格的Sheet匹配 - 提高匹配阈值
+  findMatchingSheet(itemName, sheetNames) {
+    if (!itemName || !sheetNames || sheetNames.length === 0) {
+      console.log(`❌ 输入参数无效: itemName="${itemName}", sheetNames=${sheetNames}`);
+      return null;
+    }
+
+    console.log(`\n🔍 严格Sheet匹配:`);
+    console.log(`   原始项目名: "${itemName}"`);
+    console.log(`   可用Sheet列表: [${sheetNames.join(', ')}]`);
+
+    // 1. 优先进行精确数字模式匹配
+    const numberPatterns = this.extractNumberPatterns(itemName);
+    console.log(`   🔢 提取的数字模式: [${numberPatterns.join(', ')}]`);
+
+    if (numberPatterns.length > 0) {
+      // 只进行精确匹配，不进行模糊匹配
+      for (const pattern of numberPatterns) {
+        const matchingSheet = sheetNames.find(sheetName => {
+          if (!sheetName) return false;
+          const sheetStr = sheetName.toString().trim();
+
+          // 严格精确匹配
+          if (sheetStr === pattern) {
+            console.log(`   ✅ 精确数字匹配: "${sheetStr}" === "${pattern}"`);
+            return true;
+          }
+
+          return false;
+        });
+
+        if (matchingSheet) {
+          return matchingSheet;
+        }
+      }
+    }
+
+    // 2. 严格的文本匹配
+    const cleanItemName = this.normalizeItemName(itemName);
+    console.log(`   📝 标准化名称: "${cleanItemName}"`);
+
+    // 只进行高置信度匹配
+    for (const sheetName of sheetNames) {
+      if (!sheetName) continue;
+
+      const cleanSheetName = this.normalizeItemName(sheetName.toString());
+      const similarity = this.calculateStringSimilarity(cleanItemName, cleanSheetName);
+
+      // 提高匹配阈值到0.85
+      if (similarity >= 0.85) {
+        console.log(`   ✅ 高相似度匹配 (${similarity.toFixed(2)}): "${sheetName}" <-> "${itemName}"`);
+        return sheetName;
+      }
+    }
+
+    console.log(`   ❌ 未找到符合严格匹配条件的Sheet (阈值: 0.85)`);
+    return null;
+  }
+
+  // 修复：更严格的数据验证
+  validateAndProcessSheet(item, sheetName, workbook, dataType) {
+    try {
+      const worksheet = workbook.Sheets[sheetName];
+      if (!worksheet) {
+        console.warn(`❌ Sheet ${sheetName} 不存在`);
+        return false;
+      }
+
+      // 验证Sheet有效性
+      const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1:A1');
+      const rows = range.e.r - range.s.r + 1;
+      const cols = range.e.c - range.s.c + 1;
+
+      if (rows < 2 || cols < 1) {
+        console.warn(`❌ Sheet ${sheetName} 数据不足: ${rows}行 ${cols}列`);
+        return false;
+      }
+
+      console.log(`✓ Sheet验证通过: ${sheetName} (${rows}行 ${cols}列)`);
+
+      // 处理数据
+      if (dataType === 'table') {
+        return this.processTableSheetStrict(item, worksheet, sheetName);
+      } else if (dataType === 'chart') {
+        return this.processChartSheetStrict(item, worksheet, sheetName);
+      }
+
+      return false;
+    } catch (error) {
+      console.error(`❌ 验证Sheet ${sheetName} 失败:`, error);
+      return false;
+    }
+  }
+
+  // 新增：严格的图表数据处理
+  processChartSheetStrict(item, worksheet, sheetName) {
+    try {
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+      if (!jsonData || jsonData.length < 3) { // 至少需要标题行 + 2行数据
+        console.warn(`❌ 图表数据不足: ${sheetName}`);
+        return false;
+      }
+
+      const chartResult = this.parseChartDataStrict(jsonData, sheetName);
+
+      if (chartResult && this.validateChartData(chartResult)) {
+        // 只在验证通过后才添加数据
+        item.xAxisData = chartResult.xAxisData;
+        item.seriesData = chartResult.seriesData;
+        item.echartMsg = {
+          echartId: Date.now() + Math.floor(Math.random() * 1000),
+          xName: chartResult.xName || 'X轴',
+          yName: chartResult.yName || 'Y轴',
+          minX: chartResult.minX || 0,
+          minY: chartResult.minY || 0
+        };
+
+        console.log(`✅ 严格验证通过: "${item.name}" 图表数据 (${chartResult.seriesData.length} 系列)`);
+        return true;
+      } else {
+        console.warn(`❌ 图表数据验证失败: ${sheetName}`);
+        return false;
+      }
+    } catch (error) {
+      console.error(`❌ 严格处理图表失败 ${sheetName}:`, error);
+      return false;
+    }
+  }
+
+  // 新增：验证图表数据质量
+  validateChartData(chartResult) {
+    if (!chartResult || !chartResult.seriesData || chartResult.seriesData.length === 0) {
+      return false;
+    }
+
+    // 验证每个系列
+    for (const series of chartResult.seriesData) {
+      if (!series.name || !series.data || series.data.length < 2) {
+        console.warn(`❌ 系列数据不足: ${series.name} (${series.data?.length || 0} 点)`);
+        return false;
+      }
+
+      // 验证数据点质量
+      for (const point of series.data) {
+        if (!Array.isArray(point) || point.length !== 2 ||
+            typeof point[0] !== 'number' || typeof point[1] !== 'number' ||
+            isNaN(point[0]) || isNaN(point[1])) {
+          console.warn(`❌ 无效数据点: ${JSON.stringify(point)}`);
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  // 新增：严格的图表数据解析
+  parseChartDataStrict(jsonData, sheetName) {
+    try {
+      const headers = jsonData[0].filter(header =>
+        header !== null && header !== undefined && header !== ''
+      );
+
+      if (headers.length < 2 || headers.length % 2 !== 0) {
+        console.warn(`❌ 图表列数不正确: ${headers.length} (应为偶数)`);
+        return null;
+      }
+
+      return this.parseAlternatingXYFormatStrict(jsonData, headers, sheetName);
+    } catch (error) {
+      console.error(`❌ 严格解析图表数据失败:`, error);
+      return null;
+    }
+  }
+
+  // 新增：严格的XY轴交替格式解析
+  parseAlternatingXYFormatStrict(jsonData, headers, sheetName) {
+    const seriesData = [];
+    const xAxisData = [];
+    let minX = Infinity;
+    let minY = Infinity;
+    let validPointsTotal = 0;
+
+    console.log(`🔍 严格解析XY轴交替格式: ${sheetName}`);
+
+    // 处理成对的XY列
+    for (let i = 0; i < headers.length - 1; i += 2) {
+      const xHeader = headers[i];
+      const yHeader = headers[i + 1];
+
+      if (!xHeader || !yHeader) {
+        console.warn(`⚠ 跳过无效列对: ${i}-${i+1}`);
+        continue;
+      }
+
+      const seriesPoints = [];
+      let validPointsInSeries = 0;
+
+      // 处理数据行
+      for (let rowIndex = 1; rowIndex < jsonData.length; rowIndex++) {
+        const row = jsonData[rowIndex];
+        if (!row || row.length <= i + 1) continue;
+
+        const xValue = row[i];
+        const yValue = row[i + 1];
+
+        // 严格验证数据
+        if (this.isValidNumericValue(xValue) && this.isValidNumericValue(yValue)) {
+          const numericX = Number(xValue);
+          const numericY = Number(yValue);
+
+          // 额外范围检查
+          if (this.isReasonableValue(numericX) && this.isReasonableValue(numericY)) {
+            seriesPoints.push([numericX, numericY]);
+            xAxisData.push(numericX);
+            minX = Math.min(minX, numericX);
+            minY = Math.min(minY, numericY);
+            validPointsInSeries++;
+          }
+        }
+      }
+
+      // 严格要求：每个系列至少3个有效点
+      if (validPointsInSeries >= 3) {
+        const seriesName = this.generateSeriesNameStrict(xHeader, yHeader, i);
+        seriesData.push({
+          name: seriesName,
+          type: 'line',
+          smooth: 'smooth',
+          data: seriesPoints.sort((a, b) => a[0] - b[0])
+        });
+
+        validPointsTotal += validPointsInSeries;
+        console.log(`✓ 系列验证通过: ${seriesName} (${validPointsInSeries} 个有效点)`);
+      } else {
+        console.warn(`❌ 系列数据不足: ${xHeader}-${yHeader} (${validPointsInSeries} 点 < 3)`);
+      }
+    }
+
+    // 严格要求：总有效点数至少10个
+    if (seriesData.length === 0 || validPointsTotal < 10) {
+      console.warn(`❌ 整体数据不足: ${seriesData.length} 系列, ${validPointsTotal} 总点数 < 10`);
+      return null;
+    }
+
+    return {
+      xAxisData: [...new Set(xAxisData)].sort((a, b) => a - b),
+      seriesData: seriesData,
+      xName: '温度(℃)',
+      yName: '应力(MPa)',
+      minX: minX === Infinity ? 0 : Math.floor(minX),
+      minY: minY === Infinity ? 0 : Math.floor(minY)
+    };
+  }
+
+  // 新增：验证数值有效性
+  isValidNumericValue(value) {
+    if (value === null || value === undefined || value === '') return false;
+    const num = Number(value);
+    return !isNaN(num) && isFinite(num);
+  }
+
+  // 新增：验证数值合理性
+  isReasonableValue(value) {
+    // 排除极端值
+    return value > -1e6 && value < 1e6;
+  }
+
+  // 新增：严格生成系列名称
+  generateSeriesNameStrict(xHeader, yHeader, index) {
+    if (String(xHeader).includes('_x') && String(yHeader).includes('_y')) {
+      const xBaseName = String(xHeader).replace(/_x$/i, '').trim();
+      const yBaseName = String(yHeader).replace(/_y$/i, '').trim();
+      return xBaseName === yBaseName ? xBaseName : `${xBaseName}`;
+    }
+
+    return yHeader ? String(yHeader).trim() : `系列${Math.floor(index/2) + 1}`;
   }
 
   // 读取JSON文件
@@ -403,22 +995,22 @@ export class DataProcessor {
       return null;
     }
 
-    console.log(`\n🔍 Sheet匹配调试:`);
+    console.log(`\n🔍 严格Sheet匹配:`);
     console.log(`   原始项目名: "${itemName}"`);
     console.log(`   可用Sheet列表: [${sheetNames.join(', ')}]`);
 
-    // 1. 优先进行数字模式匹配 - 处理"3.10.1"、"2.3"等数字格式
+    // 1. 优先进行精确数字模式匹配
     const numberPatterns = this.extractNumberPatterns(itemName);
     console.log(`   🔢 提取的数字模式: [${numberPatterns.join(', ')}]`);
 
     if (numberPatterns.length > 0) {
-      // 尝试精确数字匹配
+      // 只进行精确匹配，不进行模糊匹配
       for (const pattern of numberPatterns) {
         const matchingSheet = sheetNames.find(sheetName => {
           if (!sheetName) return false;
           const sheetStr = sheetName.toString().trim();
 
-          // 精确匹配数字模式
+          // 严格精确匹配
           if (sheetStr === pattern) {
             console.log(`   ✅ 精确数字匹配: "${sheetStr}" === "${pattern}"`);
             return true;
@@ -431,213 +1023,831 @@ export class DataProcessor {
           return matchingSheet;
         }
       }
+    }
 
-      // 尝试数字开头匹配
-      for (const pattern of numberPatterns) {
-        const matchingSheet = sheetNames.find(sheetName => {
-          if (!sheetName) return false;
-          const sheetStr = sheetName.toString().trim();
+    // 2. 严格的文本匹配
+    const cleanItemName = this.normalizeItemName(itemName);
+    console.log(`   📝 标准化名称: "${cleanItemName}"`);
 
-          // Sheet以数字模式开头
-          if (sheetStr.startsWith(pattern)) {
-            console.log(`   ✅ 数字开头匹配: "${sheetStr}" 以 "${pattern}" 开头`);
-            return true;
-          }
+    // 只进行高置信度匹配
+    for (const sheetName of sheetNames) {
+      if (!sheetName) continue;
 
-          return false;
-        });
+      const cleanSheetName = this.normalizeItemName(sheetName.toString());
+      const similarity = this.calculateStringSimilarity(cleanItemName, cleanSheetName);
 
-        if (matchingSheet) {
-          return matchingSheet;
-        }
-      }
-
-      // 尝试数字包含匹配
-      for (const pattern of numberPatterns) {
-        const matchingSheet = sheetNames.find(sheetName => {
-          if (!sheetName) return false;
-          const sheetStr = sheetName.toString().trim();
-
-          // Sheet包含数字模式
-          if (sheetStr.includes(pattern)) {
-            console.log(`   ✅ 数字包含匹配: "${sheetStr}" 包含 "${pattern}"`);
-            return true;
-          }
-
-          return false;
-        });
-
-        if (matchingSheet) {
-          return matchingSheet;
-        }
-      }
-
-      // 尝试拆分数字匹配（如"3.10.1" -> ["3.10", "3"]）
-      for (const pattern of numberPatterns) {
-        const parts = pattern.split('.');
-
-        // 从最长到最短尝试匹配
-        for (let i = parts.length - 1; i > 0; i--) {
-          const partialPattern = parts.slice(0, i).join('.');
-
-          const matchingSheet = sheetNames.find(sheetName => {
-            if (!sheetName) return false;
-            const sheetStr = sheetName.toString().trim();
-
-            if (sheetStr.includes(partialPattern)) {
-              console.log(`   ✅ 部分数字匹配: "${sheetStr}" 包含 "${partialPattern}"`);
-              return true;
-            }
-
-            return false;
-          });
-
-          if (matchingSheet) {
-            return matchingSheet;
-          }
-        }
+      // 提高匹配阈值到0.85
+      if (similarity >= 0.85) {
+        console.log(`   ✅ 高相似度匹配 (${similarity.toFixed(2)}): "${sheetName}" <-> "${itemName}"`);
+        return sheetName;
       }
     }
 
-    // 2. 清理项目名称进行文本匹配
-    const cleanItemName = itemName
-      .replace(/^\d+(\.\d+)*[、，,．]\s*/, '') // 移除编号前缀
-      .replace(/[，、。！？；：""''（）【】「」]/g, '') // 移除标点符号
-      .trim();
-
-    console.log(`   📝 清理后名称: "${cleanItemName}"`);
-
-    // 3. 完全匹配（忽略大小写）
-    let matchingSheet = sheetNames.find(sheetName => {
-      if (!sheetName) return false;
-      const cleanSheetName = sheetName.toString().trim();
-      const match = cleanSheetName.toLowerCase() === cleanItemName.toLowerCase();
-      if (match) {
-        console.log(`   ✅ 完全匹配: "${cleanSheetName}" === "${cleanItemName}"`);
-      }
-      return match;
-    });
-
-    if (matchingSheet) {
-      return matchingSheet;
-    }
-
-    // 4. 包含匹配（双向，忽略大小写）
-    matchingSheet = sheetNames.find(sheetName => {
-      if (!sheetName) return false;
-      const cleanSheetName = sheetName.toString().trim().toLowerCase();
-      const lowerItemName = cleanItemName.toLowerCase();
-
-      const sheetContainsItem = cleanSheetName.includes(lowerItemName);
-      const itemContainsSheet = lowerItemName.includes(cleanSheetName);
-
-      if (sheetContainsItem || itemContainsSheet) {
-        console.log(`   ✅ 包含匹配: "${sheetName}" <-> "${cleanItemName}"`);
-        console.log(`      Sheet包含Item: ${sheetContainsItem}, Item包含Sheet: ${itemContainsSheet}`);
-        return true;
-      }
-      return false;
-    });
-
-    if (matchingSheet) {
-      return matchingSheet;
-    }
-
-    // 5. 关键词匹配
-    const keywords = this.extractKeywords(cleanItemName);
-    console.log(`   🔑 提取的关键词: [${keywords.join(', ')}]`);
-
-    if (keywords.length > 0) {
-      matchingSheet = sheetNames.find(sheetName => {
-        if (!sheetName) return false;
-        const sheetLower = sheetName.toString().toLowerCase();
-
-        const matchedKeywords = keywords.filter(keyword =>
-          sheetLower.includes(keyword.toLowerCase()) ||
-          keyword.toLowerCase().includes(sheetLower)
-        );
-
-        if (matchedKeywords.length > 0) {
-          console.log(`   ✅ 关键词匹配: "${sheetName}" 匹配关键词 [${matchedKeywords.join(', ')}]`);
-          return true;
-        }
-        return false;
-      });
-
-      if (matchingSheet) {
-        return matchingSheet;
-      }
-    }
-
-    // 6. 单独数字匹配（最后尝试）
-    const singleNumbers = itemName.match(/\d+/g) || [];
-    console.log(`   🔢 单独数字: [${singleNumbers.join(', ')}]`);
-
-    if (singleNumbers.length > 0) {
-      matchingSheet = sheetNames.find(sheetName => {
-        if (!sheetName) return false;
-        const sheetStr = sheetName.toString();
-
-        const matchedNumbers = singleNumbers.filter(num => sheetStr.includes(num));
-        if (matchedNumbers.length > 0) {
-          console.log(`   ✅ 单数字匹配: "${sheetStr}" 包含数字 [${matchedNumbers.join(', ')}]`);
-          return true;
-        }
-        return false;
-      });
-
-      if (matchingSheet) {
-        return matchingSheet;
-      }
-    }
-
-    console.log(`   ❌ 未找到任何匹配的Sheet`);
-    console.log(`      建议: 检查Sheet名称是否与项目名称 "${cleanItemName}" 或数字模式 [${numberPatterns.join(', ')}] 相关\n`);
-
+    console.log(`   ❌ 未找到符合严格匹配条件的Sheet (阈值: 0.85)`);
     return null;
   }
 
-  // 新增：提取数字模式方法
-  extractNumberPatterns(text) {
-    if (!text) return [];
+  // 修复：更严格的数据验证
+  validateAndProcessSheet(item, sheetName, workbook, dataType) {
+    try {
+      const worksheet = workbook.Sheets[sheetName];
+      if (!worksheet) {
+        console.warn(`❌ Sheet ${sheetName} 不存在`);
+        return false;
+      }
 
-    const patterns = [];
+      // 验证Sheet有效性
+      const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1:A1');
+      const rows = range.e.r - range.s.r + 1;
+      const cols = range.e.c - range.s.c + 1;
 
-    // 匹配各种数字格式
-    const numberMatches = [
-      // 匹配 "3.10.1", "2.3", "1.7" 等格式
-      ...text.match(/\d+(\.\d+)+/g) || [],
-      // 匹配单独的数字 "3", "10" 等
-      ...text.match(/(?<!\d)\d+(?!\d|\.\d)/g) || []
-    ];
+      if (rows < 2 || cols < 1) {
+        console.warn(`❌ Sheet ${sheetName} 数据不足: ${rows}行 ${cols}列`);
+        return false;
+      }
 
-    // 去重并按长度排序（长的优先）
-    const uniquePatterns = [...new Set(numberMatches)];
-    uniquePatterns.sort((a, b) => b.length - a.length);
+      console.log(`✓ Sheet验证通过: ${sheetName} (${rows}行 ${cols}列)`);
 
-    return uniquePatterns;
+      // 处理数据
+      if (dataType === 'table') {
+        return this.processTableSheetStrict(item, worksheet, sheetName);
+      } else if (dataType === 'chart') {
+        return this.processChartSheetStrict(item, worksheet, sheetName);
+      }
+
+      return false;
+    } catch (error) {
+      console.error(`❌ 验证Sheet ${sheetName} 失败:`, error);
+      return false;
+    }
   }
 
-  // 修改：优化关键词提取方法
-  extractKeywords(text) {
-    if (!text) return [];
+  // 新增：严格的图表数据处理
+  processChartSheetStrict(item, worksheet, sheetName) {
+    try {
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-    console.log(`   📝 关键词提取 - 输入: "${text}"`);
+      if (!jsonData || jsonData.length < 3) { // 至少需要标题行 + 2行数据
+        console.warn(`❌ 图表数据不足: ${sheetName}`);
+        return false;
+      }
 
-    // 移除标点符号并分割，保留中文、英文和数字
-    const keywords = text
-      .replace(/[，、。！？；：""''（）【】「」/\-_]/g, ' ') // 替换标点为空格
-      .split(/\s+/) // 按空格分割
-      .filter(word => {
-        // 保留长度大于1的词，或者是单个重要字符
-        const isValid = word.length > 1 || /[a-zA-Z0-9]/.test(word);
-        console.log(`      词: "${word}" -> ${isValid ? '保留' : '丢弃'}`);
-        return isValid;
-      })
-      .slice(0, 5); // 取前5个关键词
+      const chartResult = this.parseChartDataStrict(jsonData, sheetName);
 
-    console.log(`   🎯 最终关键词: [${keywords.join(', ')}]`);
-    return keywords;
+      if (chartResult && this.validateChartData(chartResult)) {
+        // 只在验证通过后才添加数据
+        item.xAxisData = chartResult.xAxisData;
+        item.seriesData = chartResult.seriesData;
+        item.echartMsg = {
+          echartId: Date.now() + Math.floor(Math.random() * 1000),
+          xName: chartResult.xName || 'X轴',
+          yName: chartResult.yName || 'Y轴',
+          minX: chartResult.minX || 0,
+          minY: chartResult.minY || 0
+        };
+
+        console.log(`✅ 严格验证通过: "${item.name}" 图表数据 (${chartResult.seriesData.length} 系列)`);
+        return true;
+      } else {
+        console.warn(`❌ 图表数据验证失败: ${sheetName}`);
+        return false;
+      }
+    } catch (error) {
+      console.error(`❌ 严格处理图表失败 ${sheetName}:`, error);
+      return false;
+    }
+  }
+
+  // 新增：验证图表数据质量
+  validateChartData(chartResult) {
+    if (!chartResult || !chartResult.seriesData || chartResult.seriesData.length === 0) {
+      return false;
+    }
+
+    // 验证每个系列
+    for (const series of chartResult.seriesData) {
+      if (!series.name || !series.data || series.data.length < 2) {
+        console.warn(`❌ 系列数据不足: ${series.name} (${series.data?.length || 0} 点)`);
+        return false;
+      }
+
+      // 验证数据点质量
+      for (const point of series.data) {
+        if (!Array.isArray(point) || point.length !== 2 ||
+            typeof point[0] !== 'number' || typeof point[1] !== 'number' ||
+            isNaN(point[0]) || isNaN(point[1])) {
+          console.warn(`❌ 无效数据点: ${JSON.stringify(point)}`);
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  // 新增：严格的图表数据解析
+  parseChartDataStrict(jsonData, sheetName) {
+    try {
+      const headers = jsonData[0].filter(header =>
+        header !== null && header !== undefined && header !== ''
+      );
+
+      if (headers.length < 2 || headers.length % 2 !== 0) {
+        console.warn(`❌ 图表列数不正确: ${headers.length} (应为偶数)`);
+        return null;
+      }
+
+      return this.parseAlternatingXYFormatStrict(jsonData, headers, sheetName);
+    } catch (error) {
+      console.error(`❌ 严格解析图表数据失败:`, error);
+      return null;
+    }
+  }
+
+  // 新增：严格的XY轴交替格式解析
+  parseAlternatingXYFormatStrict(jsonData, headers, sheetName) {
+    const seriesData = [];
+    const xAxisData = [];
+    let minX = Infinity;
+    let minY = Infinity;
+    let validPointsTotal = 0;
+
+    console.log(`🔍 严格解析XY轴交替格式: ${sheetName}`);
+
+    // 处理成对的XY列
+    for (let i = 0; i < headers.length - 1; i += 2) {
+      const xHeader = headers[i];
+      const yHeader = headers[i + 1];
+
+      if (!xHeader || !yHeader) {
+        console.warn(`⚠ 跳过无效列对: ${i}-${i+1}`);
+        continue;
+      }
+
+      const seriesPoints = [];
+      let validPointsInSeries = 0;
+
+      // 处理数据行
+      for (let rowIndex = 1; rowIndex < jsonData.length; rowIndex++) {
+        const row = jsonData[rowIndex];
+        if (!row || row.length <= i + 1) continue;
+
+        const xValue = row[i];
+        const yValue = row[i + 1];
+
+        // 严格验证数据
+        if (this.isValidNumericValue(xValue) && this.isValidNumericValue(yValue)) {
+          const numericX = Number(xValue);
+          const numericY = Number(yValue);
+
+          // 额外范围检查
+          if (this.isReasonableValue(numericX) && this.isReasonableValue(numericY)) {
+            seriesPoints.push([numericX, numericY]);
+            xAxisData.push(numericX);
+            minX = Math.min(minX, numericX);
+            minY = Math.min(minY, numericY);
+            validPointsInSeries++;
+          }
+        }
+      }
+
+      // 严格要求：每个系列至少3个有效点
+      if (validPointsInSeries >= 3) {
+        const seriesName = this.generateSeriesNameStrict(xHeader, yHeader, i);
+        seriesData.push({
+          name: seriesName,
+          type: 'line',
+          smooth: 'smooth',
+          data: seriesPoints.sort((a, b) => a[0] - b[0])
+        });
+
+        validPointsTotal += validPointsInSeries;
+        console.log(`✓ 系列验证通过: ${seriesName} (${validPointsInSeries} 个有效点)`);
+      } else {
+        console.warn(`❌ 系列数据不足: ${xHeader}-${yHeader} (${validPointsInSeries} 点 < 3)`);
+      }
+    }
+
+    // 严格要求：总有效点数至少10个
+    if (seriesData.length === 0 || validPointsTotal < 10) {
+      console.warn(`❌ 整体数据不足: ${seriesData.length} 系列, ${validPointsTotal} 总点数 < 10`);
+      return null;
+    }
+
+    return {
+      xAxisData: [...new Set(xAxisData)].sort((a, b) => a - b),
+      seriesData: seriesData,
+      xName: '温度(℃)',
+      yName: '应力(MPa)',
+      minX: minX === Infinity ? 0 : Math.floor(minX),
+      minY: minY === Infinity ? 0 : Math.floor(minY)
+    };
+  }
+
+  // 新增：验证数值有效性
+  isValidNumericValue(value) {
+    if (value === null || value === undefined || value === '') return false;
+    const num = Number(value);
+    return !isNaN(num) && isFinite(num);
+  }
+
+  // 新增：验证数值合理性
+  isReasonableValue(value) {
+    // 排除极端值
+    return value > -1e6 && value < 1e6;
+  }
+
+  // 新增：严格生成系列名称
+  generateSeriesNameStrict(xHeader, yHeader, index) {
+    if (String(xHeader).includes('_x') && String(yHeader).includes('_y')) {
+      const xBaseName = String(xHeader).replace(/_x$/i, '').trim();
+      const yBaseName = String(yHeader).replace(/_y$/i, '').trim();
+      return xBaseName === yBaseName ? xBaseName : `${xBaseName}`;
+    }
+
+    return yHeader ? String(yHeader).trim() : `系列${Math.floor(index/2) + 1}`;
+  }
+
+  // 读取JSON文件
+  async readJsonFile(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          resolve(data);
+        } catch (error) {
+          reject(new Error(`JSON解析失败: ${error.message}`));
+        }
+      };
+      reader.onerror = () => reject(new Error('文件读取失败'));
+      reader.readAsText(file);
+    });
+  }
+
+  // 读取Excel文件
+  async readExcelFile(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          resolve(workbook);
+        } catch (error) {
+          reject(new Error(`Excel读取失败: ${error.message}`));
+        }
+      };
+      reader.onerror = () => reject(new Error('文件读取失败'));
+      reader.readAsArrayBuffer(file);
+    });
+  }
+
+  // 基于文件名判断数据类型
+  getDataTypeByFileName(fileName) {
+    const lowerFileName = fileName.toLowerCase();
+
+    if (lowerFileName.startsWith('表格') && (lowerFileName.endsWith('.xlsx') || lowerFileName.endsWith('.xls'))) {
+      return 'table';
+    }
+
+    if (!lowerFileName.startsWith('表格') && !lowerFileName.startsWith('文本') &&
+        (lowerFileName.endsWith('.xlsx') || lowerFileName.endsWith('.xls'))) {
+      return 'chart';
+    }
+
+    if (lowerFileName.startsWith('文本') && lowerFileName.endsWith('.json')) {
+      return 'text';
+    }
+
+    if (lowerFileName.endsWith('.json') && !lowerFileName.startsWith('文本')) {
+      return 'base';
+    }
+
+    return 'unknown';
+  }
+
+  // 处理所有表格Sheet
+  processAllSheets(sheetNames, workbook, data, fileName = null) {
+    this.processDataWithMethod(data, (item) => this.updateItemData(item, sheetNames, workbook, 'table', fileName));
+  }
+
+  // 处理所有图表Sheet
+  processAllCharts(sheetNames, workbook, data, fileName = null) {
+    this.processDataWithMethod(data, (item) => this.updateItemData(item, sheetNames, workbook, 'chart', fileName));
+  }
+
+  // 修复：处理数据的通用方法 - 确保正确的对象引用传递
+  processDataWithMethod(data, updateMethod) {
+    console.log('开始处理数据，支持四级标题结构...');
+
+    REQUIRED_SECTIONS.forEach(section => {
+      if (data[section] && Array.isArray(data[section])) {
+        data[section].forEach((item, itemIndex) => {
+          if (item && typeof item === 'object') {
+            // 直接传递数组中的对象引用，确保修改能够生效
+            const itemRef = data[section][itemIndex];
+
+            // 处理现有的图表数据
+            this.processExistingChartData(itemRef);
+
+            // 处理新的Excel数据
+            updateMethod(itemRef);
+
+            // 处理二级数据
+            if (itemRef.two && Array.isArray(itemRef.two)) {
+              itemRef.two.forEach((subItem, subIndex) => {
+                if (subItem && typeof subItem === 'object') {
+                  const subItemRef = itemRef.two[subIndex];
+                  this.processExistingChartData(subItemRef);
+                  updateMethod(subItemRef);
+
+                  // 处理三级数据
+                  if (subItemRef.third && Array.isArray(subItemRef.third)) {
+                    subItemRef.third.forEach((thirdItem, thirdIndex) => {
+                      if (thirdItem && typeof thirdItem === 'object') {
+                        const thirdItemRef = subItemRef.third[thirdIndex];
+                        this.processExistingChartData(thirdItemRef);
+                        updateMethod(thirdItemRef);
+
+                        // 处理四级数据（在三级下）
+                        if (thirdItemRef.fourth && Array.isArray(thirdItemRef.fourth)) {
+                          thirdItemRef.fourth.forEach((fourthItem, fourthIndex) => {
+                            if (fourthItem && typeof fourthItem === 'object') {
+                              const fourthItemRef = thirdItemRef.fourth[fourthIndex];
+                              this.processExistingChartData(fourthItemRef);
+                              updateMethod(fourthItemRef);
+                            }
+                          });
+                        }
+                      }
+                    });
+                  }
+
+                  // 处理四级数据（直接在二级下）
+                  if (subItemRef.fourth && Array.isArray(subItemRef.fourth)) {
+                    subItemRef.fourth.forEach((fourthItem, fourthIndex) => {
+                      if (fourthItem && typeof fourthItem === 'object') {
+                        const fourthItemRef = subItemRef.fourth[fourthIndex];
+                        this.processExistingChartData(fourthItemRef);
+                        updateMethod(fourthItemRef);
+                      }
+                    });
+                  }
+                }
+              });
+            }
+
+            // 处理直接在一级下的三级数据
+            if (itemRef.third && Array.isArray(itemRef.third)) {
+              itemRef.third.forEach((thirdItem, thirdIndex) => {
+                if (thirdItem && typeof thirdItem === 'object') {
+                  const thirdItemRef = itemRef.third[thirdIndex];
+                  this.processExistingChartData(thirdItemRef);
+                  updateMethod(thirdItemRef);
+
+                  // 处理四级数据（在直接三级下）
+                  if (thirdItemRef.fourth && Array.isArray(thirdItemRef.fourth)) {
+                    thirdItemRef.fourth.forEach((fourthItem, fourthIndex) => {
+                      if (fourthItem && typeof fourthItem === 'object') {
+                        const fourthItemRef = thirdItemRef.fourth[fourthIndex];
+                        this.processExistingChartData(fourthItemRef);
+                        updateMethod(fourthItemRef);
+                      }
+                    });
+                  }
+                }
+              });
+            }
+
+            // 处理四级数据（直接在一级下）
+            if (itemRef.fourth && Array.isArray(itemRef.fourth)) {
+              itemRef.fourth.forEach((fourthItem, fourthIndex) => {
+                if (fourthItem && typeof fourthItem === 'object') {
+                  const fourthItemRef = itemRef.fourth[fourthIndex];
+                  this.processExistingChartData(fourthItemRef);
+                  updateMethod(fourthItemRef);
+                }
+              });
+            }
+          }
+        });
+      }
+    });
+
+    console.log('数据处理完成');
+  }
+
+  // 修复：更新项目数据 - 移除重复处理检查
+  updateItemData(item, sheetNames, workbook, dataType, fileName) {
+    if (!item || !item.name) return;
+
+    const itemName = item.name.trim();
+    if (!itemName) return;
+
+    // 查找匹配的Sheet
+    const matchingSheet = this.findMatchingSheet(itemName, sheetNames);
+    if (!matchingSheet) {
+      console.log(`⚠ 未找到匹配的Sheet: "${itemName}"`);
+      return;
+    }
+
+    // 处理Sheet数据
+    this.processSingleSheet(item, matchingSheet, workbook, dataType, fileName);
+  }
+
+  // 修复：处理单个Sheet - 移除重复处理限制
+  processSingleSheet(item, sheetName, workbook, dataType, fileName) {
+    try {
+      const worksheet = workbook.Sheets[sheetName];
+      if (!worksheet) {
+        console.warn(`Sheet ${sheetName} 不存在`);
+        return;
+      }
+
+      console.log(`正在处理 ${dataType === 'table' ? '表格' : '图表'} Sheet: ${sheetName} -> ${item.name}`);
+
+      if (dataType === 'table') {
+        this.processTableSheet(item, worksheet, sheetName);
+      } else if (dataType === 'chart') {
+        this.processChartSheet(item, worksheet, sheetName);
+      }
+
+    } catch (error) {
+      console.error(`处理Sheet ${sheetName} 时出错:`, error);
+    }
+  }
+
+  // 修复：处理图表Sheet - 确保数据正确添加
+  processChartSheet(item, worksheet, sheetName) {
+    try {
+      console.log(`正在为 "${item.name}" 处理图表数据: ${sheetName}`);
+
+      // 将Excel数据转换为JSON格式
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+      if (!jsonData || jsonData.length < 2) {
+        console.warn(`图表 ${sheetName} 数据不足，跳过处理`);
+        return;
+      }
+
+      // 解析图表数据
+      const chartResult = this.parseChartData(jsonData);
+
+      if (chartResult && chartResult.seriesData && chartResult.seriesData.length > 0) {
+        // 直接修改传入的item对象
+        item.xAxisData = chartResult.xAxisData;
+        item.seriesData = chartResult.seriesData;
+        item.echartMsg = {
+          echartId: Date.now() + Math.floor(Math.random() * 1000),
+          xName: chartResult.xName || 'X轴',
+          yName: chartResult.yName || 'Y轴',
+          minX: chartResult.minX || 0,
+          minY: chartResult.minY || 0
+        };
+
+        console.log(`✅ 成功为 "${item.name}" 添加图表数据:`);
+        console.log(`   - 数据系列: ${chartResult.seriesData.length} 个`);
+        console.log(`   - X轴数据点: ${chartResult.xAxisData.length} 个`);
+        chartResult.seriesData.forEach((series, index) => {
+          console.log(`   - 系列${index + 1}: ${series.name} (${series.data.length} 个点)`);
+        });
+
+        // 验证数据是否正确添加
+        if (item.seriesData && item.seriesData.length > 0) {
+          console.log(`✅ 验证通过: 图表数据已成功添加到 "${item.name}"`);
+        } else {
+          console.error(`❌ 验证失败: 图表数据未能添加到 "${item.name}"`);
+        }
+
+      } else {
+        console.warn(`❌ 图表 ${sheetName} 解析失败或无有效数据`);
+      }
+
+    } catch (error) {
+      console.error(`❌ 处理图表Sheet ${sheetName} 失败:`, error);
+    }
+  }
+
+  // 修复：处理表格Sheet - 确保数据正确添加
+  processTableSheet(item, worksheet, sheetName) {
+    try {
+      console.log(`正在为 "${item.name}" 处理表格数据: ${sheetName}`);
+
+      // 将Excel数据转换为JSON格式
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+      if (!jsonData || jsonData.length < 2) {
+        console.warn(`表格 ${sheetName} 数据不足，跳过处理`);
+        return;
+      }
+
+      // 解析表格数据
+      const tableResult = this.parseTableData(jsonData, sheetName);
+
+      if (tableResult && tableResult.tableData && tableResult.tableData.length > 0) {
+        // 直接修改传入的item对象
+        item.tableData = tableResult.tableData;
+        item.tableColumns = tableResult.tableColumns;
+
+        console.log(`✅ 成功为 "${item.name}" 添加表格数据:`);
+        console.log(`   - 列数: ${tableResult.tableColumns.length}`);
+        console.log(`   - 行数: ${tableResult.tableData.length}`);
+
+        // 验证数据是否正确添加
+        if (item.tableData && item.tableData.length > 0) {
+          console.log(`✅ 验证通过: 表格数据已成功添加到 "${item.name}"`);
+        } else {
+          console.error(`❌ 验证失败: 表格数据未能添加到 "${item.name}"`);
+        }
+
+      } else {
+        console.warn(`❌ 表格 ${sheetName} 解析失败或无有效数据`);
+      }
+
+    } catch (error) {
+      console.error(`❌ 处理表格Sheet ${sheetName} 失败:`, error);
+    }
+  }
+
+  // 修复：查找匹配Sheet - 优化数字匹配逻辑，优先匹配数字格式
+  findMatchingSheet(itemName, sheetNames) {
+    if (!itemName || !sheetNames || sheetNames.length === 0) {
+      console.log(`❌ 输入参数无效: itemName="${itemName}", sheetNames=${sheetNames}`);
+      return null;
+    }
+
+    console.log(`\n🔍 严格Sheet匹配:`);
+    console.log(`   原始项目名: "${itemName}"`);
+    console.log(`   可用Sheet列表: [${sheetNames.join(', ')}]`);
+
+    // 1. 优先进行精确数字模式匹配
+    const numberPatterns = this.extractNumberPatterns(itemName);
+    console.log(`   🔢 提取的数字模式: [${numberPatterns.join(', ')}]`);
+
+    if (numberPatterns.length > 0) {
+      // 只进行精确匹配，不进行模糊匹配
+      for (const pattern of numberPatterns) {
+        const matchingSheet = sheetNames.find(sheetName => {
+          if (!sheetName) return false;
+          const sheetStr = sheetName.toString().trim();
+
+          // 严格精确匹配
+          if (sheetStr === pattern) {
+            console.log(`   ✅ 精确数字匹配: "${sheetStr}" === "${pattern}"`);
+            return true;
+          }
+
+          return false;
+        });
+
+        if (matchingSheet) {
+          return matchingSheet;
+        }
+      }
+    }
+
+    // 2. 严格的文本匹配
+    const cleanItemName = this.normalizeItemName(itemName);
+    console.log(`   📝 标准化名称: "${cleanItemName}"`);
+
+    // 只进行高置信度匹配
+    for (const sheetName of sheetNames) {
+      if (!sheetName) continue;
+
+      const cleanSheetName = this.normalizeItemName(sheetName.toString());
+      const similarity = this.calculateStringSimilarity(cleanItemName, cleanSheetName);
+
+      // 提高匹配阈值到0.85
+      if (similarity >= 0.85) {
+        console.log(`   ✅ 高相似度匹配 (${similarity.toFixed(2)}): "${sheetName}" <-> "${itemName}"`);
+        return sheetName;
+      }
+    }
+
+    console.log(`   ❌ 未找到符合严格匹配条件的Sheet (阈值: 0.85)`);
+    return null;
+  }
+
+  // 修复：更严格的数据验证
+  validateAndProcessSheet(item, sheetName, workbook, dataType) {
+    try {
+      const worksheet = workbook.Sheets[sheetName];
+      if (!worksheet) {
+        console.warn(`❌ Sheet ${sheetName} 不存在`);
+        return false;
+      }
+
+      // 验证Sheet有效性
+      const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1:A1');
+      const rows = range.e.r - range.s.r + 1;
+      const cols = range.e.c - range.s.c + 1;
+
+      if (rows < 2 || cols < 1) {
+        console.warn(`❌ Sheet ${sheetName} 数据不足: ${rows}行 ${cols}列`);
+        return false;
+      }
+
+      console.log(`✓ Sheet验证通过: ${sheetName} (${rows}行 ${cols}列)`);
+
+      // 处理数据
+      if (dataType === 'table') {
+        return this.processTableSheetStrict(item, worksheet, sheetName);
+      } else if (dataType === 'chart') {
+        return this.processChartSheetStrict(item, worksheet, sheetName);
+      }
+
+      return false;
+    } catch (error) {
+      console.error(`❌ 验证Sheet ${sheetName} 失败:`, error);
+      return false;
+    }
+  }
+
+  // 新增：严格的图表数据处理
+  processChartSheetStrict(item, worksheet, sheetName) {
+    try {
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+      if (!jsonData || jsonData.length < 3) { // 至少需要标题行 + 2行数据
+        console.warn(`❌ 图表数据不足: ${sheetName}`);
+        return false;
+      }
+
+      const chartResult = this.parseChartDataStrict(jsonData, sheetName);
+
+      if (chartResult && this.validateChartData(chartResult)) {
+        // 只在验证通过后才添加数据
+        item.xAxisData = chartResult.xAxisData;
+        item.seriesData = chartResult.seriesData;
+        item.echartMsg = {
+          echartId: Date.now() + Math.floor(Math.random() * 1000),
+          xName: chartResult.xName || 'X轴',
+          yName: chartResult.yName || 'Y轴',
+          minX: chartResult.minX || 0,
+          minY: chartResult.minY || 0
+        };
+
+        console.log(`✅ 严格验证通过: "${item.name}" 图表数据 (${chartResult.seriesData.length} 系列)`);
+        return true;
+      } else {
+        console.warn(`❌ 图表数据验证失败: ${sheetName}`);
+        return false;
+      }
+    } catch (error) {
+      console.error(`❌ 严格处理图表失败 ${sheetName}:`, error);
+      return false;
+    }
+  }
+
+  // 新增：验证图表数据质量
+  validateChartData(chartResult) {
+    if (!chartResult || !chartResult.seriesData || chartResult.seriesData.length === 0) {
+      return false;
+    }
+
+    // 验证每个系列
+    for (const series of chartResult.seriesData) {
+      if (!series.name || !series.data || series.data.length < 2) {
+        console.warn(`❌ 系列数据不足: ${series.name} (${series.data?.length || 0} 点)`);
+        return false;
+      }
+
+      // 验证数据点质量
+      for (const point of series.data) {
+        if (!Array.isArray(point) || point.length !== 2 ||
+            typeof point[0] !== 'number' || typeof point[1] !== 'number' ||
+            isNaN(point[0]) || isNaN(point[1])) {
+          console.warn(`❌ 无效数据点: ${JSON.stringify(point)}`);
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  // 新增：严格的图表数据解析
+  parseChartDataStrict(jsonData, sheetName) {
+    try {
+      const headers = jsonData[0].filter(header =>
+        header !== null && header !== undefined && header !== ''
+      );
+
+      if (headers.length < 2 || headers.length % 2 !== 0) {
+        console.warn(`❌ 图表列数不正确: ${headers.length} (应为偶数)`);
+        return null;
+      }
+
+      return this.parseAlternatingXYFormatStrict(jsonData, headers, sheetName);
+    } catch (error) {
+      console.error(`❌ 严格解析图表数据失败:`, error);
+      return null;
+    }
+  }
+
+  // 新增：严格的XY轴交替格式解析
+  parseAlternatingXYFormatStrict(jsonData, headers, sheetName) {
+    const seriesData = [];
+    const xAxisData = [];
+    let minX = Infinity;
+    let minY = Infinity;
+    let validPointsTotal = 0;
+
+    console.log(`🔍 严格解析XY轴交替格式: ${sheetName}`);
+
+    // 处理成对的XY列
+    for (let i = 0; i < headers.length - 1; i += 2) {
+      const xHeader = headers[i];
+      const yHeader = headers[i + 1];
+
+      if (!xHeader || !yHeader) {
+        console.warn(`⚠ 跳过无效列对: ${i}-${i+1}`);
+        continue;
+      }
+
+      const seriesPoints = [];
+      let validPointsInSeries = 0;
+
+      // 处理数据行
+      for (let rowIndex = 1; rowIndex < jsonData.length; rowIndex++) {
+        const row = jsonData[rowIndex];
+        if (!row || row.length <= i + 1) continue;
+
+        const xValue = row[i];
+        const yValue = row[i + 1];
+
+        // 严格验证数据
+        if (this.isValidNumericValue(xValue) && this.isValidNumericValue(yValue)) {
+          const numericX = Number(xValue);
+          const numericY = Number(yValue);
+
+          // 额外范围检查
+          if (this.isReasonableValue(numericX) && this.isReasonableValue(numericY)) {
+            seriesPoints.push([numericX, numericY]);
+            xAxisData.push(numericX);
+            minX = Math.min(minX, numericX);
+            minY = Math.min(minY, numericY);
+            validPointsInSeries++;
+          }
+        }
+      }
+
+      // 严格要求：每个系列至少3个有效点
+      if (validPointsInSeries >= 3) {
+        const seriesName = this.generateSeriesNameStrict(xHeader, yHeader, i);
+        seriesData.push({
+          name: seriesName,
+          type: 'line',
+          smooth: 'smooth',
+          data: seriesPoints.sort((a, b) => a[0] - b[0])
+        });
+
+        validPointsTotal += validPointsInSeries;
+        console.log(`✓ 系列验证通过: ${seriesName} (${validPointsInSeries} 个有效点)`);
+      } else {
+        console.warn(`❌ 系列数据不足: ${xHeader}-${yHeader} (${validPointsInSeries} 点 < 3)`);
+      }
+    }
+
+    // 严格要求：总有效点数至少10个
+    if (seriesData.length === 0 || validPointsTotal < 10) {
+      console.warn(`❌ 整体数据不足: ${seriesData.length} 系列, ${validPointsTotal} 总点数 < 10`);
+      return null;
+    }
+
+    return {
+      xAxisData: [...new Set(xAxisData)].sort((a, b) => a - b),
+      seriesData: seriesData,
+      xName: '温度(℃)',
+      yName: '应力(MPa)',
+      minX: minX === Infinity ? 0 : Math.floor(minX),
+      minY: minY === Infinity ? 0 : Math.floor(minY)
+    };
+  }
+
+  // 新增：验证数值有效性
+  isValidNumericValue(value) {
+    if (value === null || value === undefined || value === '') return false;
+    const num = Number(value);
+    return !isNaN(num) && isFinite(num);
+  }
+
+  // 新增：验证数值合理性
+  isReasonableValue(value) {
+    // 排除极端值
+    return value > -1e6 && value < 1e6;
+  }
+
+  // 新增：严格生成系列名称
+  generateSeriesNameStrict(xHeader, yHeader, index) {
+    if (String(xHeader).includes('_x') && String(yHeader).includes('_y')) {
+      const xBaseName = String(xHeader).replace(/_x$/i, '').trim();
+      const yBaseName = String(yHeader).replace(/_y$/i, '').trim();
+      return xBaseName === yBaseName ? xBaseName : `${xBaseName}`;
+    }
+
+    return yHeader ? String(yHeader).trim() : `系列${Math.floor(index/2) + 1}`;
   }
 
   // 处理现有的图表数据 - 恢复这个重要方法
@@ -772,69 +1982,47 @@ export class DataProcessor {
     };
   }
 
-  // 新增：解析表格数据
-  parseTableData(jsonData, sheetName) {
-    try {
-      if (!jsonData || jsonData.length < 2) {
-        return null;
-      }
+  // 新增：提取数字模式方法
+  extractNumberPatterns(text) {
+    if (!text) return [];
 
-      // 获取表头（第一行）
-      const headers = jsonData[0].filter(header =>
-        header !== null && header !== undefined && header !== ''
-      );
+    const patterns = [];
 
-      if (headers.length === 0) {
-        console.warn(`表格 ${sheetName} 没有有效的表头`);
-        return null;
-      }
+    // 匹配各种数字格式
+    const numberMatches = [
+      // 匹配 "3.10.1", "2.3", "1.7" 等格式
+      ...text.match(/\d+(\.\d+)+/g) || [],
+      // 匹配单独的数字 "3", "10" 等
+      ...text.match(/(?<!\d)\d+(?!\d|\.\d)/g) || []
+    ];
 
-      // 创建列配置
-      const tableColumns = headers.map(header => ({
-        label: String(header).trim(),
-        prop: String(header).trim()
-      }));
+    // 去重并按长度排序（长的优先）
+    const uniquePatterns = [...new Set(numberMatches)];
+    uniquePatterns.sort((a, b) => b.length - a.length);
 
-      // 处理数据行
-      const tableData = [];
-      for (let i = 1; i < jsonData.length; i++) {
-        const row = jsonData[i];
-        if (!row || row.length === 0) continue;
+    return uniquePatterns;
+  }
 
-        const rowData = {};
-        let hasValidData = false;
+  // 修改：优化关键词提取方法
+  extractKeywords(text) {
+    if (!text) return [];
 
-        for (let j = 0; j < headers.length && j < row.length; j++) {
-          const cellValue = row[j];
-          const header = headers[j];
+    console.log(`   📝 关键词提取 - 输入: "${text}"`);
 
-          if (cellValue !== null && cellValue !== undefined && cellValue !== '') {
-            rowData[header] = String(cellValue).trim();
-            hasValidData = true;
-          } else {
-            rowData[header] = '';
-          }
-        }
+    // 移除标点符号并分割，保留中文、英文和数字
+    const keywords = text
+      .replace(/[，、。！？；：""''（）【】「」/\-_]/g, ' ') // 替换标点为空格
+      .split(/\s+/) // 按空格分割
+      .filter(word => {
+        // 保留长度大于1的词，或者是单个重要字符
+        const isValid = word.length > 1 || /[a-zA-Z0-9]/.test(word);
+        console.log(`      词: "${word}" -> ${isValid ? '保留' : '丢弃'}`);
+        return isValid;
+      })
+      .slice(0, 5); // 取前5个关键词
 
-        if (hasValidData) {
-          tableData.push(rowData);
-        }
-      }
-
-      if (tableData.length === 0) {
-        console.warn(`表格 ${sheetName} 没有有效的数据行`);
-        return null;
-      }
-
-      return {
-        tableData: tableData,
-        tableColumns: tableColumns
-      };
-
-    } catch (error) {
-      console.error(`解析表格数据失败 ${sheetName}:`, error);
-      return null;
-    }
+    console.log(`   🎯 最终关键词: [${keywords.join(', ')}]`);
+    return keywords;
   }
 
   // 新增：处理文件的通用方法

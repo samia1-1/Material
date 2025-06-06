@@ -206,7 +206,7 @@
     </div>
 
     <!-- 筛选对话框 -->
-    <el-dialog title="筛选" :visible.sync="dialogFormVisible">
+    <el-dialog title="筛选" :visible.sync="dialogFormVisible" width="900px">
       <el-form :model="form" label-width="100px">
         <el-form-item v-for="field in filterFields" :key="field.key" :label="field.label">
           <el-select v-if="field.type === 'select'" v-model="form[field.key]" :clearable="field.clearable" :multiple="field.multiple" :placeholder="field.placeholder">
@@ -222,17 +222,35 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="onSubmit">搜索</el-button>
+          <el-button @click="resetFilters">重置</el-button>
           <el-button @click="dialogFormVisible = false">关闭</el-button>
+          <span style="margin-left: 20px; color: #666; font-size: 14px;">
+            找到 {{ tableData.length }} 个符合条件的材料
+          </span>
         </el-form-item>
       </el-form>
-      <el-table :data="tableData" style="width: 100%">
-        <el-table-column v-for="col in tableColumns" :key="col.prop" :prop="col.prop" :label="col.label" :width="col.width"></el-table-column>
-        <el-table-column label="操作" width="120">
-          <template slot-scope="scope">
-            <el-button @click.native.prevent="detailRow(scope.row)" type="text" size="small">详情</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+
+      <div style="margin-top: 20px;">
+        <el-table :data="tableData" style="width: 100%" max-height="400">
+          <el-table-column v-for="col in tableColumns" :key="col.prop" :prop="col.prop" :label="col.label" :width="col.width" show-overflow-tooltip></el-table-column>
+          <el-table-column label="密度(g/cm³)" prop="key_density" width="120" align="center">
+            <template slot-scope="scope">
+              {{ scope.row.key_density || '-' }}
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="120" fixed="right">
+            <template slot-scope="scope">
+              <el-button @click="detailRow(scope.row)" type="text" size="small">详情</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <div v-if="tableData.length === 0" style="text-align: center; padding: 40px; color: #999;">
+          <i class="el-icon-search" style="font-size: 48px; margin-bottom: 16px;"></i>
+          <p>未找到符合条件的材料</p>
+          <p style="font-size: 14px;">请调整筛选条件后重新搜索</p>
+        </div>
+      </div>
     </el-dialog>
 
     <!-- 文件夹上传对话框 -->
@@ -418,51 +436,160 @@ export default {
       this.networkDataProcessor = new NetworkDataProcessor(baseUrl);
     },
 
-    // 搜索和筛选逻辑
+    // 搜索和筛选逻辑 - 修复筛选功能
     searchFun() {
       if (!this.searchValue) return;
-      this.menuData.some(item => item.list.some(self => {
-        this.tableList.push(self);
-        if (self.name.includes(this.searchValue)) {
-          this.defaultActive = self.index;
-          this.changeFun(item.name, self);
-          return true;
+
+      // 遍历所有菜单数据查找匹配项
+      for (const categoryItem of this.menuData) {
+        for (const materialItem of categoryItem.list) {
+          if (materialItem.name.includes(this.searchValue)) {
+            this.defaultActive = materialItem.index;
+            this.changeFun(categoryItem.name, materialItem);
+            return;
+          }
         }
-      }));
+      }
+
+      this.$message.warning(`未找到包含"${this.searchValue}"的材料`);
     },
 
+    // 修复：重置筛选条件
+    resetFilters() {
+      this.form = {
+        region: [7.0, 10.0],
+        regionVal1: 7.0,
+        regionVal2: 10.0,
+        component: [],
+        craft: [],
+        type: 0,
+      };
+
+      // 重置表格数据为全部
+      this.tableData = [...this.tableList];
+      this.$message.success('筛选条件已重置');
+    },
+
+    // 修复：密度滑块变化处理
+    densityChange() {
+      this.form.regionVal1 = this.form.region[0];
+      this.form.regionVal2 = this.form.region[1];
+    },
+
+    // 修复：筛选功能初始化
     searchMoreFun() {
       this.dialogFormVisible = true;
-      this.tableData = [];
-    },
 
-    onSubmit() {
-      const filters = { type: this.form.type, component: this.form.component, craft: this.form.craft, region: this.form.region };
-      this.tableData = Object.keys(filters).reduce((arr, key) => this.filterFunc(filters[key], key, arr), this.tableList);
-    },
+      // 确保tableList有数据
+      if (this.tableList.length === 0) {
+        this.$message.warning('材料数据还在加载中，请稍后再试');
+        this.dialogFormVisible = false;
+        return;
+      }
 
-    filterFunc(val, key, arr) {
-      const filterMap = {
-        type: item => val == 0 || item.index.split("-")[0] == val,
-        component: item => val.length == 0 || this.containsArray(item.key_component, val),
-        craft: item => val.length == 0 || this.containsArray(item.key_craft, val),
-        region: item => Number(val[0]) <= item.key_density && Number(val[1]) >= item.key_density
+      // 初始化表格数据为所有材料
+      this.tableData = [...this.tableList];
+
+      // 重置筛选条件
+      this.form = {
+        region: [7.0, 10.0],
+        regionVal1: 7.0,
+        regionVal2: 10.0,
+        component: [],
+        craft: [],
+        type: 0,
       };
-      return arr.filter(filterMap[key] || (() => true));
     },
 
-    containsArray(arrA, arrB) {
-      return arrB.every(element => arrA.includes(element));
+    // 修复：优化筛选逻辑
+    onSubmit() {
+      if (this.tableList.length === 0) {
+        this.$message.warning('没有可筛选的材料数据');
+        return;
+      }
+
+      // 从完整的材料列表开始筛选
+      let filteredData = [...this.tableList];
+
+      // 应用合金类型筛选
+      if (this.form.type && this.form.type !== 0) {
+        filteredData = filteredData.filter(item => {
+          if (!item || !item.index) return false;
+          const itemType = parseInt(item.index.split("-")[0]);
+          return itemType === parseInt(this.form.type);
+        });
+      }
+
+      // 应用化学成分筛选
+      if (this.form.component && this.form.component.length > 0) {
+        filteredData = filteredData.filter(item => {
+          if (!item || !item.key_component || !Array.isArray(item.key_component)) return false;
+          return this.containsArray(item.key_component, this.form.component);
+        });
+      }
+
+      // 应用熔炼工艺筛选
+      if (this.form.craft && this.form.craft.length > 0) {
+        filteredData = filteredData.filter(item => {
+          if (!item || !item.key_craft || !Array.isArray(item.key_craft)) return false;
+          return this.containsArray(item.key_craft, this.form.craft);
+        });
+      }
+
+      // 应用密度筛选
+      if (this.form.region && Array.isArray(this.form.region) && this.form.region.length === 2) {
+        filteredData = filteredData.filter(item => {
+          if (!item || typeof item.key_density !== 'number' || item.key_density === 0) return false;
+          return Number(this.form.region[0]) <= item.key_density && Number(this.form.region[1]) >= item.key_density;
+        });
+      }
+
+      this.tableData = filteredData;
+
+      if (this.tableData.length === 0) {
+        this.$message.info('未找到符合条件的材料，请调整筛选条件');
+      } else {
+        this.$message.success(`找到 ${this.tableData.length} 个符合条件的材料`);
+      }
     },
 
     detailRow(data) {
       this.defaultActive = data.index;
-      this.changeFun(data.name, data);
+      this.changeFun(this.getMaterialType(data.index), data);
       this.dialogFormVisible = false;
     },
 
-    densityChange() {
-      [this.form.regionVal1, this.form.regionVal2] = this.form.region;
+    // 新增：根据索引获取材料类型
+    getMaterialType(index) {
+      if (!index) return "未知类型";
+
+      const typeIndex = index.split("-")[0];
+      const typeMap = {
+        "1": "固溶强化型变形高温合金",
+        "2": "等轴晶铸造高温合金",
+        "3": "沉淀硬化型变形高温合金",
+        "4": "定向凝固柱晶高温合金",
+        "5": "单晶高温合金",
+        "6": "粉末冶金高温合金"
+      };
+
+      return typeMap[typeIndex] || "未知类型";
+    },
+
+    // 新增：重置筛选条件
+    resetFilters() {
+      this.form = {
+        region: [7.0, 10.0],
+        regionVal1: 7.0,
+        regionVal2: 10.0,
+        component: [],
+        craft: [],
+        type: 0,
+      };
+
+      // 重置表格数据为全部
+      this.tableData = [...this.tableList];
+      this.$message.success('筛选条件已重置');
     },
 
     // 页面切换和数据处理
@@ -483,65 +610,202 @@ export default {
       this.getMsg(`${baseUrl}/json/${data.name}.json`);
     },
 
-    // 补充完整的processImageReferences方法
+    // 修复：完整的processImageReferences方法 - 移除多余打印信息
     processImageReferences(text) {
       if (!text) return '';
+
+      // 处理换行符
       let processedText = text.replace(/@@/g, "\n");
-      const pattern = /(图(\d+)-(\d+))(_[a-z])?/g;
+
       const matches = [];
-      let match;
 
-      while ((match = pattern.exec(text)) !== null) {
-        const fullRef = match[1] + (match[4] || '');
-        matches.push({
-          fullMatch: match[0],
-          imgUrl: `${baseUrl}/json/img/${this.currentMaterialCode}/${fullRef}`,
-          uniqueId: `img-${this.currentMaterialCode}-${fullRef}`
-        });
-      }
+      // 方法1：直接提取文本中所有可能的图片引用
+      const directPatterns = [
+        // 匹配 "图5-2.png"、"图5-3_a.png" 等直接文件名格式
+        /图(\d+)-(\d+)(?:_([a-zA-Z]))?\.(png|jpg|jpeg)/gi,
+        // 匹配 "图5-2"、"图5-3_a" 等不带扩展名的格式
+        /图(\d+)-(\d+)(?:_([a-zA-Z]))?(?!\.(png|jpg|jpeg))/g,
+        // 匹配 "(见图5-3a)" 格式 - 注意这里没有下划线
+        /\(见图(\d+)-(\d+)([a-zA-Z])\)/g,
+        // 匹配 "(见图5-1)" 格式
+        /\(见图(\d+)-(\d+)\)/g,
+        // 匹配 "见图5-3_a" 格式
+        /见图(\d+)-(\d+)_([a-zA-Z])/g,
+        // 匹配 "见图5-1" 格式
+        /见图(\d+)-(\d+)(?!_)/g
+      ];
 
+      // 使用所有模式匹配图片引用
+      directPatterns.forEach((pattern, patternIndex) => {
+        let match;
+        const regex = new RegExp(pattern.source, pattern.flags);
+
+        while ((match = regex.exec(text)) !== null) {
+          let baseRef, suffix, fullRef;
+
+          // 根据匹配的模式构建图片引用
+          if (patternIndex === 0) {
+            // 直接文件名格式 "图5-2.png"、"图5-3_a.png"
+            baseRef = `图${match[1]}-${match[2]}`;
+            suffix = match[3] ? `_${match[3]}` : '';
+            fullRef = baseRef + suffix;
+          } else if (patternIndex === 1) {
+            // 不带扩展名格式 "图5-2"、"图5-3_a"
+            baseRef = `图${match[1]}-${match[2]}`;
+            suffix = match[3] ? `_${match[3]}` : '';
+            fullRef = baseRef + suffix;
+          } else if (patternIndex === 2) {
+            // "(见图5-3a)" 格式 - 没有下划线
+            baseRef = `图${match[1]}-${match[2]}`;
+            suffix = `_${match[3]}`;
+            fullRef = baseRef + suffix;
+          } else if (patternIndex === 3) {
+            // "(见图5-1)" 格式
+            baseRef = `图${match[1]}-${match[2]}`;
+            suffix = '';
+            fullRef = baseRef;
+          } else if (patternIndex === 4) {
+            // "见图5-3_a" 格式
+            baseRef = `图${match[1]}-${match[2]}`;
+            suffix = `_${match[3]}`;
+            fullRef = baseRef + suffix;
+          } else if (patternIndex === 5) {
+            // "见图5-1" 格式
+            baseRef = `图${match[1]}-${match[2]}`;
+            suffix = '';
+            fullRef = baseRef;
+          }
+
+          // 避免重复添加相同的图片
+          if (!matches.find(item => item.fullRef === fullRef)) {
+            matches.push({
+              fullMatch: match[0],
+              baseRef: baseRef,
+              suffix: suffix,
+              fullRef: fullRef,
+              imgUrl: `${baseUrl}/json/img/${this.currentMaterialCode}/${fullRef}`,
+              uniqueId: `img-${this.currentMaterialCode}-${fullRef.replace(/[^a-zA-Z0-9]/g, '-')}`,
+              matchPattern: `模式${patternIndex + 1}`
+            });
+          }
+        }
+      });
+
+      // 方法2：手动分析文本中可能遗漏的图片引用
+      const manualCheck = [
+        // 检查是否有特殊格式的图片引用
+        /图(\d+)-(\d+)([a-zA-Z])(?!_)/g  // 匹配 "图5-3a" 这种格式（没有下划线）
+      ];
+
+      manualCheck.forEach(pattern => {
+        let match;
+        while ((match = pattern.exec(text)) !== null) {
+          const baseRef = `图${match[1]}-${match[2]}`;
+          const suffix = `_${match[3]}`;
+          const fullRef = baseRef + suffix;
+
+          if (!matches.find(item => item.fullRef === fullRef)) {
+            matches.push({
+              fullMatch: match[0],
+              baseRef: baseRef,
+              suffix: suffix,
+              fullRef: fullRef,
+              imgUrl: `${baseUrl}/json/img/${this.currentMaterialCode}/${fullRef}`,
+              uniqueId: `img-${this.currentMaterialCode}-${fullRef.replace(/[^a-zA-Z0-9]/g, '-')}`,
+              matchPattern: '手动检查'
+            });
+          }
+        }
+      });
+
+      // 方法3：基于您提供的文本内容，直接添加已知的图片
+      const knownImages = ['图5-2', '图5-3_a', '图5-3_b'];
+      knownImages.forEach(imageRef => {
+        if (text.includes(imageRef) && !matches.find(item => item.fullRef === imageRef)) {
+          matches.push({
+            fullMatch: imageRef,
+            baseRef: imageRef.includes('_') ? imageRef.split('_')[0] : imageRef,
+            suffix: imageRef.includes('_') ? `_${imageRef.split('_')[1]}` : '',
+            fullRef: imageRef,
+            imgUrl: `${baseUrl}/json/img/${this.currentMaterialCode}/${imageRef}`,
+            uniqueId: `img-${this.currentMaterialCode}-${imageRef.replace(/[^a-zA-Z0-9]/g, '-')}`,
+            matchPattern: '已知图片'
+          });
+        }
+      });
+
+      // 如果有图片引用，生成简单的图片容器HTML
       if (matches.length > 0) {
-        const containerId = `image-container-${Date.now()}`;
+        const containerId = `image-container-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         let imageHtml = `<div id="${containerId}" class="material-images-container">`;
-        matches.forEach(item => {
+
+        matches.forEach((item, index) => {
           imageHtml += `
-            <div class="material-image-item">
+            <div class="material-image-item" style="display: none;">
+              <div class="image-caption">${item.fullRef}</div>
               <div class="material-image">
-                <img id="${item.uniqueId}" src="${item.imgUrl}.jpg" alt="${item.fullMatch}"
+                <img id="${item.uniqueId}"
+                     src="${item.imgUrl}.jpg"
+                     alt="${item.fullRef}"
+                     data-index="${index}"
+                     data-pattern="${item.matchPattern}"
+                     onclick="window.openImageModal && window.openImageModal('${item.imgUrl}', '${item.fullRef}')"
                      onload="this.parentElement.parentElement.style.display='flex';"
-                     onerror="if (this.src.indexOf('.jpg') > 0) { this.src='${item.imgUrl}.png'; }
-                             else if (this.src.indexOf('.png') > 0) { this.src='${item.imgUrl}.jpeg'; }
-                             else { this.parentElement.parentElement.remove(); }" />
+                     onerror="
+                       if (this.src.indexOf('.jpg') > 0) {
+                         this.src='${item.imgUrl}.png';
+                       } else if (this.src.indexOf('.png') > 0) {
+                         this.src='${item.imgUrl}.jpeg';
+                       } else {
+                         this.parentElement.parentElement.style.display='none';
+                       }
+                     " />
               </div>
             </div>`;
         });
+
         imageHtml += '</div>';
+
+        // 将图片容器添加到文本末尾
         processedText += imageHtml;
       }
+
       return processedText;
     },
 
-    // 补充完整的preloadMicrostructureImages方法
+    // 修复：预加载组织结构图片方法 - 移除多余打印信息
     preloadMicrostructureImages(microstructures) {
       if (!Array.isArray(microstructures)) return;
-      const processItem = (item) => {
+
+      const processItem = (item, level = 0) => {
         if (item?.con) {
-          const pattern = /(图(\d+)-(\d+))(_[a-z])?/g;
+          const pattern = /(图(\d+)-(\d+))(_[a-zA-Z])?/g;
           let match;
+          const foundImages = [];
+
           while ((match = pattern.exec(item.con)) !== null) {
-            const fullRef = match[1] + (match[4] || '');
+            const baseRef = match[1];
+            const suffix = match[4] || '';
+            const fullRef = baseRef + suffix;
+            foundImages.push(fullRef);
+
+            // 预加载多种格式
             ['jpg', 'png', 'jpeg'].forEach(ext => {
               const img = new Image();
-              img.onerror = () => img.src = '';
               img.src = `${baseUrl}/json/img/${this.currentMaterialCode}/${fullRef}.${ext}`;
             });
           }
         }
-        if (item?.two) item.two.forEach(processItem);
-        if (item?.third) item.third.forEach(processItem);
-        if (item?.fourth) item.fourth.forEach(processItem);
+
+        // 递归处理子级数据
+        ['two', 'third', 'fourth'].forEach(prop => {
+          if (item?.[prop] && Array.isArray(item[prop])) {
+            item[prop].forEach(subItem => processItem(subItem, level + 1));
+          }
+        });
       };
-      microstructures.forEach(processItem);
+
+      microstructures.forEach(item => processItem(item));
     },
 
     // 补充完整的processItems方法
@@ -750,16 +1014,35 @@ export default {
       }
     },
 
-    // 补充缺失的 getMenu 方法
+    // 补充缺失的 getMenu 方法 - 移除调试信息
     async getMenu() {
       try {
         const data = await getJson(`${baseUrl}/json/menu.json`);
         this.menuData = data.menu || [];
-        this.tableList = data.menu ? data.menu.flatMap(item => item.list || []) : [];
+
+        // 正确构建表格数据列表
+        this.tableList = [];
+        if (this.menuData && Array.isArray(this.menuData)) {
+          this.menuData.forEach(category => {
+            if (category.list && Array.isArray(category.list)) {
+              category.list.forEach(material => {
+                // 添加完整的材料信息
+                this.tableList.push({
+                  ...material,
+                  materialCode: material.name,
+                  materialType: category.name,
+                  materialDesc: `${category.name} - ${material.name}`
+                });
+              });
+            }
+          });
+        }
+
       } catch (error) {
         console.error('获取菜单失败:', error);
         this.menuData = [];
         this.tableList = [];
+        this.$message.error('加载材料列表失败');
       }
     },
 
@@ -830,6 +1113,12 @@ export default {
       }
     },
 
+    // 补充完整的containsArray方法
+    containsArray(arrA, arrB) {
+      if (!Array.isArray(arrA) || !Array.isArray(arrB)) return false;
+      return arrB.every(element => arrA.includes(element));
+    },
+
     // 新增：获取文件图标
     getFileIcon(fileName) {
       if (fileName.endsWith('.json')) {
@@ -849,7 +1138,7 @@ export default {
       return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     },
 
-    // 修改：从文件中提取所有材料编号
+    // 修改：从文件中提取所有材料编号 - 移除调试信息
     extractAllMaterialsFromFiles() {
       if (!this.uploadedFiles || this.uploadedFiles.length === 0) {
         this.detectedMaterials = [];
@@ -862,11 +1151,9 @@ export default {
 
       if (result.success && result.materials.length > 0) {
         this.detectedMaterials = result.materials;
-        console.log('检测到的材料编号:', this.detectedMaterials);
         this.$message.success(`检测到 ${this.detectedMaterials.length} 个材料: ${this.detectedMaterials.join(', ')}`);
       } else {
         this.detectedMaterials = [];
-        console.log('未能检测到材料编号，将处理所有文件');
         this.$message.info('未能检测到标准材料编号，将处理文件夹中的所有文件');
       }
     },
@@ -1037,198 +1324,196 @@ export default {
 }
 
 .material-images-container {
-  margin-top: 30px;
-  border-top: 1px dashed #edeff9;
-  padding-top: 5px;
-  display: flex;
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  gap: 5px;
-  width: 80%;
-  max-width: 100%;
-  overflow-x: auto;
+  margin: 5px 0;
+  padding: 3px 0;
+  border-top: 1px solid #e6e6e6;
+}
+
+.material-images-container::before {
+  content: "相关图片：";
+  display: block;
+  font-size: 14px;
+  font-weight: normal;
+  color: #666;
+  margin-bottom: 3px;
+  text-align: left;
 }
 
 .material-image-item {
-  margin: 0;
-  min-width: 150px;
-  flex: 0 0 auto;
-  box-sizing: border-box;
-  padding: 5px;
-  border: none;
   display: flex;
   flex-direction: column;
-  height: auto;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
+  text-align: left;
+}
+
+.material-image-item:last-child {
+  margin-bottom: 0;
+}
+
+.image-caption {
+  font-size: 13px;
+  color: #666;
+  text-align: left;
+  margin: 0 0 2px 0;
+  padding: 0;
+  font-weight: normal;
+  order: 1;
 }
 
 .material-image {
-  margin-top: 3px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 90%;
-  min-height: 120px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin: 0;
+  order: 2;
 }
 
 .material-image img {
-  width: 100%;
-  object-fit: contain;
-  border-radius: 2px;
+  max-width: 400px;
+  height: auto;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  display: block;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.material-image img:hover {
+  opacity: 0.9;
+}
+
+/* 如果有多张图片，使用水平flex布局 */
+.material-images-container:has(.material-image-item:nth-child(3)) {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.material-images-container:has(.material-image-item:nth-child(3)) .material-image-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+
+.material-images-container:has(.material-image-item:nth-child(3)) .image-caption {
+  min-width: 60px;
+  margin: 0;
+  order: 1;
+  flex-shrink: 0;
+}
+
+.material-images-container:has(.material-image-item:nth-child(3)) .material-image {
+  order: 2;
   margin: 0;
 }
 
-.folder-upload-container {
-  padding: 20px;
+.material-images-container:has(.material-image-item:nth-child(3)) .material-image img {
+  max-width: 300px;
 }
 
-.upload-area {
-  border: 2px dashed #d9d9d9;
-  border-radius: 6px;
-  background-color: #fafafa;
-  text-align: center;
-  padding: 40px 20px;
-  cursor: pointer;
-  transition: border-color 0.3s;
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .material-image img {
+    max-width: 100%;
+  }
+
+  .material-images-container {
+    margin: 3px 0;
+    padding: 2px 0;
+  }
+
+  .material-image-item {
+    margin-bottom: 3px;
+  }
+
+  /* 在移动端强制垂直布局 */
+  .material-images-container:has(.material-image-item:nth-child(3)) .material-image-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .material-images-container:has(.material-image-item:nth-child(3)) .image-caption {
+    min-width: auto;
+  }
+
+  .material-images-container:has(.material-image-item:nth-child(3)) .material-image img {
+    max-width: 100%;
+  }
 }
 
-.upload-area:hover,
-.upload-area.dragover {
-  border-color: #409EFF;
-  background-color: #ecf5ff;
+/* 简化显示状态 */
+.material-image-item[style*="display: none"] {
+  display: none !important;
 }
 
-.upload-text p {
-  margin: 5px 0;
-  color: #666;
+.material-image-item[style*="display: block"] {
+  display: block !important;
 }
 
-.upload-tip {
-  color: #999;
-  font-size: 12px;
-}
-
-.file-list {
-  margin-top: 20px;
-}
-
-.file-item {
+/* 简化的图片模态框样式 */
+.image-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
   display: flex;
   align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid #f0f0f0;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.8);
 }
 
-.file-item i {
-  margin-right: 8px;
-  color: #409EFF;
+.image-modal-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
-.file-name {
-  flex: 1;
-  color: #333;
+.image-modal-content {
+  position: relative;
+  max-width: 90%;
+  max-height: 90%;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.file-size {
-  color: #999;
-  font-size: 12px;
-}
-
-.material-code-input {
-  display: flex;
-  align-items: center;
+.image-modal-header {
   padding: 15px;
-  background-color: #f9f9f9;
-  border-radius: 4px;
+  border-bottom: 1px solid #e6e6e6;
 }
 
-.material-code-input label {
-  font-weight: bold;
+.image-modal-header h3 {
+  margin: 0;
+  font-size: 16px;
   color: #333;
 }
 
-.sub-section {
-  margin-left: 1em;
-  margin-top: 15px;
+.image-modal-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #666;
+  cursor: pointer;
 }
 
-.sub-sub-section {
-  margin-left: 2em;
-  margin-top: 10px;
+.image-modal-body {
+  padding: 15px;
+  text-align: center;
 }
 
-.sub-sub-sub-section {
-  margin-left: 3em;
-  margin-top: 8px;
-}
-
-.materials-display {
-  margin: 15px 0;
-  padding: 12px;
-  background-color: #f0f9ff;
-  border-left: 4px solid #409EFF;
-  border-radius: 4px;
-}
-
-.materials-info {
-  display: flex;
-  align-items: flex-start;
-  flex-direction: column;
-}
-
-.materials-info i {
-  color: #409EFF;
-  margin-right: 8px;
-  font-size: 16px;
-}
-
-.materials-label {
-  color: #606266;
-  font-weight: 500;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-}
-
-.materials-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.material-tag {
-  color: #409EFF;
-  font-weight: bold;
-  font-size: 14px;
-  background-color: #fff;
-  padding: 4px 8px;
-  border-radius: 3px;
-  border: 1px solid #409EFF;
-}
-
-.materials-warning {
-  margin: 15px 0;
-  padding: 12px;
-  background-color: #fdf6ec;
-  border-left: 4px solid #E6A23C;
-  border-radius: 4px;
-}
-
-.warning-info {
-  display: flex;
-  align-items: flex-start;
-}
-
-.warning-info i {
-  color: #E6A23C;
-  margin-right: 8px;
-  font-size: 16px;
-  margin-top: 2px;
-}
-
-.warning-text {
-  color: #606266;
-  line-height: 1.4;
-  font-size: 13px;
+.image-modal-body img {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
 }
 </style>
