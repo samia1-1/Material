@@ -19,9 +19,10 @@
           </div>
 
           <el-menu :default-active="defaultActive" :unique-opened="true">
-            <el-submenu :index="item.index" v-for="(item,index) in menuData" :key="index">
+            <el-submenu :index="item.index" v-for="(item, index) in menuData" :key="index">
               <template slot="title">{{ item.name }}</template>
-              <el-menu-item @click="changeFun(item.name,self)" v-for="(self,key) in item.list" :key="key" :index="self.index">{{self.name }}</el-menu-item>
+              <el-menu-item @click="changeFun(item.name, self)" v-for="(self, key) in item.list" :key="key"
+                :index="self.index">{{ self.name }}</el-menu-item>
             </el-submenu>
           </el-menu>
         </el-aside>
@@ -29,7 +30,7 @@
         <el-container>
           <el-main>
             <el-breadcrumb separator-class="el-icon-arrow-right">
-              <el-breadcrumb-item>{{name1}}</el-breadcrumb-item>
+              <el-breadcrumb-item>{{ name1 }}</el-breadcrumb-item>
               <el-breadcrumb-item>{{ name2 }}</el-breadcrumb-item>
             </el-breadcrumb>
 
@@ -44,17 +45,14 @@
 
               <div class="nr">
                 <!-- 修改：完整的递归数据渲染模板 -->
-                <div v-if="introduce.length>0" v-for="(item,index) in introduce" :key="index">
-                  <div class="tit1">{{item.name}}</div>
+                <div v-if="introduce.length > 0" v-for="(item, index) in introduce" :key="index">
+                  <div class="tit1">{{ item.name }}</div>
                   <div class="txt" v-html="processImageReferences(item.con)"></div>
 
                   <!-- 一级表格 -->
                   <div class="table1" v-if="item.tableData">
                     <el-table size="mini" :data="item.tableData" style="width: 100%">
-                      <el-table-column
-                        v-for="column in item.tableColumns"
-                        :key="column.prop"
-                        :prop="column.prop"
+                      <el-table-column v-for="column in item.tableColumns" :key="column.prop" :prop="column.prop"
                         :label="column.label">
                       </el-table-column>
                     </el-table>
@@ -65,10 +63,7 @@
                     <div v-for="(table, tableIndex) in item.multipleTables" :key="tableIndex" class="table-item">
                       <div class="table-title">{{ table.title }}</div>
                       <el-table size="mini" :data="table.tableData" style="width: 100%; margin-bottom: 20px;">
-                        <el-table-column
-                          v-for="column in table.tableColumns"
-                          :key="column.prop"
-                          :prop="column.prop"
+                        <el-table-column v-for="column in table.tableColumns" :key="column.prop" :prop="column.prop"
                           :label="column.label">
                         </el-table-column>
                       </el-table>
@@ -90,17 +85,14 @@
 
                   <!-- 递归处理二级数据 -->
                   <template v-if="item.two">
-                    <div v-for="(self,key) in item.two" :key="`two-${key}`" class="sub-level">
-                      <div class="tit2">{{self.name}}</div>
+                    <div v-for="(self, key) in item.two" :key="`two-${key}`" class="sub-level">
+                      <div class="tit2">{{ self.name }}</div>
                       <div class="txt" v-html="processImageReferences(self.con)"></div>
 
                       <!-- 二级表格 -->
                       <div class="table1" v-if="self.tableData">
                         <el-table size="mini" :data="self.tableData" style="width: 100%">
-                          <el-table-column
-                            v-for="column in self.tableColumns"
-                            :key="column.prop"
-                            :prop="column.prop"
+                          <el-table-column v-for="column in self.tableColumns" :key="column.prop" :prop="column.prop"
                             :label="column.label">
                           </el-table-column>
                         </el-table>
@@ -111,10 +103,7 @@
                         <div v-for="(table, tableIndex) in self.multipleTables" :key="tableIndex" class="table-item">
                           <div class="table-title">{{ table.title }}</div>
                           <el-table size="mini" :data="table.tableData" style="width: 100%; margin-bottom: 20px;">
-                            <el-table-column
-                              v-for="column in table.tableColumns"
-                              :key="column.prop"
-                              :prop="column.prop"
+                            <el-table-column v-for="column in table.tableColumns" :key="column.prop" :prop="column.prop"
                               :label="column.label">
                             </el-table-column>
                           </el-table>
@@ -136,32 +125,27 @@
 
                       <!-- 递归处理三级数据 -->
                       <template v-if="self.third">
-                        <div v-for="(option,num) in self.third" :key="`third-${num}`" class="sub-level">
-                          <div class="tit3">{{option.name}}</div>
+                        <div v-for="(option, num) in self.third" :key="`third-${num}`" class="sub-level">
+                          <div class="tit3">{{ option.name }}</div>
                           <div class="txt" v-html="processImageReferences(option.con)"></div>
 
                           <!-- 三级表格 -->
                           <div class="table1" v-if="option.tableData">
                             <el-table size="mini" :data="option.tableData" style="width: 100%">
-                              <el-table-column
-                                v-for="column in option.tableColumns"
-                                :key="column.prop"
-                                :prop="column.prop"
-                                :label="column.label">
+                              <el-table-column v-for="column in option.tableColumns" :key="column.prop"
+                                :prop="column.prop" :label="column.label">
                               </el-table-column>
                             </el-table>
                           </div>
 
                           <!-- 三级多个独立表格 -->
                           <div v-if="option.multipleTables" class="multiple-tables">
-                            <div v-for="(table, tableIndex) in option.multipleTables" :key="tableIndex" class="table-item">
+                            <div v-for="(table, tableIndex) in option.multipleTables" :key="tableIndex"
+                              class="table-item">
                               <div class="table-title">{{ table.title }}</div>
                               <el-table size="mini" :data="table.tableData" style="width: 100%; margin-bottom: 20px;">
-                                <el-table-column
-                                  v-for="column in table.tableColumns"
-                                  :key="column.prop"
-                                  :prop="column.prop"
-                                  :label="column.label">
+                                <el-table-column v-for="column in table.tableColumns" :key="column.prop"
+                                  :prop="column.prop" :label="column.label">
                                 </el-table-column>
                               </el-table>
                             </div>
@@ -174,7 +158,8 @@
 
                           <!-- 三级多个独立图表 -->
                           <div v-if="option.multipleCharts" class="multiple-charts">
-                            <div v-for="(chart, chartIndex) in option.multipleCharts" :key="chartIndex" class="chart-item">
+                            <div v-for="(chart, chartIndex) in option.multipleCharts" :key="chartIndex"
+                              class="chart-item">
                               <div class="chart-title">{{ chart.title }}</div>
                               <div :id="`echarts${chart.echartMsg.echartId}`" class="echart"></div>
                             </div>
@@ -182,32 +167,29 @@
 
                           <!-- 递归处理四级数据 -->
                           <template v-if="option.fourth">
-                            <div v-for="(fourth,fourthIndex) in option.fourth" :key="`fourth-${fourthIndex}`" class="sub-level">
-                              <div class="tit4">{{fourth.name}}</div>
+                            <div v-for="(fourth, fourthIndex) in option.fourth" :key="`fourth-${fourthIndex}`"
+                              class="sub-level">
+                              <div class="tit4">{{ fourth.name }}</div>
                               <div class="txt" v-html="processImageReferences(fourth.con)"></div>
 
                               <!-- 四级表格 -->
                               <div class="table1" v-if="fourth.tableData">
                                 <el-table size="mini" :data="fourth.tableData" style="width: 100%">
-                                  <el-table-column
-                                    v-for="column in fourth.tableColumns"
-                                    :key="column.prop"
-                                    :prop="column.prop"
-                                    :label="column.label">
+                                  <el-table-column v-for="column in fourth.tableColumns" :key="column.prop"
+                                    :prop="column.prop" :label="column.label">
                                   </el-table-column>
                                 </el-table>
                               </div>
 
                               <!-- 四级多个独立表格 -->
                               <div v-if="fourth.multipleTables" class="multiple-tables">
-                                <div v-for="(table, tableIndex) in fourth.multipleTables" :key="tableIndex" class="table-item">
+                                <div v-for="(table, tableIndex) in fourth.multipleTables" :key="tableIndex"
+                                  class="table-item">
                                   <div class="table-title">{{ table.title }}</div>
-                                  <el-table size="mini" :data="fourth.tableData" style="width: 100%; margin-bottom: 20px;">
-                                    <el-table-column
-                                      v-for="column in fourth.tableColumns"
-                                      :key="column.prop"
-                                      :prop="column.prop"
-                                      :label="column.label">
+                                  <el-table size="mini" :data="fourth.tableData"
+                                    style="width: 100%; margin-bottom: 20px;">
+                                    <el-table-column v-for="column in fourth.tableColumns" :key="column.prop"
+                                      :prop="column.prop" :label="column.label">
                                     </el-table-column>
                                   </el-table>
                                 </div>
@@ -220,7 +202,8 @@
 
                               <!-- 四级多个独立图表 -->
                               <div v-if="fourth.multipleCharts" class="multiple-charts">
-                                <div v-for="(chart, chartIndex) in fourth.multipleCharts" :key="chartIndex" class="chart-item">
+                                <div v-for="(chart, chartIndex) in fourth.multipleCharts" :key="chartIndex"
+                                  class="chart-item">
                                   <div class="chart-title">{{ chart.title }}</div>
                                   <div :id="`echarts${chart.echartMsg.echartId}`" class="echart"></div>
                                 </div>
@@ -244,50 +227,33 @@
       <el-form :model="form" label-width="100px">
         <el-form-item label="合金类型:">
           <el-select v-model="form.type" clearable placeholder="请选择">
-            <el-option
-              v-for="item in typeList"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
+            <el-option v-for="item in typeList" :key="item.value" :label="item.label" :value="item.value">
             </el-option>
           </el-select>
         </el-form-item>
 
         <el-form-item label="化学成分:">
           <el-select v-model="form.component" clearable multiple placeholder="请选择">
-            <el-option
-              v-for="item in componentList"
-              :key="item.prop"
-              :label="item.label"
-              :value="item.prop">
+            <el-option v-for="item in componentList" :key="item.prop" :label="item.label" :value="item.prop">
             </el-option>
           </el-select>
         </el-form-item>
 
         <el-form-item label="熔炼工艺:">
           <el-select v-model="form.craft" clearable multiple placeholder="请选择">
-            <el-option
-              v-for="item in craftList"
-              :key="item.prop"
-              :label="item.label"
-              :value="item.value">
+            <el-option v-for="item in craftList" :key="item.prop" :label="item.label" :value="item.value">
             </el-option>
           </el-select>
         </el-form-item>
 
         <el-form-item label="合金密度:">
           <div class="block sliderBox">
-            <el-slider
-              v-model="form.region"
-              range
-              :step="0.02"
-              @change="densityChange"
-              :min="7"
-              :max="10">
+            <el-slider v-model="form.region" range :step="0.02" @change="densityChange" :min="7" :max="10">
             </el-slider>
           </div>
           <el-input disabled v-model="form.regionVal1" style="width: 60px;margin-left: 5px;"></el-input>~
-          <el-input disabled v-model="form.regionVal2" style="width: 60px;margin-left: 5px;margin-right: 5px;"></el-input>g/cm³
+          <el-input disabled v-model="form.regionVal2"
+            style="width: 60px;margin-left: 5px;margin-right: 5px;"></el-input>g/cm³
         </el-form-item>
 
         <el-form-item>
@@ -317,19 +283,10 @@
       <div class="folder-upload-container">
 
         <!-- 上传区域 -->
-        <div class="upload-area"
-             :class="{ dragover: isDragOver }"
-             @drop="handleDrop"
-             @dragover="handleDragOver"
-             @dragleave="handleDragLeave"
-             @click="triggerFileInput">
-          <input ref="folderInput"
-                 type="file"
-                 webkitdirectory
-                 directory
-                 multiple
-                 style="display: none;"
-                 @change="handleFolderSelect">
+        <div class="upload-area" :class="{ dragover: isDragOver }" @drop="handleDrop" @dragover="handleDragOver"
+          @dragleave="handleDragLeave" @click="triggerFileInput">
+          <input ref="folderInput" type="file" webkitdirectory directory multiple style="display: none;"
+            @change="handleFolderSelect">
           <i class="el-icon-upload"></i>
           <div class="upload-text">
             <p>选择包含材料文件的文件夹</p>
@@ -341,14 +298,14 @@
         <div v-if="folderAnalysis" class="file-analysis">
           <h4>📁 检测结果</h4>
           <div class="stats">
-            <span>总文件: {{folderAnalysis.statistics.totalFiles}}</span>
-            <span>材料数: {{folderAnalysis.statistics.materialsCount}}</span>
-            <span>可处理: {{folderAnalysis.statistics.readyMaterials}}</span>
+            <span>总文件: {{ folderAnalysis.statistics.totalFiles }}</span>
+            <span>材料数: {{ folderAnalysis.statistics.materialsCount }}</span>
+            <span>可处理: {{ folderAnalysis.statistics.readyMaterials }}</span>
           </div>
 
           <div class="materials-grid">
             <div v-for="material in folderAnalysis.materials" :key="material.code" class="material-item">
-              <span class="material-code">{{material.code}}</span>
+              <span class="material-code">{{ material.code }}</span>
               <div class="file-types">
                 <span v-if="material.hasJson" class="file-type json">J</span>
                 <span v-if="material.hasTableExcel" class="file-type table">T</span>
@@ -362,24 +319,23 @@
         <div v-if="isProcessing" class="processing">
           <h4>🔄 处理中...</h4>
           <el-progress :percentage="processProgress.progress"></el-progress>
-          <p>{{processProgress.currentMaterial}} ({{processProgress.current}}/{{processProgress.total}})</p>
+          <p>{{ processProgress.currentMaterial }} ({{ processProgress.current }}/{{ processProgress.total }})</p>
         </div>
 
         <!-- 简化的处理结果 -->
         <div v-if="batchResults" class="results">
           <h4>✅ 处理完成</h4>
           <div class="result-stats">
-            <el-tag type="success">成功: {{batchResults.summary.processed}}</el-tag>
-            <el-tag type="danger" v-if="batchResults.summary.failed > 0">失败: {{batchResults.summary.failed}}</el-tag>
-            <el-tag type="warning" v-if="batchResults.summary.skipped > 0">跳过: {{batchResults.summary.skipped}}</el-tag>
+            <el-tag type="success">成功: {{ batchResults.summary.processed }}</el-tag>
+            <el-tag type="danger" v-if="batchResults.summary.failed > 0">失败: {{ batchResults.summary.failed }}</el-tag>
+            <el-tag type="warning" v-if="batchResults.summary.skipped > 0">跳过: {{ batchResults.summary.skipped }}</el-tag>
           </div>
 
           <div class="processed-materials">
-            <div v-for="(data, materialCode) in batchResults.processedMaterials"
-                 :key="materialCode"
-                 class="processed-item">
-              <span>{{materialCode}}</span>
-              <span>{{getDataItemsCount(data)}} 项</span>
+            <div v-for="(data, materialCode) in batchResults.processedMaterials" :key="materialCode"
+              class="processed-item">
+              <span>{{ materialCode }}</span>
+              <span>{{ getDataItemsCount(data) }} 项</span>
             </div>
           </div>
         </div>
@@ -387,10 +343,8 @@
 
       <div slot="footer">
         <el-button @click="folderUploadVisible = false">关闭</el-button>
-        <el-button v-if="folderAnalysis && !isProcessing && !batchResults"
-                   type="primary"
-                   @click="startBatchProcessing"
-                   :disabled="folderAnalysis.statistics.readyMaterials === 0">
+        <el-button v-if="folderAnalysis && !isProcessing && !batchResults" type="primary" @click="startBatchProcessing"
+          :disabled="folderAnalysis.statistics.readyMaterials === 0">
           开始处理
         </el-button>
         <el-button v-if="batchResults" type="success" @click="downloadBatchResults">
@@ -445,43 +399,43 @@ export default {
 
       // 配置数据
       componentList: [
-        {"label":"C","prop":"C"},{"label":"Cr","prop":"Cr"},{"label":"Ni","prop":"Ni"},
-        {"label":"W","prop":"W"},{"label":"Mo","prop":"Mo"},{"label":"Fe","prop":"Fe"},
-        {"label":"Nb","prop":"Nb"},{"label":"B","prop":"B"},{"label":"Ce","prop":"Ce"},
-        {"label":"Mn","prop":"Mn"},{"label":"Si","prop":"Si"},{"label":"P","prop":"P"},
-        {"label":"S","prop":"S"},{"label":"Cu","prop":"Cu"},{"label":"V","prop":"V"},
-        {"label":"N","prop":"N"},{"label":"Al","prop":"Al"},{"label":"Ti","prop":"Ti"},
-        {"label":"Co","prop":"Co"},{"label":"Sn","prop":"Sn"},{"label":"Pb","prop":"Pb"},
-        {"label":"Zr","prop":"Zr"},{"label":"La","prop":"La"},{"label":"Sb","prop":"Sb"},
-        {"label":"As","prop":"As"},{"label":"Bi","prop":"Bi"},{"label":"Ta","prop":"Ta"},
-        {"label":"Se","prop":"Se"},{"label":"Ag","prop":"Ag"},{"label":"Mg","prop":"Mg"},
-        {"label":"Hf","prop":"Hf"},{"label":"Ga","prop":"Ga"},{"label":"In","prop":"In"},
-        {"label":"Te","prop":"Te"},{"label":"Tl","prop":"Tl"},{"label":"Zn","prop":"Zn"},
-        {"label":"Cd","prop":"Cd"}
+        { "label": "C", "prop": "C" }, { "label": "Cr", "prop": "Cr" }, { "label": "Ni", "prop": "Ni" },
+        { "label": "W", "prop": "W" }, { "label": "Mo", "prop": "Mo" }, { "label": "Fe", "prop": "Fe" },
+        { "label": "Nb", "prop": "Nb" }, { "label": "B", "prop": "B" }, { "label": "Ce", "prop": "Ce" },
+        { "label": "Mn", "prop": "Mn" }, { "label": "Si", "prop": "Si" }, { "label": "P", "prop": "P" },
+        { "label": "S", "prop": "S" }, { "label": "Cu", "prop": "Cu" }, { "label": "V", "prop": "V" },
+        { "label": "N", "prop": "N" }, { "label": "Al", "prop": "Al" }, { "label": "Ti", "prop": "Ti" },
+        { "label": "Co", "prop": "Co" }, { "label": "Sn", "prop": "Sn" }, { "label": "Pb", "prop": "Pb" },
+        { "label": "Zr", "prop": "Zr" }, { "label": "La", "prop": "La" }, { "label": "Sb", "prop": "Sb" },
+        { "label": "As", "prop": "As" }, { "label": "Bi", "prop": "Bi" }, { "label": "Ta", "prop": "Ta" },
+        { "label": "Se", "prop": "Se" }, { "label": "Ag", "prop": "Ag" }, { "label": "Mg", "prop": "Mg" },
+        { "label": "Hf", "prop": "Hf" }, { "label": "Ga", "prop": "Ga" }, { "label": "In", "prop": "In" },
+        { "label": "Te", "prop": "Te" }, { "label": "Tl", "prop": "Tl" }, { "label": "Zn", "prop": "Zn" },
+        { "label": "Cd", "prop": "Cd" }
       ],
 
       craftList: [
-        {"label":"电弧炉","value":1},
-        {"label":"电渣重熔","value":2},
-        {"label":"真空电弧重熔","value":3},
-        {"label":"非真空感应炉","value":4},
-        {"label":"真空感应炉","value":5},
-        {"label":"真空双联熔炼","value":6},
-        {"label":"电弧炉+真空自耗重熔","value":7},
-        {"label":"电弧炉+电渣重熔","value":8},
-        {"label":"电弧炉+真空电弧重熔","value":9},
-        {"label":"非真空感应炉+真空电弧重熔","value":10},
-        {"label":"非真空感应炉+电渣重熔","value":11},
-        {"label":"非真空感应炉+真空自耗","value":12},
-        {"label":"真空感应炉+电渣重熔","value":13},
-        {"label":"真空感应炉+真空自耗","value":14}
+        { "label": "电弧炉", "value": 1 },
+        { "label": "电渣重熔", "value": 2 },
+        { "label": "真空电弧重熔", "value": 3 },
+        { "label": "非真空感应炉", "value": 4 },
+        { "label": "真空感应炉", "value": 5 },
+        { "label": "真空双联熔炼", "value": 6 },
+        { "label": "电弧炉+真空自耗重熔", "value": 7 },
+        { "label": "电弧炉+电渣重熔", "value": 8 },
+        { "label": "电弧炉+真空电弧重熔", "value": 9 },
+        { "label": "非真空感应炉+真空电弧重熔", "value": 10 },
+        { "label": "非真空感应炉+电渣重熔", "value": 11 },
+        { "label": "非真空感应炉+真空自耗", "value": 12 },
+        { "label": "真空感应炉+电渣重熔", "value": 13 },
+        { "label": "真空感应炉+真空自耗", "value": 14 }
       ],
 
       typeList: [
-        {"label":"请选择","value":0},
-        {"label":"固溶强化型变形高温合金","value":1},
-        {"label":"等轴晶铸造高温合金","value":2},
-        {"label":"定向凝固柱晶高温合金","value":3},
+        { "label": "请选择", "value": 0 },
+        { "label": "固溶强化型变形高温合金", "value": 1 },
+        { "label": "等轴晶铸造高温合金", "value": 2 },
+        { "label": "定向凝固柱晶高温合金", "value": 3 },
       ],
 
       // 新增：文件夹上传相关
@@ -762,6 +716,9 @@ export default {
 
     // 图表配置
     initChart1(Chart, xAxisData, seriesData, echartMsg) {
+      // 新增：对所有系列数据进行排序
+      const sortedSeriesData = this.sortSeriesDataByX(seriesData);
+
       let option = {
         color: ['#43b1fd', '#1bddb5', '#fe708d', '#e7e734', '#1fdaeb', '#cf48c9', '#ffb129', '#1b11fe'],
         tooltip: {
@@ -824,13 +781,52 @@ export default {
             show: true
           },
         }],
-        series: seriesData
+        series: sortedSeriesData // 使用排序后的数据
       };
 
       if (Chart) {
         Chart.clear();
       }
       Chart.setOption(option, true);
+    },
+
+    // 新增：数据排序方法
+    sortSeriesDataByX(seriesData) {
+      if (!Array.isArray(seriesData)) {
+        console.warn('⚠️ seriesData 不是数组:', seriesData);
+        return seriesData;
+      }
+
+      return seriesData.map((series, index) => {
+        if (!series || !Array.isArray(series.data)) {
+          console.warn(`⚠️ 系列 ${index} 数据格式异常:`, series);
+          return series;
+        }
+
+        // 创建系列副本避免修改原数据
+        const sortedSeries = { ...series };
+
+        // 按X轴坐标（第一个元素）排序
+        sortedSeries.data = [...series.data].sort((a, b) => {
+          // 确保数据点是数组格式 [x, y]
+          if (!Array.isArray(a) || !Array.isArray(b)) {
+            console.warn('⚠️ 数据点格式异常:', { a, b });
+            return 0;
+          }
+
+          const xA = parseFloat(a[0]);
+          const xB = parseFloat(b[0]);
+
+          if (isNaN(xA) || isNaN(xB)) {
+            console.warn('⚠️ X坐标非数值:', { xA, xB, a, b });
+            return 0;
+          }
+
+          return xA - xB; // 升序排列
+        });
+
+        return sortedSeries;
+      });
     },
 
     // 新增：显示文件夹上传对话框
@@ -1096,20 +1092,27 @@ export default {
 
       if (matches.length > 0) {
         const containerId = `image-container-${Date.now()}`;
-        let imageHtml = `<div id="${containerId}" class="material-images-container">`;
+        // 修改：增大容器最大宽度，减少右侧留白
+        let imageHtml = `<div id="${containerId}" class="material-images-container" style="margin: 0; padding: 0; line-height: 1; font-size: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 0; width: 100%; max-width: 800px;">`;
 
         matches.forEach((item, index) => {
-          // 修改：使用flex布局显示，压缩上下间距
+          // 修改：增大图片项最大宽度，让图片显示更大
           imageHtml += `
-            <div class="material-image-item" style="display: none;" data-base-ref="${item.baseRef}">
-              <div class="image-caption">${item.cleanRef}</div>
-              <div class="material-image">
+            <div class="material-image-item" style="display: none; margin: 0; padding: 0; line-height: 1; flex-shrink: 0; width: auto; max-width: 600px;" data-base-ref="${item.baseRef}">
+              <div class="image-caption" style="margin: 0; margin-bottom: 3px; padding: 3px 8px; font-size: 13px; color: #666; background: #f5f5f5; border-radius: 4px; font-weight: 500; width: fit-content; line-height: 1.3; display: inline-block;">${item.cleanRef}</div>
+              <div class="material-image" style="margin: 0; margin-bottom: 12px; padding: 3px; display: flex; align-items: center; justify-content: flex-start; width: 100%; max-width: 600px; min-height: 80px; border: 1px solid #ddd; border-radius: 8px; background: #fafafa; overflow: hidden; line-height: 1; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
                 <img id="${item.uniqueId}"
                      alt="${item.cleanRef}"
+                     style="width: 100%; height: auto; object-fit: contain; border-radius: 6px; margin: 0; padding: 0; max-height: 350px; max-width: 100%; display: block; line-height: 1;"
                      onload="console.log('✅ 图片加载成功:', this.src);
-                             this.parentElement.parentElement.style.display='flex';
-                             this.parentElement.parentElement.style.flexDirection='column';
-                             this.parentElement.parentElement.style.alignItems='flex-start';"
+                             var container = this.parentElement.parentElement;
+                             container.style.display='flex';
+                             container.style.flexDirection='column';
+                             container.style.alignItems='flex-start';
+                             container.style.margin='0';
+                             container.style.marginBottom='15px';
+                             container.style.padding='0';
+                             container.style.lineHeight='1';"
                      onerror="console.log('❌ 图片加载失败:', this.src);
                              var formats = ['.jpg', '.png', '.jpeg'];
                              var currentSrc = this.src;
@@ -1132,8 +1135,28 @@ export default {
         imageHtml += '</div>';
         processedText += imageHtml;
 
-        // 修改：延迟加载图片，避免立即触发所有请求
+        // 修改：优化加载后的样式设置
         setTimeout(() => {
+          const container = document.getElementById(containerId);
+          if (container) {
+            container.style.marginTop = '12px';
+            container.style.marginBottom = '18px';
+            container.style.paddingLeft = '0';
+            container.style.width = '100%';
+            container.style.maxWidth = '750px';
+
+            // 为图片项设置适当的间距
+            const imageItems = container.querySelectorAll('.material-image-item');
+            imageItems.forEach((item, index) => {
+              item.style.marginBottom = '15px';
+              item.style.width = '100%';
+              item.style.maxWidth = '580px';
+              if (index === imageItems.length - 1) {
+                item.style.marginBottom = '8px'; // 最后一个图片项较小间距
+              }
+            });
+          }
+
           matches.forEach((item, index) => {
             setTimeout(() => {
               const imgElement = document.getElementById(item.uniqueId);
@@ -1386,7 +1409,7 @@ export default {
   white-space: pre-wrap;
   line-height: 28px;
   color: #333;
-  margin-bottom: 0; /* 确保文本底部没有多余边距 */
+  margin-bottom: 0;
 }
 
 .echart {
@@ -1413,202 +1436,4 @@ export default {
   width: 600px;
 }
 
-.material-images-container {
-  margin-top: -5px;
-  margin-bottom: -5px;
-  border-top: 0px dashed #edeff9;
-  padding-top: 0px;
-  padding-bottom: 0px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0px;
-  width: 100%;
-  max-width: 100%;
-  line-height: 1;
-}
-
-.material-image-item {
-  margin: 0;
-  margin-top: -20px;
-  margin-bottom: -20px;
-  width: auto;
-  max-width: 300px;
-  box-sizing: border-box;
-  padding: 0;
-  border: none;
-  display: none;
-  flex-direction: column;
-  align-items: flex-start;
-  line-height: 1;
-  vertical-align: top;
-}
-
-.image-caption {
-  text-align: left;
-  font-size: 12px;
-  color: #666;
-  margin-top: -10px;
-  margin-bottom: -10px;
-  padding: 1px 3px;
-  background: #f0f0f0;
-  border-radius: 2px;
-  font-weight: 500;
-  width: fit-content;
-  line-height: 1;
-  height: auto;
-}
-
-.material-image {
-  margin-top: -10px;
-  margin-bottom: -10px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  width: 100%;
-  min-height: 50px;
-  border: 1px solid #eee;
-  border-radius: 4px;
-  background: #f9f9f9;
-  overflow: hidden;
-  padding: 1px;
-  line-height: 1;
-}
-
-.material-image img {
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-  border-radius: 2px;
-  margin: 0;
-  margin-top: -1px; /* 图片向上负边距 */
-  padding: 0;
-  max-height: 120px;
-  display: block;
-  line-height: 1;
-  transform: translateY(-1px); /* 图片向上偏移1px */
-}
-
-/* 修改：处理相邻图片项的负边距 */
-.material-image-item + .material-image-item {
-  margin-top: -4px; /* 相邻图片项更大的负边距 */
-  border-top: none;
-  transform: translateY(-2px); /* 相邻项额外向上偏移2px */
-}
-
-/* 修改：强制压缩容器内元素间距 */
-.material-images-container > .material-image-item {
-  padding: 0;
-  margin: 0;
-  margin-top: -3px; /* 容器内图片项负边距 */
-  margin-bottom: -1px;
-}
-
-/* 修改：标题与图片之间使用负边距 */
-.material-image-item > .image-caption {
-  padding: 1px 3px;
-  margin-bottom: -2px; /* 标题与图片间负边距 */
-  transform: translateY(-1px);
-}
-
-.material-image-item > .material-image {
-  padding: 1px;
-  margin-top: -2px; /* 图片容器负边距 */
-  margin-bottom: 0;
-  transform: translateY(-1px);
-}
-
-/* 修改：文本与图片容器使用负边距连接 */
-.content .nr .txt + .material-images-container {
-  margin-top: -8px; /* 完全移除间距：从1px改为0px */
-  transform: translateY(-3px); /* 额外向上偏移 */
-}
-
-/* 新增：第一个图片项特殊处理 */
-.material-image-item:first-child {
-  margin-top: -5px; /* 第一个图片项更大负边距 */
-  transform: translateY(-3px); /* 第一个图片项更大偏移 */
-}
-
-/* 新增：最后一个图片项特殊处理 */
-.material-image-item:last-child {
-  margin-bottom: -3px; /* 最后一个图片项负边距 */
-  transform: translateY(-2px);
-}
-
-/* 修改：响应式布局使用更大负边距 */
-@media (max-width: 768px) {
-  .material-images-container {
-    gap: 0px;
-    margin-top: -8px; /* 小屏幕更大负边距 */
-    margin-bottom: -5px;
-    padding-top: 0px;
-    padding-bottom: 0px;
-    transform: translateY(-5px); /* 小屏幕更大偏移 */
-  }
-
-  .material-image-item {
-    max-width: 250px;
-    margin-top: -3px; /* 小屏幕负边距 */
-    margin-bottom: -2px;
-    transform: translateY(-2px);
-  }
-
-  .material-image-item + .material-image-item {
-    margin-top: -5px; /* 小屏幕相邻项更大负边距 */
-    transform: translateY(-3px);
-  }
-
-  .material-image {
-    min-height: 40px;
-    padding: 0px;
-    margin-top: -2px;
-    margin-bottom: -1px;
-    transform: translateY(-1px);
-  }
-
-  .material-image img {
-    max-height: 80px;
-    margin-top: -1px;
-    transform: translateY(-1px);
-  }
-
-  .image-caption {
-    font-size: 11px;
-    margin-top: -2px;
-    margin-bottom: -2px;
-    padding: 0px 2px;
-    transform: translateY(-1px);
-  }
-
-  .content .nr .txt + .material-images-container {
-    margin-top: -10px; /* 小屏幕文本与图片间更大负边距 */
-    transform: translateY(-5px);
-  }
-}
-
-/* 新增：强制覆盖任何可能的默认间距 */
-.material-images-container * {
-  box-sizing: border-box;
-}
-
-/* 新增：使用绝对定位进一步压缩（可选） */
-.material-image-item[style*="display: flex"] {
-  flex-shrink: 0;
-  flex-grow: 0;
-  flex-basis: auto;
-  align-self: flex-start;
-  position: relative; /* 启用相对定位以便使用transform */
-}
-
-/* 新增：容器内强制紧凑布局 */
-.material-images-container {
-  font-size: 0;
-  position: relative; /* 启用相对定位 */
-}
-
-.material-images-container > .material-image-item {
-  font-size: initial;
-  position: relative; /* 每个图片项启用相对定位 */
-}
 </style>
