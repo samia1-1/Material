@@ -10,11 +10,11 @@
               <el-button slot="append" @click="searchMoreFun" icon="el-icon-menu"></el-button>
             </el-input>
 
-            <!-- <div style="margin-top: 10px;">
+            <div style="margin-top: 10px;">
               <el-button type="primary" size="mini" @click="showFolderUpload" icon="el-icon-folder-add">
                 批量上传
               </el-button>
-            </div> -->
+            </div>
 
           </div>
 
@@ -71,13 +71,14 @@
                   </div>
 
                   <!-- 一级图表 -->
-                  <div class="echartBox" v-if="item.seriesData">
+                  <div class="echartBox" v-if="item.seriesData && isValidChartData(item.seriesData)">
                     <div :id="`echarts${item.echartMsg.echartId}`" class="echart"></div>
                   </div>
 
                   <!-- 一级多个独立图表 -->
-                  <div v-if="item.multipleCharts" class="multiple-charts">
-                    <div v-for="(chart, chartIndex) in item.multipleCharts" :key="chartIndex" class="chart-item">
+                  <div v-if="item.multipleCharts && item.multipleCharts.length > 0" class="multiple-charts">
+                    <div v-for="(chart, chartIndex) in item.multipleCharts" :key="chartIndex" class="chart-item"
+                         v-if="chart.seriesData && isValidChartData(chart.seriesData)">
                       <div class="chart-title">{{ chart.title }}</div>
                       <div :id="`echarts${chart.echartMsg.echartId}`" class="echart"></div>
                     </div>
@@ -111,13 +112,14 @@
                       </div>
 
                       <!-- 二级图表 -->
-                      <div class="echartBox" v-if="self.seriesData">
+                      <div class="echartBox" v-if="self.seriesData && isValidChartData(self.seriesData)">
                         <div :id="`echarts${self.echartMsg.echartId}`" class="echart"></div>
                       </div>
 
                       <!-- 二级多个独立图表 -->
-                      <div v-if="self.multipleCharts" class="multiple-charts">
-                        <div v-for="(chart, chartIndex) in self.multipleCharts" :key="chartIndex" class="chart-item">
+                      <div v-if="self.multipleCharts && self.multipleCharts.length > 0" class="multiple-charts">
+                        <div v-for="(chart, chartIndex) in self.multipleCharts" :key="chartIndex" class="chart-item"
+                             v-if="chart.seriesData && isValidChartData(chart.seriesData)">
                           <div class="chart-title">{{ chart.title }}</div>
                           <div :id="`echarts${chart.echartMsg.echartId}`" class="echart"></div>
                         </div>
@@ -152,14 +154,14 @@
                           </div>
 
                           <!-- 三级图表 -->
-                          <div class="echartBox" v-if="option.seriesData">
+                          <div class="echartBox" v-if="option.seriesData && isValidChartData(option.seriesData)">
                             <div :id="`echarts${option.echartMsg.echartId}`" class="echart"></div>
                           </div>
 
                           <!-- 三级多个独立图表 -->
-                          <div v-if="option.multipleCharts" class="multiple-charts">
+                          <div v-if="option.multipleCharts && option.multipleCharts.length > 0" class="multiple-charts">
                             <div v-for="(chart, chartIndex) in option.multipleCharts" :key="chartIndex"
-                              class="chart-item">
+                                 class="chart-item" v-if="chart.seriesData && isValidChartData(chart.seriesData)">
                               <div class="chart-title">{{ chart.title }}</div>
                               <div :id="`echarts${chart.echartMsg.echartId}`" class="echart"></div>
                             </div>
@@ -196,14 +198,14 @@
                               </div>
 
                               <!-- 四级图表 -->
-                              <div class="echartBox" v-if="fourth.seriesData">
+                              <div class="echartBox" v-if="fourth.seriesData && isValidChartData(fourth.seriesData)">
                                 <div :id="`echarts${fourth.echartMsg.echartId}`" class="echart"></div>
                               </div>
 
                               <!-- 四级多个独立图表 -->
-                              <div v-if="fourth.multipleCharts" class="multiple-charts">
+                              <div v-if="fourth.multipleCharts && fourth.multipleCharts.length > 0" class="multiple-charts">
                                 <div v-for="(chart, chartIndex) in fourth.multipleCharts" :key="chartIndex"
-                                  class="chart-item">
+                                     class="chart-item" v-if="chart.seriesData && isValidChartData(chart.seriesData)">
                                   <div class="chart-title">{{ chart.title }}</div>
                                   <div :id="`echarts${chart.echartMsg.echartId}`" class="echart"></div>
                                 </div>
@@ -686,6 +688,14 @@ export default {
       try {
         // 绘制主图表
         if (item.seriesData && item.echartMsg && item.echartMsg.echartId) {
+          // 验证数据有效性
+          if (!this.isValidChartData(item.seriesData)) {
+            console.warn('⚠️ 跳过无效图表数据:', "echarts" + item.echartMsg.echartId);
+            // 移除可能存在的空图表容器
+            this.removeEmptyChartContainer("echarts" + item.echartMsg.echartId);
+            return;
+          }
+
           const chartElement = document.getElementById("echarts" + item.echartMsg.echartId);
           if (chartElement) {
             const chartObj = this.$echarts.init(chartElement);
@@ -698,7 +708,14 @@ export default {
         // 绘制多个独立图表
         if (item.multipleCharts && Array.isArray(item.multipleCharts)) {
           item.multipleCharts.forEach((chart, index) => {
-            if (chart.echartMsg && chart.echartMsg.echartId) {
+            if (chart.echartMsg && chart.echartMsg.echartId && chart.seriesData) {
+              // 验证数据有效性
+              if (!this.isValidChartData(chart.seriesData)) {
+                console.warn('⚠️ 跳过无效多图表数据:', "echarts" + chart.echartMsg.echartId);
+                this.removeEmptyChartContainer("echarts" + chart.echartMsg.echartId);
+                return;
+              }
+
               const chartElement = document.getElementById("echarts" + chart.echartMsg.echartId);
               if (chartElement) {
                 const chartObj = this.$echarts.init(chartElement);
@@ -1114,20 +1131,28 @@ export default {
                              container.style.padding='0';
                              container.style.lineHeight='1';"
                      onerror="console.log('❌ 图片加载失败:', this.src);
-                             var formats = ['.jpg', '.png', '.jpeg'];
-                             var currentSrc = this.src;
-                             var baseSrc = currentSrc.replace(/\.(jpg|png|jpeg)$/i, '');
-                             var currentFormat = currentSrc.match(/\.(jpg|png|jpeg)$/i);
-                             var currentIndex = currentFormat ? formats.indexOf('.' + currentFormat[1].toLowerCase()) : -1;
+         var formats = ['.jpg', '.png', '.jpeg'];
+         var currentSrc = this.src;
+         var baseSrc = currentSrc.replace(/\.(jpg|png|jpeg)$/i, '');
+         var currentFormat = currentSrc.match(/\.(jpg|png|jpeg)$/i);
+         var currentIndex = currentFormat ? formats.indexOf('.' + currentFormat[1].toLowerCase()) : -1;
 
-                             if (currentIndex < formats.length - 1) {
-                               var nextFormat = formats[currentIndex + 1];
-                               console.log('🔄 尝试下一个格式:', nextFormat);
-                               this.src = baseSrc + nextFormat;
-                             } else {
-                               console.log('💀 所有格式都失败，移除元素');
-                               this.parentElement.parentElement.remove();
-                             }" />
+         // 尝试不同文件格式
+         if (currentIndex < formats.length - 1) {
+           var nextFormat = formats[currentIndex + 1];
+           console.log('🔄 尝试下一个格式:', nextFormat);
+           this.src = baseSrc + nextFormat;
+         } else {
+           // 所有格式都失败，尝试回退到基本形式
+           var baseRef = baseSrc.replace(/_[a-zA-Z]$/, '');
+           if (baseRef !== baseSrc) {
+             console.log('🔄 尝试回退到基本形式:', baseRef + '.jpg');
+             this.src = baseRef + '.jpg';
+           } else {
+             console.log('💀 所有尝试都失败，移除元素');
+             this.parentElement.parentElement.remove();
+           }
+         }" />
               </div>
             </div>`;
         });
@@ -1314,6 +1339,60 @@ export default {
           img.src = testUrl;
         });
       });
+    },
+
+    // 新增：验证图表数据是否有效
+    isValidChartData(seriesData) {
+      // 检查 seriesData 是否存在且为数组
+      if (!Array.isArray(seriesData) || seriesData.length === 0) {
+        console.log('⚠️ 图表数据无效: 不是数组或为空数组', seriesData);
+        return false;
+      }
+
+      // 检查每个系列是否有有效数据
+      const hasValidData = seriesData.some(series => {
+        if (!series || typeof series !== 'object') {
+          return false;
+        }
+
+        // 检查是否有数据点
+        if (!Array.isArray(series.data) || series.data.length === 0) {
+          return false;
+        }
+
+        // 检查数据点格式是否正确 [x, y]
+        const hasValidPoints = series.data.some(point => {
+          return Array.isArray(point) &&
+                 point.length >= 2 &&
+                 !isNaN(parseFloat(point[0])) &&
+                 !isNaN(parseFloat(point[1]));
+        });
+
+        return hasValidPoints;
+      });
+
+      if (!hasValidData) {
+        console.log('⚠️ 图表数据无效: 没有有效的数据点', seriesData);
+      }
+
+      return hasValidData;
+    },
+
+    // 新增：移除空的图表容器
+    removeEmptyChartContainer(chartId) {
+      try {
+        const chartElement = document.getElementById(chartId);
+        if (chartElement) {
+          // 查找包含图表的父容器
+          const chartBox = chartElement.closest('.echartBox, .chart-item');
+          if (chartBox) {
+            console.log('🗑️ 移除空图表容器:', chartId);
+            chartBox.remove();
+          }
+        }
+      } catch (error) {
+        console.warn('⚠️ 移除空图表容器失败:', error);
+      }
     },
   },
 };

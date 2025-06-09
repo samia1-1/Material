@@ -984,7 +984,26 @@ export class DataProcessor {
   // 新增：导出批量处理结果方法（移动到基类）
   async exportBatchResults(results, includeMenu = true, existingMenuUrl = null) {
     try {
-      const JSZip = (await import('jszip')).default;
+      // 修复：改进 JSZip 导入方式
+      let JSZip;
+      try {
+        // 尝试直接导入 JSZip
+        const jsZipModule = await import('jszip');
+        JSZip = jsZipModule.default || jsZipModule;
+      } catch (importError) {
+        // 如果动态导入失败，尝试全局 JSZip
+        if (typeof window !== 'undefined' && window.JSZip) {
+          JSZip = window.JSZip;
+        } else {
+          throw new Error('JSZip 库未正确加载');
+        }
+      }
+
+      // 验证 JSZip 构造函数
+      if (typeof JSZip !== 'function') {
+        throw new Error('JSZip 不是一个有效的构造函数');
+      }
+
       const zip = new JSZip();
 
       // 添加处理的材料数据文件
