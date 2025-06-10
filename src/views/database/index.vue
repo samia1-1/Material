@@ -10,11 +10,11 @@
               <el-button slot="append" @click="searchMoreFun" icon="el-icon-menu"></el-button>
             </el-input>
 
-            <div style="margin-top: 10px;">
+            <!-- <div style="margin-top: 10px;">
               <el-button type="primary" size="mini" @click="showFolderUpload" icon="el-icon-folder-add">
                 批量上传
               </el-button>
-            </div>
+            </div> -->
 
           </div>
 
@@ -280,7 +280,7 @@
       </div>
     </el-dialog>
 
-    <!-- 新增：简化的文件夹上传对话框 -->
+    <!-- 文件夹上传对话框 -->
     <el-dialog title="批量材料文件处理" :visible.sync="folderUploadVisible" width="70%" :close-on-click-modal="false">
       <div class="folder-upload-container">
 
@@ -296,7 +296,7 @@
           </div>
         </div>
 
-        <!-- 简化的分析结果 -->
+        <!-- 分析结果 -->
         <div v-if="folderAnalysis" class="file-analysis">
           <h4>📁 检测结果</h4>
           <div class="stats">
@@ -324,7 +324,7 @@
           <p>{{ processProgress.currentMaterial }} ({{ processProgress.current }}/{{ processProgress.total }})</p>
         </div>
 
-        <!-- 简化的处理结果 -->
+        <!-- 处理结果 -->
         <div v-if="batchResults" class="results">
           <h4>✅ 处理完成</h4>
           <div class="result-stats">
@@ -440,7 +440,7 @@ export default {
         { "label": "定向凝固柱晶高温合金", "value": 3 },
       ],
 
-      // 新增：文件夹上传相关
+      // 文件夹上传相关
       folderUploadVisible: false,
       isDragOver: false,
       uploadedFiles: [],
@@ -457,7 +457,7 @@ export default {
   },
 
   methods: {
-    // 修复：初始化方法增加错误处理
+    // 初始化方法增加错误处理
     initProcessors() {
       try {
         this.dataProcessor = new DataProcessor(baseUrl);
@@ -465,7 +465,7 @@ export default {
 
         if (this.validateProcessors()) {
           console.log('✅ 数据处理器初始化成功');
-          // 新增：验证方法使用情况
+          // 验证方法使用情况
           this.dataProcessor.validateMethodUsage();
         }
       } catch (error) {
@@ -582,7 +582,7 @@ export default {
       if (sectionIndex >= 0 && sectionIndex < sections.length) {
         this.introduce = this.jsonData[sections[sectionIndex]] || [];
 
-        // 特别关注组织结构章节
+        // 组织结构章节特殊处理
         if (sections[sectionIndex] === 'microstructures') {
           console.log('🔬 切换到组织结构章节:', this.introduce);
           this.preloadMicrostructureImages(this.introduce);
@@ -667,7 +667,7 @@ export default {
                 self.third.forEach((option) => {
                   this.drawItemCharts(option);
 
-                  // 新增：处理四级数据
+                  // 处理四级数据
                   if (option.fourth) {
                     option.fourth.forEach((fourth) => {
                       this.drawItemCharts(fourth);
@@ -681,7 +681,7 @@ export default {
       }, 100);
     },
 
-    // 新增：统一的图表绘制方法 - 修复chartObj变量问题
+    // 统一的图表绘制方法 - 修复chartObj变量问题
     drawItemCharts(item) {
       if (!item) return;
 
@@ -733,7 +733,7 @@ export default {
 
     // 图表配置
     initChart1(Chart, xAxisData, seriesData, echartMsg) {
-      // 新增：对所有系列数据进行排序
+      // 对所有系列数据进行排序
       const sortedSeriesData = this.sortSeriesDataByX(seriesData);
 
       let option = {
@@ -807,7 +807,7 @@ export default {
       Chart.setOption(option, true);
     },
 
-    // 新增：数据排序方法
+    // 数据排序方法
     sortSeriesDataByX(seriesData) {
       if (!Array.isArray(seriesData)) {
         console.warn('⚠️ seriesData 不是数组:', seriesData);
@@ -866,18 +866,18 @@ export default {
       };
     },
 
-    // 新增：触发文件选择
+    // 触发文件选择
     triggerFileInput() {
       this.$refs.folderInput.click();
     },
 
-    // 新增：处理文件夹选择
+    // 处理文件夹选择
     handleFolderSelect(event) {
       const files = Array.from(event.target.files);
       this.processUploadedFiles(files);
     },
 
-    // 新增：处理拖拽
+    // 处理拖拽
     handleDragOver(event) {
       event.preventDefault();
       this.isDragOver = true;
@@ -896,7 +896,7 @@ export default {
       this.processUploadedFiles(files);
     },
 
-    // 新增：处理上传的文件
+    // 处理上传的文件
     processUploadedFiles(files) {
       if (files.length === 0) {
         this.$message.warning('没有选择文件');
@@ -934,7 +934,7 @@ export default {
           this.uploadedFiles,
           (progress) => {
             this.processProgress = progress;
-            // 新增：进度验证
+            // 进度验证
             if (progress.progress > 100) {
               console.warn('⚠️ 进度超过100%:', progress);
             }
@@ -957,7 +957,7 @@ export default {
       }
     },
 
-    // 修改：简化的下载结果 - 支持菜单合并
+    // 简化的下载结果 - 支持菜单合并
     async downloadBatchResults() {
       try {
         // 传递现有菜单URL进行合并
@@ -984,7 +984,7 @@ export default {
       }
     },
 
-    // 新增：重新加载菜单数据
+    // 重新加载菜单数据
     async refreshMenuData() {
       try {
         await this.getMenu();
@@ -995,7 +995,7 @@ export default {
       }
     },
 
-    // 修改：验证数据处理器状态
+    // 验证数据处理器状态
     validateProcessors() {
       const issues = [];
 
@@ -1035,7 +1035,7 @@ export default {
       return true;
     },
 
-    // 新增：获取数据项数量（添加缺失的方法）
+    // 获取数据项数量（添加缺失的方法）
     getDataItemsCount(materialData) {
       if (this.fileUploadProcessor && typeof this.fileUploadProcessor.countDataItems === 'function') {
         return this.fileUploadProcessor.countDataItems(materialData);
@@ -1052,7 +1052,7 @@ export default {
       return count;
     },
 
-    // 修改：修正图片引用处理的正则表达式
+    // 图片引用处理的正则表达式
     processImageReferences(text) {
       if (!text) return '';
 
@@ -1060,7 +1060,7 @@ export default {
 
       let processedText = text.replace(/@@/g, "\n");
 
-      // 修改：更新正则表达式，匹配图片引用
+      // 更新正则表达式，匹配图片引用
       const imageRefPattern = /图\d+[-－−—]\d+[a-zA-Z]*/g;
 
       const matches = [];
@@ -1080,8 +1080,22 @@ export default {
         }
         processedRefs.add(cleanImageRef);
 
-        // 生成图片变体
-        const imageVariants = this.generateImageVariants(cleanImageRef);
+        // 检查是否已经有字母后缀，如果有则不生成变体
+        const hasLetterSuffix = /[a-zA-Z]+$/.test(cleanImageRef);
+
+        let imageVariants;
+        if (hasLetterSuffix) {
+          // 如果已经有字母后缀，只使用当前引用，不生成变体
+          imageVariants = [cleanImageRef];
+          console.log('📷 已有后缀的图片引用，不生成变体:', cleanImageRef);
+        } else {
+          // 只有基础格式才生成变体
+          imageVariants = this.generateImageVariants(cleanImageRef);
+          console.log('📷 基础格式图片引用，生成变体:', {
+            基础: cleanImageRef,
+            变体: imageVariants
+          });
+        }
 
         imageVariants.forEach((variant, index) => {
           const imgInfo = {
@@ -1100,6 +1114,7 @@ export default {
           原文: match[0],
           原始引用: rawImageRef,
           规范化引用: cleanImageRef,
+          有字母后缀: hasLetterSuffix,
           生成变体数量: imageVariants.length,
           变体列表: imageVariants
         });
@@ -1109,11 +1124,9 @@ export default {
 
       if (matches.length > 0) {
         const containerId = `image-container-${Date.now()}`;
-        // 修改：增大容器最大宽度，减少右侧留白
         let imageHtml = `<div id="${containerId}" class="material-images-container" style="margin: 0; padding: 0; line-height: 1; font-size: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 0; width: 100%; max-width: 800px;">`;
 
         matches.forEach((item, index) => {
-          // 修改：增大图片项最大宽度，让图片显示更大
           imageHtml += `
             <div class="material-image-item" style="display: none; margin: 0; padding: 0; line-height: 1; flex-shrink: 0; width: auto; max-width: 600px;" data-base-ref="${item.baseRef}">
               <div class="image-caption" style="margin: 0; margin-bottom: 3px; padding: 3px 8px; font-size: 13px; color: #666; background: #f5f5f5; border-radius: 4px; font-weight: 500; width: fit-content; line-height: 1.3; display: inline-block;">${item.cleanRef}</div>
@@ -1131,28 +1144,22 @@ export default {
                              container.style.padding='0';
                              container.style.lineHeight='1';"
                      onerror="console.log('❌ 图片加载失败:', this.src);
-         var formats = ['.jpg', '.png', '.jpeg'];
-         var currentSrc = this.src;
-         var baseSrc = currentSrc.replace(/\.(jpg|png|jpeg)$/i, '');
-         var currentFormat = currentSrc.match(/\.(jpg|png|jpeg)$/i);
-         var currentIndex = currentFormat ? formats.indexOf('.' + currentFormat[1].toLowerCase()) : -1;
+                             var formats = ['.jpg', '.png', '.jpeg'];
+                             var currentSrc = this.src;
+                             var baseSrc = currentSrc.replace(/\.(jpg|png|jpeg)$/i, '');
+                             var currentFormat = currentSrc.match(/\.(jpg|png|jpeg)$/i);
+                             var currentIndex = currentFormat ? formats.indexOf('.' + currentFormat[1].toLowerCase()) : -1;
 
-         // 尝试不同文件格式
-         if (currentIndex < formats.length - 1) {
-           var nextFormat = formats[currentIndex + 1];
-           console.log('🔄 尝试下一个格式:', nextFormat);
-           this.src = baseSrc + nextFormat;
-         } else {
-           // 所有格式都失败，尝试回退到基本形式
-           var baseRef = baseSrc.replace(/_[a-zA-Z]$/, '');
-           if (baseRef !== baseSrc) {
-             console.log('🔄 尝试回退到基本形式:', baseRef + '.jpg');
-             this.src = baseRef + '.jpg';
-           } else {
-             console.log('💀 所有尝试都失败，移除元素');
-             this.parentElement.parentElement.remove();
-           }
-         }" />
+                             // 修改：只尝试不同文件格式，不回退到基础名称
+                             if (currentIndex < formats.length - 1) {
+                               var nextFormat = formats[currentIndex + 1];
+                               console.log('🔄 尝试下一个格式:', nextFormat);
+                               this.src = baseSrc + nextFormat;
+                             } else {
+                               // 修改：所有格式都失败时直接移除，不回退到基础形式
+                               console.log('💀 所有格式都失败，移除元素');
+                               this.parentElement.parentElement.remove();
+                             }" />
               </div>
             </div>`;
         });
@@ -1160,7 +1167,7 @@ export default {
         imageHtml += '</div>';
         processedText += imageHtml;
 
-        // 修改：优化加载后的样式设置
+        // 优化加载后的样式设置
         setTimeout(() => {
           const container = document.getElementById(containerId);
           if (container) {
@@ -1224,21 +1231,27 @@ export default {
       return variants;
     },
 
-    // 修改：更新规范化图片引用格式，去除括号处理
+    // 更新规范化图片引用格式，处理所有字母后缀格式
     normalizeImageReference(rawRef) {
       if (!rawRef) return '';
 
-      // 移除可能的空格（不处理括号，因为新的正则已经排除了括号）
+      // 移除可能的空格
       let cleanRef = rawRef.trim();
 
       // 标准化连字符（将各种连字符统一为标准的连字符）
       cleanRef = cleanRef.replace(/[－−—]/g, '-');
 
       // 检查是否有字母后缀但没有下划线，需要添加下划线
+      // 匹配格式：图数字-数字字母 -> 图数字-数字_字母
       const letterSuffixMatch = cleanRef.match(/^(图\d+-\d+)([a-zA-Z]+)$/);
       if (letterSuffixMatch) {
         // 将字母后缀前添加下划线：图5-3a -> 图5-3_a
         cleanRef = letterSuffixMatch[1] + '_' + letterSuffixMatch[2];
+        console.log('🔧 添加下划线到字母后缀:', {
+          原始: rawRef,
+          处理前: letterSuffixMatch[0],
+          处理后: cleanRef
+        });
       }
 
       console.log('🔧 图片引用规范化:', {
@@ -1250,7 +1263,7 @@ export default {
       return cleanRef;
     },
 
-    // 修改：更新预加载方法
+    // 更新预加载方法
     preloadMicrostructureImages(microstructures) {
       if (!Array.isArray(microstructures)) return;
 
@@ -1299,7 +1312,7 @@ export default {
       microstructures.forEach(processItem);
     },
 
-    // 修改：更新调试方法
+    // 更新调试方法
     debugImagePaths() {
       if (!this.name2) {
         console.log('❌ 当前材料名称为空');
@@ -1341,7 +1354,7 @@ export default {
       });
     },
 
-    // 新增：验证图表数据是否有效
+    // 验证图表数据是否有效
     isValidChartData(seriesData) {
       // 检查 seriesData 是否存在且为数组
       if (!Array.isArray(seriesData) || seriesData.length === 0) {
@@ -1378,7 +1391,7 @@ export default {
       return hasValidData;
     },
 
-    // 新增：移除空的图表容器
+    // 移除空的图表容器
     removeEmptyChartContainer(chartId) {
       try {
         const chartElement = document.getElementById(chartId);
