@@ -92,7 +92,8 @@
     "script-ext-html-webpack-plugin": "2.1.5",
     "svg-sprite-loader": "5.1.1",
     "vue-template-compiler": "2.6.12",
-    "webpack-bundle-analyzer": "^4.10.1"
+    "webpack-bundle-analyzer": "^4.10.1",
+    "worker-loader": "^3.0.8"
   },
   "engines": {
     "node": ">=8.9",
