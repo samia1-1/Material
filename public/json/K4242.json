@@ -584,7 +584,7 @@
       ],
       "seriesData": [
         {
-          "name": "技术标准",
+          "name": "技术标准-绝对伸长量_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -643,7 +643,7 @@
           ]
         },
         {
-          "name": "ω（Zr）0.05%",
+          "name": "ω（Zr）0.05%-绝对伸长量_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -694,7 +694,7 @@
           ]
         },
         {
-          "name": "ω（B）0.007%",
+          "name": "ω（B）0.007%-绝对伸长量_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -765,7 +765,7 @@
           ]
         },
         {
-          "name": "ω（B）0.006%+ω（Zr）0.05%",
+          "name": "ω（B）0.006%+ω（Zr）0.05%-绝对伸长量_y",
           "type": "line",
           "smooth": "smooth",
           "data": [

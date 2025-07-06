@@ -960,7 +960,7 @@
       ],
       "seriesData": [
         {
-          "name": "850℃",
+          "name": "850℃-σ_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -991,7 +991,7 @@
           ]
         },
         {
-          "name": "800℃",
+          "name": "800℃-σ_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -1026,7 +1026,7 @@
           ]
         },
         {
-          "name": "750℃",
+          "name": "750℃-σ_y",
           "type": "line",
           "smooth": "smooth",
           "data": [

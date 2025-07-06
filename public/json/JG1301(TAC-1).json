@@ -483,7 +483,7 @@
           "con": "",
           "seriesData": [
             {
-              "name": "650℃",
+              "name": "650℃-δ₅_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -510,7 +510,7 @@
               ]
             },
             {
-              "name": "650℃",
+              "name": "650℃-σP0.2_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -553,7 +553,7 @@
               ]
             },
             {
-              "name": "650℃",
+              "name": "650℃-σb_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -580,7 +580,7 @@
               ]
             },
             {
-              "name": "750℃",
+              "name": "750℃-δ₅_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -599,7 +599,7 @@
               ]
             },
             {
-              "name": "750℃",
+              "name": "750℃-σP0.2_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -622,7 +622,7 @@
               ]
             },
             {
-              "name": "750℃",
+              "name": "750℃-σb_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -645,7 +645,7 @@
               ]
             },
             {
-              "name": "850℃",
+              "name": "850℃-δ₅_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -668,7 +668,7 @@
               ]
             },
             {
-              "name": "850℃",
+              "name": "850℃-σb_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -964,7 +964,7 @@
       "con": "热轧板经不同热处理，20℃和650℃、应力比为0.1的疲劳裂纹da/dN-ΔK曲线见图3-2。",
       "seriesData": [
         {
-          "name": "A.20℃",
+          "name": "A.20℃-da/dN_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -995,7 +995,7 @@
           ]
         },
         {
-          "name": "A.650℃",
+          "name": "A.650℃-da/dN_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -1038,7 +1038,7 @@
           ]
         },
         {
-          "name": "B.20℃",
+          "name": "B.20℃-dB/dN_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -1061,7 +1061,7 @@
           ]
         },
         {
-          "name": "B.650℃",
+          "name": "B.650℃-dB/dN_y",
           "type": "line",
           "smooth": "smooth",
           "data": [

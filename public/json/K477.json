@@ -833,7 +833,7 @@
                   "identifier": "图3-4",
                   "seriesData": [
                     {
-                      "name": "R=0.1",
+                      "name": "R=0.1-σmax_y",
                       "type": "line",
                       "smooth": "smooth",
                       "data": [
@@ -956,7 +956,7 @@
                       ]
                     },
                     {
-                      "name": "R=-1",
+                      "name": "R=-1-σmax_y",
                       "type": "line",
                       "smooth": "smooth",
                       "data": [
@@ -1088,7 +1088,7 @@
               ],
               "seriesData": [
                 {
-                  "name": "R=0.1",
+                  "name": "R=0.1-σmax_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -1183,7 +1183,7 @@
                   ]
                 },
                 {
-                  "name": "R=-1",
+                  "name": "R=-1-σmax_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -1320,7 +1320,7 @@
                   "identifier": "图3-6",
                   "seriesData": [
                     {
-                      "name": "R=0.1",
+                      "name": "R=0.1-σmax_y",
                       "type": "line",
                       "smooth": "smooth",
                       "data": [
@@ -1423,7 +1423,7 @@
                       ]
                     },
                     {
-                      "name": "R=-1",
+                      "name": "R=-1-σmax_y",
                       "type": "line",
                       "smooth": "smooth",
                       "data": [
@@ -1535,7 +1535,7 @@
               ],
               "seriesData": [
                 {
-                  "name": "R=0.1",
+                  "name": "R=0.1-σmax_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -1638,7 +1638,7 @@
                   ]
                 },
                 {
-                  "name": "R=-1",
+                  "name": "R=-1-σmax_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -1789,7 +1789,7 @@
               "identifier": "图3-8",
               "seriesData": [
                 {
-                  "name": "△εt/2",
+                  "name": "△εt/2-△ε/2_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -1824,7 +1824,7 @@
                   ]
                 },
                 {
-                  "name": "△εe/2",
+                  "name": "△εe/2-△ε/2_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -1851,7 +1851,7 @@
                   ]
                 },
                 {
-                  "name": "△εP/2",
+                  "name": "△εP/2-△ε/2_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -1891,7 +1891,7 @@
           ],
           "seriesData": [
             {
-              "name": "△εt/2",
+              "name": "△εt/2-△ε/2_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1914,7 +1914,7 @@
               ]
             },
             {
-              "name": "△εe/2",
+              "name": "△εe/2-△ε/2_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1937,7 +1937,7 @@
               ]
             },
             {
-              "name": "△εP/2",
+              "name": "△εP/2-△ε/2_y",
               "type": "line",
               "smooth": "smooth",
               "data": [

@@ -1166,7 +1166,7 @@
       "con": "冷拔棒不同温度的应力松弛曲线见图3-1。",
       "seriesData": [
         {
-          "name": "400℃",
+          "name": "400℃-σ_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -1221,7 +1221,7 @@
           ]
         },
         {
-          "name": "550℃",
+          "name": "550℃-σ_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -1276,7 +1276,7 @@
           ]
         },
         {
-          "name": "600℃",
+          "name": "600℃-σ_y",
           "type": "line",
           "smooth": "smooth",
           "data": [

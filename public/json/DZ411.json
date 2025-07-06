@@ -1116,7 +1116,7 @@
           "con": "",
           "seriesData": [
             {
-              "name": "650℃",
+              "name": "650℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1147,7 +1147,7 @@
               ]
             },
             {
-              "name": "850℃",
+              "name": "850℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1178,7 +1178,7 @@
               ]
             },
             {
-              "name": "980℃",
+              "name": "980℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1499,7 +1499,7 @@
           "con": "",
           "seriesData": [
             {
-              "name": "980℃，190MPa",
+              "name": "980℃，190MPa-持久寿命_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1542,7 +1542,7 @@
       "con": "合金不同温度和应力的蠕变曲线见图3-3。",
       "seriesData": [
         {
-          "name": "850℃、370MPa",
+          "name": "850℃、370MPa-εt_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -1621,7 +1621,7 @@
           ]
         },
         {
-          "name": "980℃、145MPa",
+          "name": "980℃、145MPa-εt_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -1684,7 +1684,7 @@
           ]
         },
         {
-          "name": "870℃、290MPa",
+          "name": "870℃、290MPa-εt_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -1759,7 +1759,7 @@
           ]
         },
         {
-          "name": "800℃、432MPa",
+          "name": "800℃、432MPa-εt_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -1814,7 +1814,7 @@
           ]
         },
         {
-          "name": "980℃、124MPa",
+          "name": "980℃、124MPa-εt_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -1881,7 +1881,7 @@
           ]
         },
         {
-          "name": "870℃、242MPa",
+          "name": "870℃、242MPa-εt_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -1932,7 +1932,7 @@
           ]
         },
         {
-          "name": "850℃、248MPa",
+          "name": "850℃、248MPa-εt_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -1995,7 +1995,7 @@
           ]
         },
         {
-          "name": "850℃、196MPa",
+          "name": "850℃、196MPa-εt_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -2050,7 +2050,7 @@
           ]
         },
         {
-          "name": "850℃、137MPa",
+          "name": "850℃、137MPa-εt_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -2168,7 +2168,7 @@
           ],
           "seriesData": [
             {
-              "name": "900℃、光滑",
+              "name": "900℃、光滑-σmax_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -2227,7 +2227,7 @@
               ]
             },
             {
-              "name": "900℃、缺口",
+              "name": "900℃、缺口-σmax_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -2379,7 +2379,98 @@
               "label": "试样数/根",
               "prop": "试样数/根"
             }
-          ]
+          ],
+          "seriesData": [
+            {
+              "name": "△εt/2_y",
+              "type": "line",
+              "smooth": "smooth",
+              "data": [
+                [
+                  105.78974,
+                  0.03317
+                ],
+                [
+                  491.34831,
+                  0.02008
+                ],
+                [
+                  4225.83431,
+                  0.01292
+                ],
+                [
+                  8364.5735,
+                  0.01036
+                ],
+                [
+                  42985.3307,
+                  0.00756
+                ]
+              ]
+            },
+            {
+              "name": "△εc/2_y",
+              "type": "line",
+              "smooth": "smooth",
+              "data": [
+                [
+                  107.75339,
+                  0.01798
+                ],
+                [
+                  508.58763,
+                  0.01354
+                ],
+                [
+                  4364.05658,
+                  0.00973
+                ],
+                [
+                  8212.14153,
+                  0.00819
+                ],
+                [
+                  44493.50332,
+                  0.00626
+                ]
+              ]
+            },
+            {
+              "name": "△εP/2_y",
+              "type": "line",
+              "smooth": "smooth",
+              "data": [
+                [
+                  107.75339,
+                  0.01121
+                ],
+                [
+                  500.46861,
+                  0.00464
+                ],
+                [
+                  4601.01955,
+                  0.000797951
+                ],
+                [
+                  8212.14153,
+                  0.000609675
+                ],
+                [
+                  42299.11863,
+                  0.00041195
+                ]
+              ]
+            }
+          ],
+          "xAxisData": [],
+          "echartMsg": {
+            "echartId": "3102_35",
+            "xName": "",
+            "yName": "",
+            "minX": 105.78974,
+            "minY": 0.00041195
+          }
         },
         {
           "name": "3.10.3、特种疲劳",

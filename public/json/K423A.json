@@ -1056,9 +1056,69 @@
         {
           "name": "3.8.2、合金不同温度的持久应力-寿命曲线见图3-1，持久热强参数综合曲线见图3-2。",
           "con": "",
+          "multipleCharts": [
+            {
+              "title": "3.8.2",
+              "identifier": "图3-2",
+              "seriesData": [
+                {
+                  "name": "σ_y",
+                  "type": "line",
+                  "smooth": "smooth",
+                  "data": [
+                    [
+                      22.83088,
+                      532.47367
+                    ],
+                    [
+                      23.23317,
+                      488.49263
+                    ],
+                    [
+                      23.75828,
+                      442.9846
+                    ],
+                    [
+                      24.77467,
+                      343.57701
+                    ],
+                    [
+                      25.20722,
+                      327.39256
+                    ],
+                    [
+                      25.298,
+                      300.15755
+                    ],
+                    [
+                      25.94059,
+                      249.87291
+                    ],
+                    [
+                      26.6882,
+                      196.94263
+                    ],
+                    [
+                      27.79537,
+                      123.05393
+                    ]
+                  ]
+                }
+              ],
+              "xAxisData": [],
+              "echartMsg": {
+                "echartId": "382_32_multi_0",
+                "xName": "",
+                "yName": "",
+                "minX": 22.83088,
+                "minY": 123.05393
+              },
+              "sourceSheet": "3.8.2_图3-2"
+            }
+          ],
           "seriesData": [
             {
-              "name": "750℃",
+              "name": "750℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1081,7 +1141,7 @@
               ]
             },
             {
-              "name": "850℃",
+              "name": "850℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1104,7 +1164,7 @@
               ]
             },
             {
-              "name": "900℃",
+              "name": "900℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1413,7 +1473,7 @@
       "con": "合金900℃和1000℃的蠕变曲线见图3-3。",
       "seriesData": [
         {
-          "name": "900℃-235MPa",
+          "name": "900℃-235MPa-εt_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -1472,7 +1532,7 @@
           ]
         },
         {
-          "name": "1000℃-100MPa",
+          "name": "1000℃-100MPa-εt_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -1670,7 +1730,7 @@
           "identifier": "图5-2",
           "seriesData": [
             {
-              "name": "K423",
+              "name": "K423-μ相析出量_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1705,7 +1765,7 @@
               ]
             },
             {
-              "name": "K423A",
+              "name": "K423A-μ相析出量_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1749,7 +1809,7 @@
       ],
       "seriesData": [
         {
-          "name": "K423",
+          "name": "K423-σ相析出量_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -1792,7 +1852,7 @@
           ]
         },
         {
-          "name": "K423A",
+          "name": "K423A-σ相析出量_y",
           "type": "line",
           "smooth": "smooth",
           "data": [

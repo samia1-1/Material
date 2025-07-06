@@ -1006,7 +1006,7 @@
           "con": "",
           "seriesData": [
             {
-              "name": "343MPa",
+              "name": "343MPa-εt_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1061,7 +1061,7 @@
               ]
             },
             {
-              "name": "372MPa",
+              "name": "372MPa-εt_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1108,7 +1108,7 @@
               ]
             },
             {
-              "name": "412MPa",
+              "name": "412MPa-εt_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1163,7 +1163,7 @@
               ]
             },
             {
-              "name": "451MPa",
+              "name": "451MPa-εt_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1214,7 +1214,7 @@
               ]
             },
             {
-              "name": "490MPa",
+              "name": "490MPa-εt_y",
               "type": "line",
               "smooth": "smooth",
               "data": [

@@ -646,7 +646,7 @@
       ],
       "seriesData": [
         {
-          "name": "900℃",
+          "name": "900℃-重量变化_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -689,7 +689,7 @@
           ]
         },
         {
-          "name": "1000℃",
+          "name": "1000℃-重量变化_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -736,7 +736,7 @@
           ]
         },
         {
-          "name": "1100℃",
+          "name": "1100℃-重量变化_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -794,7 +794,68 @@
     },
     {
       "name": "2.12、耐腐蚀性能",
-      "con": "合金经表面涂盐腐蚀，950℃热腐蚀动力学曲线见图2-2。"
+      "con": "合金经表面涂盐腐蚀，950℃热腐蚀动力学曲线见图2-2。",
+      "seriesData": [
+        {
+          "name": "重量变化_y",
+          "type": "line",
+          "smooth": "smooth",
+          "data": [
+            [
+              -0.16457,
+              -2.49754
+            ],
+            [
+              4.74814,
+              0.14835
+            ],
+            [
+              9.33489,
+              0.98469
+            ],
+            [
+              14.13119,
+              -2.49754
+            ],
+            [
+              19.14867,
+              -4.596
+            ],
+            [
+              23.85183,
+              -6.83131
+            ],
+            [
+              28.54336,
+              -14.63212
+            ],
+            [
+              33.66561,
+              -22.29606
+            ],
+            [
+              38.25236,
+              -29.41258
+            ],
+            [
+              42.95553,
+              -39.02292
+            ],
+            [
+              48.18256,
+              -46.13944
+            ]
+          ]
+        }
+      ],
+      "xAxisData": [],
+      "echartMsg": {
+        "echartId": "212_22",
+        "xName": "",
+        "yName": "",
+        "minX": -0.16457,
+        "minY": -46.13944
+      }
     }
   ],
   "mechanical": [
@@ -1136,9 +1197,97 @@
         {
           "name": "3.8.2、合金不同温度的持久应力-寿命曲线见图3-1，持久热强参数综合曲线见图3-2。",
           "con": "",
+          "multipleCharts": [
+            {
+              "title": "3.8.2",
+              "identifier": "图3-2",
+              "seriesData": [
+                {
+                  "name": "σ_y",
+                  "type": "line",
+                  "smooth": "smooth",
+                  "data": [
+                    [
+                      39.61879,
+                      894.55239
+                    ],
+                    [
+                      40.58113,
+                      790.42429
+                    ],
+                    [
+                      41.31284,
+                      734.29219
+                    ],
+                    [
+                      41.97296,
+                      641.21665
+                    ],
+                    [
+                      46.562,
+                      285.16729
+                    ],
+                    [
+                      47.12669,
+                      246.10304
+                    ],
+                    [
+                      48.12085,
+                      209.28397
+                    ],
+                    [
+                      49.05138,
+                      163.87949
+                    ],
+                    [
+                      49.88648,
+                      118.86178
+                    ],
+                    [
+                      50.14893,
+                      129.84699
+                    ],
+                    [
+                      50.6818,
+                      106.58473
+                    ],
+                    [
+                      52.34404,
+                      69.32109
+                    ],
+                    [
+                      52.83714,
+                      58.95008
+                    ],
+                    [
+                      53.3382,
+                      53.48793
+                    ],
+                    [
+                      54.03809,
+                      49.10727
+                    ],
+                    [
+                      54.49938,
+                      41.27111
+                    ]
+                  ]
+                }
+              ],
+              "xAxisData": [],
+              "echartMsg": {
+                "echartId": "382_32_multi_0",
+                "xName": "",
+                "yName": "",
+                "minX": 39.61879,
+                "minY": 41.27111
+              },
+              "sourceSheet": "3.8.2_图3-2"
+            }
+          ],
           "seriesData": [
             {
-              "name": "750℃",
+              "name": "750℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1161,7 +1310,7 @@
               ]
             },
             {
-              "name": "900℃",
+              "name": "900℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1180,7 +1329,7 @@
               ]
             },
             {
-              "name": "980℃",
+              "name": "980℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1199,7 +1348,7 @@
               ]
             },
             {
-              "name": "1030℃",
+              "name": "1030℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1218,7 +1367,7 @@
               ]
             },
             {
-              "name": "1050℃",
+              "name": "1050℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1596,7 +1745,7 @@
               "identifier": " 图3-4",
               "seriesData": [
                 {
-                  "name": "950℃、265MPa",
+                  "name": "950℃、265MPa-εt_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -1690,7 +1839,7 @@
               "identifier": " 图3-5",
               "seriesData": [
                 {
-                  "name": "1030℃、210MPa",
+                  "name": "1030℃、210MPa-εt_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -1776,7 +1925,7 @@
               "identifier": " 图3-6",
               "seriesData": [
                 {
-                  "name": "1050℃、145MPa",
+                  "name": "1050℃、145MPa-εt_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -1868,7 +2017,7 @@
           ],
           "seriesData": [
             {
-              "name": "850℃、400MPa",
+              "name": "850℃、400MPa-εt_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1961,7 +2110,7 @@
               "identifier": "图3-8",
               "seriesData": [
                 {
-                  "name": "760℃",
+                  "name": "760℃-σ_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -1996,7 +2145,7 @@
                   ]
                 },
                 {
-                  "name": "980℃",
+                  "name": "980℃-σ_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -2054,7 +2203,7 @@
               "identifier": "图3-9",
               "seriesData": [
                 {
-                  "name": "760℃",
+                  "name": "760℃-σ_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -2093,7 +2242,7 @@
                   ]
                 },
                 {
-                  "name": "980℃",
+                  "name": "980℃-σ_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -2149,7 +2298,7 @@
           ],
           "seriesData": [
             {
-              "name": "760℃",
+              "name": "760℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -2204,7 +2353,7 @@
               ]
             },
             {
-              "name": "980℃",
+              "name": "980℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -2404,7 +2553,7 @@
           ],
           "seriesData": [
             {
-              "name": "700℃、R=0.1、Kt=1",
+              "name": "700℃、R=0.1、Kt=1-σmax_y",
               "type": "line",
               "smooth": "smooth",
               "data": [

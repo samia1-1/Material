@@ -914,9 +914,101 @@
         {
           "name": "3.8.2、合金不同温度的持久应力-寿命曲线见图3-1，持久热强参数综合曲线见图3-2。",
           "con": "",
+          "multipleCharts": [
+            {
+              "title": "3.8.2",
+              "identifier": "图3-2",
+              "seriesData": [
+                {
+                  "name": "σ_y",
+                  "type": "line",
+                  "smooth": "smooth",
+                  "data": [
+                    [
+                      22.6895,
+                      828.74439
+                    ],
+                    [
+                      23.51324,
+                      775.41
+                    ],
+                    [
+                      23.69232,
+                      746.54741
+                    ],
+                    [
+                      23.99186,
+                      643.56717
+                    ],
+                    [
+                      24.41187,
+                      611.82686
+                    ],
+                    [
+                      24.96538,
+                      551.14432
+                    ],
+                    [
+                      25.31213,
+                      496.48042
+                    ],
+                    [
+                      25.42446,
+                      450.19841
+                    ],
+                    [
+                      26.18146,
+                      395.4195
+                    ],
+                    [
+                      26.95962,
+                      317.01447
+                    ],
+                    [
+                      27.38126,
+                      255.69743
+                    ],
+                    [
+                      27.68894,
+                      237.66877
+                    ],
+                    [
+                      27.99825,
+                      192.33217
+                    ],
+                    [
+                      28.38245,
+                      196.60841
+                    ],
+                    [
+                      29.05642,
+                      165.25549
+                    ],
+                    [
+                      29.59039,
+                      139.28473
+                    ],
+                    [
+                      30.1618,
+                      128.3303
+                    ]
+                  ]
+                }
+              ],
+              "xAxisData": [],
+              "echartMsg": {
+                "echartId": "382_32_multi_0",
+                "xName": "",
+                "yName": "",
+                "minX": 22.6895,
+                "minY": 128.3303
+              },
+              "sourceSheet": "3.8.2_图3-2"
+            }
+          ],
           "seriesData": [
             {
-              "name": "760℃",
+              "name": "760℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1059,7 +1151,7 @@
               ]
             },
             {
-              "name": "850℃",
+              "name": "850℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1202,7 +1294,7 @@
               ]
             },
             {
-              "name": "950℃",
+              "name": "950℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1345,7 +1437,7 @@
               ]
             },
             {
-              "name": "1050℃",
+              "name": "1050℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1884,7 +1976,7 @@
               "identifier": "图3-4",
               "seriesData": [
                 {
-                  "name": "850℃-530MPa",
+                  "name": "850℃-530MPa-εt_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -2074,7 +2166,7 @@
               "identifier": "图3-5",
               "seriesData": [
                 {
-                  "name": "980℃-230MPa",
+                  "name": "980℃-230MPa-εt_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -2228,7 +2320,7 @@
               "identifier": "图3-6",
               "seriesData": [
                 {
-                  "name": "1000℃-216MPa",
+                  "name": "1000℃-216MPa-εt_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -2416,7 +2508,7 @@
           ],
           "seriesData": [
             {
-              "name": "760℃-840MPa",
+              "name": "760℃-840MPa-εt_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -2575,7 +2667,7 @@
               ]
             },
             {
-              "name": "760℃-880MPa",
+              "name": "760℃-880MPa-εt_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -2749,7 +2841,7 @@
               "identifier": "图3-8",
               "seriesData": [
                 {
-                  "name": "870℃、R=0.1-Kt=1",
+                  "name": "870℃、R=0.1-Kt=1-σmax_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -2809,7 +2901,7 @@
           ],
           "seriesData": [
             {
-              "name": "700℃、R=0.1-Kt=1",
+              "name": "700℃、R=0.1-Kt=1-σmax_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -2860,7 +2952,7 @@
               ]
             },
             {
-              "name": "700℃、R=0.1-Kt=3",
+              "name": "700℃、R=0.1-Kt=3-σmax_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -2925,7 +3017,7 @@
           "con": "合金760℃的低周疲劳ε-N曲线见图3-9。",
           "seriesData": [
             {
-              "name": "760℃",
+              "name": "760℃-△εt/2_y",
               "type": "line",
               "smooth": "smooth",
               "data": [

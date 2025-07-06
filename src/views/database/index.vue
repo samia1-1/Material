@@ -22,7 +22,8 @@
             <el-submenu :index="item.index" v-for="(item, index) in menuData" :key="index">
               <template slot="title">{{ item.name }}</template>
               <el-menu-item @click="changeFun(item.name, self)" v-for="(self, key) in item.list" :key="key"
-                :index="self.index">{{ self.name }}</el-menu-item>
+                :index="self.index">{{
+                self.name }}</el-menu-item>
             </el-submenu>
           </el-menu>
         </el-aside>
@@ -45,18 +46,20 @@
 
               <div class="nr">
                 <div v-if="introduce.length > 0" v-for="(item, index) in introduce" :key="index">
-                  <div class="tit1">{{ item.name }}</div>
+                  <div class="tit1" v-html="processImageReferences(item.name, true)"></div>
                   <div class="txt" v-html="processImageReferences(item.con)"></div>
                   <div class="table1" v-if="item.tableData">
                     <el-table size="mini" :data="item.tableData" style="width: 100%">
-                      <el-table-column v-for="column in item.tableColumns" :key="column.prop" :prop="column.prop" :label="column.label"></el-table-column>
+                      <el-table-column v-for="column in item.tableColumns" :key="column.prop" :prop="column.prop"
+                        :label="column.label"></el-table-column>
                     </el-table>
                   </div>
                   <div v-if="item.multipleTables" class="multiple-tables">
                     <div v-for="(table, tableIndex) in item.multipleTables" :key="tableIndex" class="table-item">
                       <div class="table-title">{{ table.title }}</div>
                       <el-table size="mini" :data="table.tableData" style="width: 100%; margin-bottom: 20px;">
-                        <el-table-column v-for="column in table.tableColumns" :key="column.prop" :prop="column.prop" :label="column.label"></el-table-column>
+                        <el-table-column v-for="column in table.tableColumns" :key="column.prop" :prop="column.prop"
+                          :label="column.label"></el-table-column>
                       </el-table>
                     </div>
                   </div>
@@ -64,25 +67,28 @@
                     <div :id="`echarts${item.echartMsg.echartId}`" class="echart"></div>
                   </div>
                   <div v-if="item.multipleCharts && item.multipleCharts.length > 0" class="multiple-charts">
-                    <div v-for="(chart, chartIndex) in item.multipleCharts" :key="chartIndex" class="chart-item" v-if="chart.seriesData && isValidChartData(chart.seriesData)">
+                    <div v-for="(chart, chartIndex) in item.multipleCharts" :key="chartIndex" class="chart-item"
+                      v-if="chart.seriesData && isValidChartData(chart.seriesData)">
                       <div class="chart-title">{{ chart.title }}</div>
                       <div :id="`echarts${chart.echartMsg.echartId}`" class="echart"></div>
                     </div>
                   </div>
                   <template v-if="item.two">
                     <div v-for="(self, key) in item.two" :key="`two-${key}`" class="sub-level">
-                      <div class="tit2">{{ self.name }}</div>
+                      <div class="tit2" v-html="processImageReferences(self.name, true)"></div>
                       <div class="txt" v-html="processImageReferences(self.con)"></div>
                       <div class="table1" v-if="self.tableData">
                         <el-table size="mini" :data="self.tableData" style="width: 100%">
-                          <el-table-column v-for="column in self.tableColumns" :key="column.prop" :prop="column.prop" :label="column.label"></el-table-column>
+                          <el-table-column v-for="column in self.tableColumns" :key="column.prop" :prop="column.prop"
+                            :label="column.label"></el-table-column>
                         </el-table>
                       </div>
                       <div v-if="self.multipleTables" class="multiple-tables">
                         <div v-for="(table, tableIndex) in self.multipleTables" :key="tableIndex" class="table-item">
                           <div class="table-title">{{ table.title }}</div>
                           <el-table size="mini" :data="table.tableData" style="width: 100%; margin-bottom: 20px;">
-                            <el-table-column v-for="column in table.tableColumns" :key="column.prop" :prop="column.prop" :label="column.label"></el-table-column>
+                            <el-table-column v-for="column in table.tableColumns" :key="column.prop" :prop="column.prop"
+                              :label="column.label"></el-table-column>
                           </el-table>
                         </div>
                       </div>
@@ -90,25 +96,29 @@
                         <div :id="`echarts${self.echartMsg.echartId}`" class="echart"></div>
                       </div>
                       <div v-if="self.multipleCharts && self.multipleCharts.length > 0" class="multiple-charts">
-                        <div v-for="(chart, chartIndex) in self.multipleCharts" :key="chartIndex" class="chart-item" v-if="chart.seriesData && isValidChartData(chart.seriesData)">
+                        <div v-for="(chart, chartIndex) in self.multipleCharts" :key="chartIndex" class="chart-item"
+                          v-if="chart.seriesData && isValidChartData(chart.seriesData)">
                           <div class="chart-title">{{ chart.title }}</div>
                           <div :id="`echarts${chart.echartMsg.echartId}`" class="echart"></div>
                         </div>
                       </div>
                       <template v-if="self.third">
                         <div v-for="(option, num) in self.third" :key="`third-${num}`" class="sub-level">
-                          <div class="tit3">{{ option.name }}</div>
+                          <div class="tit3" v-html="processImageReferences(option.name, true)"></div>
                           <div class="txt" v-html="processImageReferences(option.con)"></div>
                           <div class="table1" v-if="option.tableData">
                             <el-table size="mini" :data="option.tableData" style="width: 100%">
-                              <el-table-column v-for="column in option.tableColumns" :key="column.prop" :prop="column.prop" :label="column.label"></el-table-column>
+                              <el-table-column v-for="column in option.tableColumns" :key="column.prop"
+                                :prop="column.prop" :label="column.label"></el-table-column>
                             </el-table>
                           </div>
                           <div v-if="option.multipleTables" class="multiple-tables">
-                            <div v-for="(table, tableIndex) in option.multipleTables" :key="tableIndex" class="table-item">
+                            <div v-for="(table, tableIndex) in option.multipleTables" :key="tableIndex"
+                              class="table-item">
                               <div class="table-title">{{ table.title }}</div>
                               <el-table size="mini" :data="table.tableData" style="width: 100%; margin-bottom: 20px;">
-                                <el-table-column v-for="column in table.tableColumns" :key="column.prop" :prop="column.prop" :label="column.label"></el-table-column>
+                                <el-table-column v-for="column in table.tableColumns" :key="column.prop"
+                                  :prop="column.prop" :label="column.label"></el-table-column>
                               </el-table>
                             </div>
                           </div>
@@ -116,37 +126,119 @@
                             <div :id="`echarts${option.echartMsg.echartId}`" class="echart"></div>
                           </div>
                           <div v-if="option.multipleCharts && option.multipleCharts.length > 0" class="multiple-charts">
-                            <div v-for="(chart, chartIndex) in option.multipleCharts" :key="chartIndex" class="chart-item" v-if="chart.seriesData && isValidChartData(chart.seriesData)">
+                            <div v-for="(chart, chartIndex) in option.multipleCharts" :key="chartIndex"
+                              class="chart-item" v-if="chart.seriesData && isValidChartData(chart.seriesData)">
                               <div class="chart-title">{{ chart.title }}</div>
                               <div :id="`echarts${chart.echartMsg.echartId}`" class="echart"></div>
                             </div>
                           </div>
                           <template v-if="option.fourth">
-                            <div v-for="(fourth, fourthIndex) in option.fourth" :key="`fourth-${fourthIndex}`" class="sub-level">
-                              <div class="tit4">{{ fourth.name }}</div>
+                            <div v-for="(fourth, fourthIndex) in option.fourth" :key="`fourth-${fourthIndex}`"
+                              class="sub-level">
+                              <div class="tit4" v-html="processImageReferences(fourth.name, true)"></div>
                               <div class="txt" v-html="processImageReferences(fourth.con)"></div>
                               <div class="table1" v-if="fourth.tableData">
                                 <el-table size="mini" :data="fourth.tableData" style="width: 100%">
-                                  <el-table-column v-for="column in fourth.tableColumns" :key="column.prop" :prop="column.prop" :label="column.label"></el-table-column>
+                                  <el-table-column v-for="column in fourth.tableColumns" :key="column.prop"
+                                    :prop="column.prop" :label="column.label"></el-table-column>
                                 </el-table>
                               </div>
                               <div v-if="fourth.multipleTables" class="multiple-tables">
-                                <div v-for="(table, tableIndex) in fourth.multipleTables" :key="tableIndex" class="table-item">
+                                <div v-for="(table, tableIndex) in fourth.multipleTables" :key="tableIndex"
+                                  class="table-item">
                                   <div class="table-title">{{ table.title }}</div>
-                                  <el-table size="mini" :data="fourth.tableData" style="width: 100%; margin-bottom: 20px;">
-                                    <el-table-column v-for="column in fourth.tableColumns" :key="column.prop" :prop="column.prop" :label="column.label"></el-table-column>
+                                  <el-table size="mini" :data="fourth.tableData"
+                                    style="width: 100%; margin-bottom: 20px;">
+                                    <el-table-column v-for="column in fourth.tableColumns" :key="column.prop"
+                                      :prop="column.prop" :label="column.label"></el-table-column>
                                   </el-table>
                                 </div>
                               </div>
                               <div class="echartBox" v-if="fourth.seriesData && isValidChartData(fourth.seriesData)">
                                 <div :id="`echarts${fourth.echartMsg.echartId}`" class="echart"></div>
                               </div>
-                              <div v-if="fourth.multipleCharts && fourth.multipleCharts.length > 0" class="multiple-charts">
-                                <div v-for="(chart, chartIndex) in fourth.multipleCharts" :key="chartIndex" class="chart-item" v-if="chart.seriesData && isValidChartData(chart.seriesData)">
+                              <div v-if="fourth.multipleCharts && fourth.multipleCharts.length > 0"
+                                class="multiple-charts">
+                                <div v-for="(chart, chartIndex) in fourth.multipleCharts" :key="chartIndex"
+                                  class="chart-item" v-if="chart.seriesData && isValidChartData(chart.seriesData)">
                                   <div class="chart-title">{{ chart.title }}</div>
                                   <div :id="`echarts${chart.echartMsg.echartId}`" class="echart"></div>
                                 </div>
                               </div>
+                              <template v-if="fourth.fifth">
+                                <div v-for="(fifth, fifthIndex) in fourth.fifth" :key="`fifth-${fifthIndex}`"
+                                  class="sub-level">
+                                  <div class="tit5" v-html="processImageReferences(fifth.name, true)"></div>
+                                  <div class="txt" v-html="processImageReferences(fifth.con)"></div>
+                                  <div class="table1" v-if="fifth.tableData">
+                                    <el-table size="mini" :data="fifth.tableData" style="width: 100%">
+                                      <el-table-column v-for="column in fifth.tableColumns" :key="column.prop"
+                                        :prop="column.prop" :label="column.label"></el-table-column>
+                                    </el-table>
+                                  </div>
+                                  <div v-if="fifth.multipleTables" class="multiple-tables">
+                                    <div v-for="(table, tableIndex) in fifth.multipleTables" :key="tableIndex"
+                                      class="table-item">
+                                      <div class="table-title">{{ table.title }}</div>
+                                      <el-table size="mini" :data="fifth.tableData"
+                                        style="width: 100%; margin-bottom: 20px;">
+                                        <el-table-column v-for="column in fifth.tableColumns" :key="column.prop"
+                                          :prop="column.prop" :label="column.label"></el-table-column>
+                                      </el-table>
+                                    </div>
+                                  </div>
+                                  <div class="echartBox" v-if="fifth.seriesData && isValidChartData(fifth.seriesData)">
+                                    <div :id="`echarts${fifth.echartMsg.echartId}`" class="echart"></div>
+                                  </div>
+                                  <div v-if="fifth.multipleCharts && fifth.multipleCharts.length > 0"
+                                    class="multiple-charts">
+                                    <div v-for="(chart, chartIndex) in fifth.multipleCharts" :key="chartIndex"
+                                      class="chart-item" v-if="chart.seriesData && isValidChartData(chart.seriesData)">
+                                      <div class="chart-title">{{ chart.title }}</div>
+                                      <div :id="`echarts${chart.echartMsg.echartId}`" class="echart"></div>
+                                    </div>
+                                  </div>
+                                  <!-- sixth 层递归渲染 -->
+                                  <template v-if="fifth.sixth">
+                                    <div v-for="(sixth, sixthIndex) in fifth.sixth" :key="`sixth-${sixthIndex}`"
+                                      class="sub-level">
+                                      <div class="tit6" v-html="processImageReferences(sixth.name, true)"></div>
+                                      <div class="txt" v-html="processImageReferences(sixth.con)"></div>
+                                      <div class="table1" v-if="sixth.tableData">
+                                        <el-table size="mini" :data="sixth.tableData" style="width: 100%">
+                                          <el-table-column v-for="column in sixth.tableColumns" :key="column.prop"
+                                            :prop="column.prop" :label="column.label"></el-table-column>
+                                        </el-table>
+                                      </div>
+                                      <div v-if="sixth.multipleTables" class="multiple-tables">
+                                        <div v-for="(table, tableIndex) in sixth.multipleTables" :key="tableIndex"
+                                          class="table-item">
+                                          <div class="table-title">{{ table.title }}</div>
+                                          <el-table size="mini" :data="table.tableData"
+                                            style="width: 100%; margin-bottom: 20px;">
+                                            <el-table-column v-for="column in table.tableColumns" :key="column.prop"
+                                              :prop="column.prop" :label="column.label"></el-table-column>
+                                          </el-table>
+                                        </div>
+                                      </div>
+                                      <div class="echartBox"
+                                        v-if="sixth.seriesData && isValidChartData(sixth.seriesData)">
+                                        <div :id="`echarts${sixth.echartMsg.echartId}`" class="echart"></div>
+                                      </div>
+                                      <div v-if="sixth.multipleCharts && sixth.multipleCharts.length > 0"
+                                        class="multiple-charts">
+                                        <div v-for="(chart, chartIndex) in sixth.multipleCharts" :key="chartIndex"
+                                          class="chart-item"
+                                          v-if="chart.seriesData && isValidChartData(chart.seriesData)">
+                                          <div class="chart-title">{{ chart.title }}</div>
+                                          <div :id="`echarts${chart.echartMsg.echartId}`" class="echart"></div>
+                                        </div>
+                                      </div>
+                                      <!-- 可继续递归 seventh 层... -->
+                                    </div>
+                                  </template>
+                                </div>
+                              </template>
                             </div>
                           </template>
                         </div>
@@ -171,7 +263,8 @@
         </el-form-item>
         <el-form-item label="化学成分:">
           <el-select v-model="form.component" clearable multiple placeholder="请选择">
-            <el-option v-for="item in componentList" :key="item.prop" :label="item.label" :value="item.prop"></el-option>
+            <el-option v-for="item in componentList" :key="item.prop" :label="item.label"
+              :value="item.prop"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="熔炼工艺:">
@@ -184,7 +277,8 @@
             <el-slider v-model="form.region" range :step="0.02" @change="densityChange" :min="7" :max="10"></el-slider>
           </div>
           <el-input disabled v-model="form.regionVal1" style="width: 60px;margin-left: 5px;"></el-input>~
-          <el-input disabled v-model="form.regionVal2" style="width: 60px;margin-left: 5px;margin-right: 5px;"></el-input>g/cm³
+          <el-input disabled v-model="form.regionVal2"
+            style="width: 60px;margin-left: 5px;margin-right: 5px;"></el-input>g/cm³
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="onSubmit">搜索</el-button>
@@ -210,7 +304,7 @@
 </template>
 
 <script>
-import smallNav from "../../components/smallNav/smallNav";
+import smallNav from "../../components/smallNav/smallNav.vue";
 import BatchUploadDialog from './components/BatchUploadDialog.vue';
 import { getJson } from '@/api/database/dataStretch.js';
 
@@ -392,6 +486,7 @@ export default {
             if (item.two) drawRecursively(item.two);
             if (item.third) drawRecursively(item.third);
             if (item.fourth) drawRecursively(item.fourth);
+            if (item.fifth) drawRecursively(item.fifth);
           });
         };
         drawRecursively(this.introduce);
@@ -473,24 +568,24 @@ export default {
       this.folderUploadVisible = true;
     },
 
-    processImageReferences(text) {
+    processImageReferences(text, isName = false) {
       if (!text) return '';
       let processedText = text.replace(/@@/g, "\n");
-      const imageRefPattern = /图\d+[-－−—]\d+[a-zA-Z]*/g;
+      // 精准匹配
+      const exactPattern = /图\d+[-－−—]\d+[a-zA-Z]*[\.。、，,]?/g;
+      const isMicrostructureTab = this.activeName === '4';
       const matches = [];
       const processedRefs = new Set();
       let match;
+      const debugImageRefs = [];
 
-      const isMicrostructureTab = this.activeName === '4';
-
-      while ((match = imageRefPattern.exec(text)) !== null) {
+      while ((match = exactPattern.exec(text)) !== null) {
         let rawImageRef = match[0];
         let cleanImageRef = this.normalizeImageReference(rawImageRef);
-
         if (processedRefs.has(cleanImageRef)) continue;
         processedRefs.add(cleanImageRef);
-
         if (isMicrostructureTab) {
+          // 组织结构部分，name/con都生成变体
           const hasLetterSuffix = /[a-zA-Z]+$/.test(cleanImageRef);
           let imageVariants = hasLetterSuffix ? [cleanImageRef] : this.generateImageVariants(cleanImageRef);
           imageVariants.forEach((variant, index) => {
@@ -503,25 +598,28 @@ export default {
               isVariant: index > 0,
               baseRef: cleanImageRef
             });
+            debugImageRefs.push(`/img/${this.name2}/${variant}`);
           });
         } else {
+          // 其他部分，name/con都精准匹配
           matches.push({
             fullMatch: match[0],
             originalRef: rawImageRef,
             cleanRef: cleanImageRef,
-            imgUrl: `/原图/${this.name2}/${cleanImageRef}`,
+            imgUrl: `/photo/${this.name2}/${cleanImageRef}`,
             uniqueId: `img-${this.name2}-${cleanImageRef}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
             isVariant: false,
             baseRef: cleanImageRef
           });
+
         }
       }
 
       if (matches.length > 0) {
-        let imageHtml = `<div class="material-images-container" style="display: flex; flex-direction: column; gap: 10px;">`;
+        let imageHtml = `<div class="material-images-container" style="display: flex; flex-direction: column;">`;
         matches.forEach(item => {
           imageHtml += `
-            <div class="material-image-item" style="display: none; margin-bottom: 5px;">
+            <div class="material-image-item" style="display: none; margin-bottom: 0px;">
               <div class="image-caption">${item.cleanRef}</div>
               <div class="material-image">
                 <img id="${item.uniqueId}" alt="${item.cleanRef}" style="width: 100%; height: auto; max-width: 600px;"
@@ -549,7 +647,9 @@ export default {
             setTimeout(() => {
               const imgElement = document.getElementById(item.uniqueId);
               if (imgElement) {
-                imgElement.src = `${item.imgUrl}.jpg`;
+                imgElement.src = isMicrostructureTab
+                  ? `${item.imgUrl}.jpg`
+                  : `${item.imgUrl}.jpg`;
               }
             }, index * 50);
           });
@@ -558,19 +658,10 @@ export default {
       return processedText;
     },
 
-    generateImageVariants(cleanRef) {
-      const variants = [cleanRef];
-      const basicPattern = /^图\d+-\d+$/;
-      if (basicPattern.test(cleanRef)) {
-        const commonSuffixes = ['a', 'b', 'c', 'd', 'e'];
-        commonSuffixes.forEach(suffix => variants.push(`${cleanRef}_${suffix}`));
-      }
-      return variants;
-    },
-
     normalizeImageReference(rawRef) {
       if (!rawRef) return '';
       let cleanRef = rawRef.trim().replace(/[－−—]/g, '-');
+      cleanRef = cleanRef.replace(/[\.。、，,]$/, ''); // 去除末尾标点
       const letterSuffixMatch = cleanRef.match(/^(图\d+-\d+)([a-zA-Z]+)$/);
       if (letterSuffixMatch) {
         cleanRef = letterSuffixMatch[1] + '_' + letterSuffixMatch[2];
@@ -619,6 +710,16 @@ export default {
         }
       });
     },
+
+
+    generateImageVariants(baseRef) {
+      const variants = [baseRef];
+      const letters = ['a', 'b', 'c', 'd', 'e', 'f'];
+      letters.forEach(letter => {
+        variants.push(baseRef + '_' + letter);
+      });
+      return variants;
+    },
   },
   computed: {
     isDev() {
@@ -629,6 +730,29 @@ export default {
 </script>
 
 <style>
+.material-image-item {
+  margin-bottom: 0px;
+}
+
+.image-caption {
+  margin-bottom: 0px;
+  font-size: 13px;
+  color: #666;
+  background: #f5f5f5;
+  padding: 0px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.material-image {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 3px;
+  max-width: 600px;
+}
+</style>
+
+<style scoped>
 .el-form-item__content {
   display: flex;
 }
@@ -669,7 +793,8 @@ export default {
 }
 
 .el-menu {
-  height: calc(100% - 120px); /* Adjusted for the new button */
+  height: calc(100% - 120px);
+  /* Adjusted for the new button */
   overflow: auto;
 }
 
@@ -743,35 +868,15 @@ export default {
   width: 600px;
 }
 
-.multiple-tables .table-item, .multiple-charts .chart-item {
-    margin-bottom: 20px;
+.multiple-tables .table-item,
+.multiple-charts .chart-item {
+  margin-bottom: 20px;
 }
 
-.table-title, .chart-title {
-    font-weight: bold;
-    margin-bottom: 10px;
-    font-size: 14px;
+.table-title,
+.chart-title {
+  font-weight: bold;
+  margin-bottom: 10px;
+  font-size: 14px;
 }
-
-.material-image-item {
-    margin-bottom: 5px;
-}
-
-.image-caption {
-    margin-bottom: 5px;
-    font-size: 13px;
-    color: #666;
-    background: #f5f5f5;
-    padding: 3px 8px;
-    border-radius: 4px;
-    display: inline-block;
-}
-
-.material-image {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 3px;
-    max-width: 600px;
-}
-
 </style>

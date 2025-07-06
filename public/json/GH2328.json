@@ -1285,7 +1285,7 @@
           "con": "",
           "seriesData": [
             {
-              "name": "500度",
+              "name": "500度-持久寿命_y",
               "type": "line",
               "smooth": "smooth",
               "data": [

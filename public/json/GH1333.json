@@ -1154,7 +1154,7 @@
           ],
           "seriesData": [
             {
-              "name": "δ₅-感应炉+电渣",
+              "name": "δ₅-感应炉+电渣_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1189,7 +1189,7 @@
               ]
             },
             {
-              "name": "δ₅-电弧炉+电渣",
+              "name": "δ₅-电弧炉+电渣_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1224,7 +1224,7 @@
               ]
             },
             {
-              "name": "σP0.2-感应炉+电渣",
+              "name": "σP0.2-感应炉+电渣_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1247,7 +1247,7 @@
               ]
             },
             {
-              "name": "σb-感应炉+电渣",
+              "name": "σb-感应炉+电渣_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1286,7 +1286,7 @@
               ]
             },
             {
-              "name": "σb-电弧炉+电渣",
+              "name": "σb-电弧炉+电渣_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1871,7 +1871,7 @@
           "con": "",
           "seriesData": [
             {
-              "name": "700℃",
+              "name": "700℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1902,7 +1902,7 @@
               ]
             },
             {
-              "name": "800℃",
+              "name": "800℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1941,7 +1941,7 @@
               ]
             },
             {
-              "name": "900℃",
+              "name": "900℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1968,7 +1968,7 @@
               ]
             },
             {
-              "name": "950℃",
+              "name": "950℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -2241,7 +2241,7 @@
           "con": "",
           "seriesData": [
             {
-              "name": "25MPa",
+              "name": "25MPa-εt_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -2288,7 +2288,7 @@
               ]
             },
             {
-              "name": "42MPa",
+              "name": "42MPa-εt_y",
               "type": "line",
               "smooth": "smooth",
               "data": [

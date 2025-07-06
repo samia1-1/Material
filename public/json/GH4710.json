@@ -645,7 +645,7 @@
           "con": "",
           "seriesData": [
             {
-              "name": "d25mm棒材",
+              "name": "d25mm棒材-aKU_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -678,6 +678,37 @@
                   413.72864
                 ]
               ]
+            },
+            {
+              "name": "饼材-aKU_y",
+              "type": "line",
+              "smooth": "smooth",
+              "data": [
+                [
+                  550.87326,
+                  185.81891
+                ],
+                [
+                  664.17512,
+                  187.76989
+                ],
+                [
+                  756.3368,
+                  201.6041
+                ],
+                [
+                  824.74547,
+                  223.06486
+                ],
+                [
+                  877.23962,
+                  205.50605
+                ],
+                [
+                  974.62696,
+                  278.22433
+                ]
+              ]
             }
           ],
           "xAxisData": [],
@@ -694,7 +725,7 @@
           "con": "",
           "seriesData": [
             {
-              "name": "750℃",
+              "name": "750℃-aKU_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -833,7 +864,7 @@
               ]
             },
             {
-              "name": "850℃",
+              "name": "850℃-aKU_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -964,7 +995,7 @@
               ]
             },
             {
-              "name": "950℃",
+              "name": "950℃-aKU_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1443,7 +1474,7 @@
           ],
           "seriesData": [
             {
-              "name": "20℃拉伸_δ5-750℃时效",
+              "name": "20℃拉伸_δ5-750℃时效_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1474,7 +1505,7 @@
               ]
             },
             {
-              "name": "20℃拉伸_δ5-850℃时效",
+              "name": "20℃拉伸_δ5-850℃时效_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1505,7 +1536,7 @@
               ]
             },
             {
-              "name": "20℃拉伸_δ5-950℃时效",
+              "name": "20℃拉伸_δ5-950℃时效_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1536,7 +1567,7 @@
               ]
             },
             {
-              "name": "20℃拉伸_σb-750℃时效",
+              "name": "20℃拉伸_σb-750℃时效_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1567,7 +1598,7 @@
               ]
             },
             {
-              "name": "20℃拉伸_σb-850℃时效",
+              "name": "20℃拉伸_σb-850℃时效_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1598,7 +1629,7 @@
               ]
             },
             {
-              "name": "20℃拉伸_σb-950℃时效",
+              "name": "20℃拉伸_σb-950℃时效_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1629,7 +1660,7 @@
               ]
             },
             {
-              "name": "870℃拉伸_σb-750℃时效",
+              "name": "870℃拉伸_σb-750℃时效_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1664,7 +1695,7 @@
               ]
             },
             {
-              "name": "870℃拉伸_σb-850℃时效",
+              "name": "870℃拉伸_σb-850℃时效_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1695,7 +1726,7 @@
               ]
             },
             {
-              "name": "870℃拉伸_σb-950℃时效",
+              "name": "870℃拉伸_σb-950℃时效_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1722,7 +1753,7 @@
               ]
             },
             {
-              "name": "870℃拉伸_δ5-750℃时效",
+              "name": "870℃拉伸_δ5-750℃时效_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1757,7 +1788,7 @@
               ]
             },
             {
-              "name": "870℃拉伸_δ5-850℃时效",
+              "name": "870℃拉伸_δ5-850℃时效_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1784,7 +1815,7 @@
               ]
             },
             {
-              "name": "870℃拉伸_δ5-950℃时效",
+              "name": "870℃拉伸_δ5-950℃时效_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -2065,9 +2096,77 @@
         {
           "name": "3.8.2、棒材不同温度的持久应力-寿命曲线见图3-4，持久热强参数综合曲线见图3-5。",
           "con": "",
+          "multipleCharts": [
+            {
+              "title": "3.8.2",
+              "identifier": "图3-5",
+              "seriesData": [
+                {
+                  "name": "σ_y",
+                  "type": "line",
+                  "smooth": "smooth",
+                  "data": [
+                    [
+                      21.29771,
+                      782.26394
+                    ],
+                    [
+                      21.94183,
+                      671.05869
+                    ],
+                    [
+                      22.51257,
+                      610.9823
+                    ],
+                    [
+                      23.02624,
+                      472.62645
+                    ],
+                    [
+                      23.73559,
+                      456.55495
+                    ],
+                    [
+                      24.05357,
+                      395.76275
+                    ],
+                    [
+                      24.63247,
+                      340.56063
+                    ],
+                    [
+                      25.08091,
+                      297.23746
+                    ],
+                    [
+                      25.21136,
+                      249.55199
+                    ],
+                    [
+                      25.84733,
+                      249.55199
+                    ],
+                    [
+                      27.07035,
+                      150.90646
+                    ]
+                  ]
+                }
+              ],
+              "xAxisData": [],
+              "echartMsg": {
+                "echartId": "382_35_multi_0",
+                "xName": "",
+                "yName": "",
+                "minX": 21.29771,
+                "minY": 150.90646
+              },
+              "sourceSheet": "3.8.2_图3-5"
+            }
+          ],
           "seriesData": [
             {
-              "name": "730℃",
+              "name": "730℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -2090,7 +2189,7 @@
               ]
             },
             {
-              "name": "815℃",
+              "name": "815℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -2125,7 +2224,7 @@
               ]
             },
             {
-              "name": "870℃",
+              "name": "870℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -2156,7 +2255,7 @@
               ]
             },
             {
-              "name": "980℃",
+              "name": "980℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -2904,7 +3003,7 @@
               "identifier": "图3-7",
               "seriesData": [
                 {
-                  "name": "157MPa",
+                  "name": "157MPa-εt_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -3023,7 +3122,7 @@
                   ]
                 },
                 {
-                  "name": "78MPa",
+                  "name": "78MPa-εt_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -3110,7 +3209,7 @@
                   ]
                 },
                 {
-                  "name": "177MPa",
+                  "name": "177MPa-εt_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -3218,7 +3317,7 @@
           ],
           "seriesData": [
             {
-              "name": "157MPa",
+              "name": "157MPa-εt_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -3393,7 +3492,7 @@
               ]
             },
             {
-              "name": "177MPa",
+              "name": "177MPa-εt_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -3568,7 +3667,7 @@
               ]
             },
             {
-              "name": "196MPa",
+              "name": "196MPa-εt_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -3747,7 +3846,7 @@
               ]
             },
             {
-              "name": "245MPa",
+              "name": "245MPa-εt_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -4018,7 +4117,7 @@
           "identifier": "图4-2",
           "seriesData": [
             {
-              "name": "a-1-变形",
+              "name": "a-1-变形量_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -4165,7 +4264,7 @@
               ]
             },
             {
-              "name": "a-2-变形",
+              "name": "a-2-变形量_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -4276,7 +4375,7 @@
               ]
             },
             {
-              "name": "a-3-变形",
+              "name": "a-3-变形量_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -4407,7 +4506,7 @@
               ]
             },
             {
-              "name": "a-4-变形",
+              "name": "a-4-变形量_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -4486,7 +4585,7 @@
               ]
             },
             {
-              "name": "b-1-变形",
+              "name": "b-1-变形量_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -4637,7 +4736,7 @@
               ]
             },
             {
-              "name": "b-2-变形",
+              "name": "b-2-变形量_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -4753,7 +4852,30 @@
       ],
       "seriesData": [
         {
-          "name": "铸态+1150℃X4h/AC",
+          "name": "铸态-aKU_y",
+          "type": "line",
+          "smooth": "smooth",
+          "data": [
+            [
+              1001.21951,
+              280.99688
+            ],
+            [
+              1003.04878,
+              289.71963
+            ],
+            [
+              1006.09756,
+              302.18069
+            ],
+            [
+              1005.4878,
+              284.7352
+            ]
+          ]
+        },
+        {
+          "name": "铸态+1150℃X4h/AC-aKU_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -4824,7 +4946,7 @@
           ]
         },
         {
-          "name": "铸态十1140℃X12h/AC",
+          "name": "铸态十1140℃X12h/AC-aKU_y",
           "type": "line",
           "smooth": "smooth",
           "data": [

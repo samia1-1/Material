@@ -526,7 +526,7 @@
       "con": "合金在空气介质中，900℃恒温氧化动力学曲线及与DZ438G和K438G合金对比见图2-1。",
       "seriesData": [
         {
-          "name": "900℃-K438G",
+          "name": "900℃-K438G-增重值_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -777,7 +777,7 @@
           ]
         },
         {
-          "name": "900℃-DZ438G",
+          "name": "900℃-DZ438G-增重值_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -1016,7 +1016,7 @@
           ]
         },
         {
-          "name": "900℃-DD408",
+          "name": "900℃-DD408-增重值_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -1229,7 +1229,7 @@
           "identifier": "图2-3",
           "seriesData": [
             {
-              "name": "盐成分：3.5mg/cm2、950℃-K438G",
+              "name": "盐成分：3.5mg/cm2、950℃-K438G-增重值_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1276,7 +1276,7 @@
               ]
             },
             {
-              "name": "盐成分：3.5mg/cm2、950℃-DZ438G",
+              "name": "盐成分：3.5mg/cm2、950℃-DZ438G-增重值_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1323,7 +1323,7 @@
               ]
             },
             {
-              "name": "盐成分：3.5mg/cm2、950℃-DD408",
+              "name": "盐成分：3.5mg/cm2、950℃-DD408-增重值_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1366,7 +1366,7 @@
               ]
             },
             {
-              "name": "盐成分：1.0mg/cm2、950℃-K438G",
+              "name": "盐成分：1.0mg/cm2、950℃-K438G-增重值_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1409,7 +1409,7 @@
               ]
             },
             {
-              "name": "盐成分：1.0mg/cm2、950℃-DZ438G",
+              "name": "盐成分：1.0mg/cm2、950℃-DZ438G-增重值_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1456,7 +1456,7 @@
               ]
             },
             {
-              "name": "盐成分：1.0mg/cm2、950℃-DD408",
+              "name": "盐成分：1.0mg/cm2、950℃-DD408-增重值_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1512,7 +1512,7 @@
       ],
       "seriesData": [
         {
-          "name": "900℃-K438G",
+          "name": "900℃-K438G-增重值_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -1571,7 +1571,7 @@
           ]
         },
         {
-          "name": "900℃-DZ438G",
+          "name": "900℃-DZ438G-增重值_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -1638,7 +1638,7 @@
           ]
         },
         {
-          "name": "900℃-DD408",
+          "name": "900℃-DD408-增重值_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -2069,6 +2069,62 @@
         {
           "name": "3.8.2、合金不同温度的持久应力-寿命曲线见图3-1，持久热强参数综合曲线见图3-2。",
           "con": "",
+          "multipleCharts": [
+            {
+              "title": "3.8.2",
+              "identifier": "图3-2",
+              "seriesData": [
+                {
+                  "name": "σ_y",
+                  "type": "line",
+                  "smooth": "smooth",
+                  "data": [
+                    [
+                      20.85983,
+                      962.74356
+                    ],
+                    [
+                      21.47409,
+                      950.96228
+                    ],
+                    [
+                      23.52491,
+                      678.55273
+                    ],
+                    [
+                      23.74287,
+                      651.10994
+                    ],
+                    [
+                      25.05262,
+                      474.45666
+                    ],
+                    [
+                      26.57836,
+                      293.7415
+                    ],
+                    [
+                      27.70779,
+                      195.37743
+                    ],
+                    [
+                      28.35573,
+                      163.96593
+                    ]
+                  ]
+                }
+              ],
+              "xAxisData": [],
+              "echartMsg": {
+                "echartId": "382_32_multi_0",
+                "xName": "",
+                "yName": "",
+                "minX": 20.85983,
+                "minY": 163.96593
+              },
+              "sourceSheet": "3.8.2_图3-2"
+            }
+          ],
           "seriesData": [
             {
               "name": "1000℃",
@@ -2685,7 +2741,56 @@
               "label": "Nf/ 周",
               "prop": "Nf/ 周"
             }
-          ]
+          ],
+          "seriesData": [
+            {
+              "name": "σmax/Mpa",
+              "type": "line",
+              "smooth": "smooth",
+              "data": [
+                [
+                  800,
+                  800
+                ],
+                [
+                  455826.56755,
+                  619.75056
+                ],
+                [
+                  1235208.71125,
+                  590.20945
+                ],
+                [
+                  5636971.27942,
+                  569.72536
+                ],
+                [
+                  4468596.27242,
+                  539.5071
+                ],
+                [
+                  8428816.51385,
+                  541.03071
+                ],
+                [
+                  10284000,
+                  540.60748
+                ],
+                [
+                  9771463.01928,
+                  519.23462
+                ]
+              ]
+            }
+          ],
+          "xAxisData": [],
+          "echartMsg": {
+            "echartId": "3101",
+            "xName": "",
+            "yName": "",
+            "minX": 800,
+            "minY": 519.23462
+          }
         },
         {
           "name": "3.10.2、低周疲劳",
@@ -2721,7 +2826,7 @@
           ],
           "seriesData": [
             {
-              "name": "760℃、R=-1",
+              "name": "760℃、R=-1-σmax_y",
               "type": "line",
               "smooth": "smooth",
               "data": [

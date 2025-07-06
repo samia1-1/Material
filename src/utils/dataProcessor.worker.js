@@ -115,6 +115,12 @@ export class DataProcessor {
     }
 
     if (this.hasAnyData(materialData)) {
+      // 合并后自动补全所有 tableColumns
+      REQUIRED_SECTIONS.forEach(section => {
+        if (materialData[section] && Array.isArray(materialData[section])) {
+          materialData[section].forEach(item => this.autoFillTableColumns(item));
+        }
+      });
       const validationStats = this.validateMergeResults(materialData);
       console.log('📊 最终验证结果:', validationStats);
     }
@@ -202,7 +208,7 @@ export class DataProcessor {
         }
       }
     }
-    ['two', 'third', 'fourth'].forEach(prop => {
+    ['two', 'third', 'fourth', 'fifth'].forEach(prop => {
       if (item[prop] && Array.isArray(item[prop])) {
         item[prop].forEach((subItem, index) => {
           const subPath = path ? `${path}.${prop}[${index}]` : `${prop}[${index}]`;
@@ -249,7 +255,7 @@ export class DataProcessor {
         }
       }
     }
-    ['two', 'third', 'fourth'].forEach(prop => {
+    ['two', 'third', 'fourth', 'fifth'].forEach(prop => {
       if (item[prop] && Array.isArray(item[prop])) {
         item[prop].forEach((subItem, index) => {
           const subPath = path ? `${path}.${prop}[${index}]` : `${prop}[${index}]`;
@@ -361,56 +367,61 @@ export class DataProcessor {
 
   // 修正后的 tubiao 方法：智能配对 x/y 列并生成 [x, y] 点对
   tubiao(jsonData, lineName) {
-    if (!jsonData || jsonData.length < 2) return [0, 0, []];
+    if (!jsonData || jsonData.length < 1 || !jsonData[0]) return [0, 0, []];
 
     const columns = Object.keys(jsonData[0]);
     const seriesData = [];
 
-    // 方法1：处理标准 _x/_y 后缀的列
+    // 策略1：处理标准 _x/_y 后缀的列
     const xCols = columns.filter(col => /_x$/i.test(col));
-    xCols.forEach(xCol => {
-      const yCol = xCol.replace(/_x$/i, '_y');
-      if (columns.includes(yCol)) {
-        const baseName = xCol.replace(/_x$/i, '');
-        const data = jsonData.map(row => {
-          const x = parseFloat(row[xCol]);
-          const y = parseFloat(row[yCol]);
-          return (!isNaN(x) && !isNaN(y)) ? [x, y] : null;
-        }).filter(point => point !== null);
+    if (xCols.length > 0) {
+      xCols.forEach(xCol => {
+        const yCol = xCol.replace(/_x$/i, '_y');
+        if (columns.includes(yCol)) {
+          const baseName = xCol.replace(/_x$/i, '');
+          const data = jsonData.map(row => {
+            const x = parseFloat(row[xCol]);
+            const y = parseFloat(row[yCol]);
+            return (!isNaN(x) && !isNaN(y)) ? [x, y] : null;
+          }).filter(point => point !== null);
 
-        if (data.length > 0) {
-          seriesData.push({
-            name: baseName || lineName,
-            type: 'line',
-            smooth: 'smooth',
-            data
-          });
-        }
-      }
-    });
-
-    // 方法2：如果没有 _x/_y 后缀，尝试智能配对相似列名
-    if (seriesData.length === 0) {
-      // 查找可能的 x/y 配对（基于相似的前缀）
-      const pairedColumns = this.findColumnPairs(columns);
-
-      pairedColumns.forEach(pair => {
-        const { xCol, yCol, baseName } = pair;
-        const data = jsonData.map(row => {
-          const x = parseFloat(row[xCol]);
-          const y = parseFloat(row[yCol]);
-          return (!isNaN(x) && !isNaN(y)) ? [x, y] : null;
-        }).filter(point => point !== null);
-
-        if (data.length > 0) {
-          seriesData.push({
-            name: baseName || `${xCol}-${yCol}`,
-            type: 'line',
-            smooth: 'smooth',
-            data
-          });
+          if (data.length > 0) {
+            seriesData.push({
+              name: baseName || lineName,
+              type: 'line',
+              smooth: 'smooth',
+              data
+            });
+          }
         }
       });
+    }
+
+    // 策略2：如果策略1未找到数据，则按顺序将列两两配对
+    if (seriesData.length === 0 && columns.length >= 2) {
+      for (let i = 0; i < columns.length; i += 2) {
+        if (i + 1 < columns.length) {
+          const xCol = columns[i];
+          const yCol = columns[i + 1];
+
+          const baseName = yCol; // 使用Y轴列名作为系列名
+
+          const data = jsonData.map(row => {
+            const x = parseFloat(row[xCol]);
+            const y = parseFloat(row[yCol]);
+            return (!isNaN(x) && !isNaN(y)) ? [x, y] : null;
+          }).filter(point => point !== null);
+
+          if (data.length > 0) {
+            seriesData.push({
+              name: baseName || `${xCol}-${yCol}`,
+              type: 'line',
+              smooth: 'smooth',
+              data
+            });
+          }
+        }
+      }
     }
 
     // 如果没有找到任何有效的 x/y 配对，返回空数据
@@ -419,7 +430,7 @@ export class DataProcessor {
       return [0, 0, []];
     }
 
-    // 计算 minX/minY（仅处理二维数据点）
+    // 计算所有系列中的 minX/minY
     let xArr = [], yArr = [];
     seriesData.forEach(series => {
       series.data.forEach(point => {
@@ -435,97 +446,6 @@ export class DataProcessor {
       yArr.length > 0 ? Math.min(...yArr) : 0,
       seriesData
     ];
-  }
-
-  // 智能查找列配对的辅助方法
-  findColumnPairs(columns) {
-    const pairs = [];
-    const usedColumns = new Set();
-
-    // 策略1：基于相似前缀和不同后缀配对
-    for (let i = 0; i < columns.length; i++) {
-      if (usedColumns.has(columns[i])) continue;
-
-      const col1 = columns[i];
-
-      // 查找可能的配对列
-      for (let j = i + 1; j < columns.length; j++) {
-        if (usedColumns.has(columns[j])) continue;
-
-        const col2 = columns[j];
-        const similarity = this.calculateColumnSimilarity(col1, col2);
-
-        if (similarity.isPair) {
-          // 确定哪个是 x 轴，哪个是 y 轴
-          let xCol, yCol, baseName;
-          if (similarity.col1IsX) {
-            xCol = col1;
-            yCol = col2;
-          } else {
-            xCol = col2;
-            yCol = col1;
-          }
-          baseName = similarity.commonPrefix;
-
-          pairs.push({ xCol, yCol, baseName });
-          usedColumns.add(col1);
-          usedColumns.add(col2);
-          break;
-        }
-      }
-    }
-
-    return pairs;
-  }
-
-  // 计算两个列名的相似性，判断是否可以配对
-  calculateColumnSimilarity(col1, col2) {
-    // 查找公共前缀
-    let commonPrefix = '';
-    const minLen = Math.min(col1.length, col2.length);
-    for (let i = 0; i < minLen; i++) {
-      if (col1[i] === col2[i]) {
-        commonPrefix += col1[i];
-      } else {
-        break;
-      }
-    }
-
-    // 如果公共前缀太短，不认为是配对
-    if (commonPrefix.length < 5) {
-      return { isPair: false };
-    }
-
-    const suffix1 = col1.substring(commonPrefix.length);
-    const suffix2 = col2.substring(commonPrefix.length);
-
-    // 常见的 x/y 轴标识符
-    const xIndicators = ['t', 'time', 'temp', 'temperature', 'stress', 'load', 'x'];
-    const yIndicators = ['εt', 'ε', 'strain', 'elongation', 'displacement', 'y'];
-
-    const col1IsX = xIndicators.some(indicator =>
-      suffix1.toLowerCase().includes(indicator.toLowerCase())
-    );
-    const col2IsY = yIndicators.some(indicator =>
-      suffix2.toLowerCase().includes(indicator.toLowerCase())
-    );
-    const col2IsX = xIndicators.some(indicator =>
-      suffix2.toLowerCase().includes(indicator.toLowerCase())
-    );
-    const col1IsY = yIndicators.some(indicator =>
-      suffix1.toLowerCase().includes(indicator.toLowerCase())
-    );
-
-    // 如果能明确识别 x/y 关系，则认为是配对
-    if ((col1IsX && col2IsY) || (col2IsX && col1IsY)) {
-      return {
-        isPair: true,
-        col1IsX: col1IsX,
-        commonPrefix: commonPrefix.replace(/-$/, '') // 移除末尾的连字符
-      };
-    }
-
-    return { isPair: false };
   }
 
   mergeDataStructuresIntelligently(sourceData, targetData) {
@@ -561,45 +481,42 @@ export class DataProcessor {
 
   extractIdentifierFromName(name) {
     if (!name) return null;
-    // 优先匹配4段编号，其次3段，再2段
-    const patterns = [/\b(\d+\.\d+\.\d+\.\d+)\b/, /\b(\d+\.\d+\.\d+)\b/, /\b(\d+\.\d+)\b/];
-    for (const pattern of patterns) {
-      const match = name.match(pattern);
-      if (match) return match[1];
-    }
+    // This regex now supports up to 5 levels of dot-separated numbers
+    const match = name.match(/\b(\d+(\.\d+){1,4})\b/);
+    if (match) return match[1];
     return null;
   }
 
   extractIdentifierFromSheetName(sheetName) {
     if (!sheetName) return null;
-    if (sheetName.includes('_')) {
-      const beforeUnderscore = sheetName.split('_')[0];
-      if (this.isValidNumberIdentifier(beforeUnderscore)) return beforeUnderscore;
-    }
-    // 优先匹配4段编号，其次3段，再2段
-    const patterns = [/^(\d+\.\d+\.\d+\.\d+)$/, /^(\d+\.\d+\.\d+)$/, /^(\d+\.\d+)$/];
-    for (const pattern of patterns) {
-      const match = sheetName.match(pattern);
-      if (match) return match[1];
-    }
-    // 兼容提取
-    const extractPatterns = [/\b(\d+\.\d+\.\d+\.\d+)\b/, /\b(\d+\.\d+\.\d+)\b/, /\b(\d+\.\d+)\b/];
-    for (const pattern of extractPatterns) {
-      const match = sheetName.match(pattern);
-      if (match && this.isValidNumberIdentifier(match[1])) return match[1];
+    // This regex matches a numeric, dot-separated identifier at the start of the string.
+    // e.g., "3.9.2.3" from "3.9.2.3_图3-30" or "3.9.2.4" from "3.9.2.4"
+    const match = sheetName.match(/^(\d+(\.\d+)+)/);
+    // We also validate it against the allowed formats (e.g., X.X, X.X.X, etc.)
+    if (match && match[1] && this.isValidNumberIdentifier(match[1])) {
+      return match[1];
     }
     return null;
   }
 
   isValidNumberIdentifier(str) {
     if (!str) return false;
-    const patterns = [/^\d+\.\d+\.\d+\.\d+$/, /^\d+\.\d+\.\d+$/, /^\d+\.\d+$/];
-    return patterns.some(pattern => pattern.test(str));
+    // This regex now supports up to 5 levels of dot-separated numbers
+    return /^\d+(\.\d+){1,4}$/.test(str);
   }
 
   isIdentifierMatch(itemIdentifier, sheetIdentifier) {
     if (!itemIdentifier || !sheetIdentifier) return false;
     if (!this.isValidNumberIdentifier(itemIdentifier) || !this.isValidNumberIdentifier(sheetIdentifier)) return false;
+
+    // 通过比较“.”的数量来确保层级深度一致，防止父级匹配子级
+    const itemDots = (itemIdentifier.match(/\./g) || []).length;
+    const sheetDots = (sheetIdentifier.match(/\./g) || []).length;
+
+    if (itemDots !== sheetDots) {
+        return false;
+    }
+
     return itemIdentifier === sheetIdentifier;
   }
 
@@ -668,7 +585,7 @@ export class DataProcessor {
     let count = items.length;
     items.forEach(item => {
       if (item) {
-        ['two', 'third', 'fourth'].forEach(prop => {
+        ['two', 'third', 'fourth', 'fifth'].forEach(prop => {
           if (item[prop] && Array.isArray(item[prop])) {
             count += this.countItemsRecursively(item[prop]);
           }
@@ -824,12 +741,27 @@ export class DataProcessor {
         result.push({ seriesData: chart.seriesData, echartMsg: chart.echartMsg });
       });
     }
-    ['two', 'third', 'fourth'].forEach(key => {
+    ['two', 'third', 'fourth', 'fifth'].forEach(key => {
       if (Array.isArray(node[key])) {
         node[key].forEach(child => this.collectAllCharts(child, result));
       }
     });
     return result;
+  }
+
+  // 合并数据结构后自动补全所有 tableColumns
+  autoFillTableColumns(item) {
+    if (item.tableData && (!item.tableColumns || item.tableColumns.length === 0)) {
+      const firstRow = item.tableData.find(row => typeof row === 'object' && row !== null);
+      if (firstRow) {
+        item.tableColumns = Object.keys(firstRow).map(key => ({ label: key, prop: key }));
+      }
+    }
+    ['two', 'third', 'fourth', 'fifth', 'sixth'].forEach(childKey => {
+      if (Array.isArray(item[childKey])) {
+        item[childKey].forEach(sub => this.autoFillTableColumns(sub));
+      }
+    });
   }
 }
 

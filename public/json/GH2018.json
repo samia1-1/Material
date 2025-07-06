@@ -954,7 +954,7 @@
               "identifier": "图3-2",
               "seriesData": [
                 {
-                  "name": "850℃×500h-δ₅",
+                  "name": "850℃×500h-δ₅_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -981,7 +981,7 @@
                   ]
                 },
                 {
-                  "name": "800℃×500h-δ₅",
+                  "name": "800℃×500h-δ₅_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -1004,7 +1004,7 @@
                   ]
                 },
                 {
-                  "name": "750℃×500h-δ₅",
+                  "name": "750℃×500h-δ₅_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -1035,7 +1035,7 @@
                   ]
                 },
                 {
-                  "name": "850℃×500h-σb",
+                  "name": "850℃×500h-σb_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -1058,7 +1058,7 @@
                   ]
                 },
                 {
-                  "name": "800℃×500h-σb",
+                  "name": "800℃×500h-σb_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -1081,7 +1081,7 @@
                   ]
                 },
                 {
-                  "name": "750℃×500h-σb",
+                  "name": "750℃×500h-σb_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -1121,7 +1121,7 @@
           ],
           "seriesData": [
             {
-              "name": "800℃×1000h-δ₅",
+              "name": "800℃×1000h-δ₅_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1144,7 +1144,7 @@
               ]
             },
             {
-              "name": "800℃×200h-δ₅",
+              "name": "800℃×200h-δ₅_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1171,7 +1171,7 @@
               ]
             },
             {
-              "name": "800℃×500h-δ₅",
+              "name": "800℃×500h-δ₅_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1198,7 +1198,7 @@
               ]
             },
             {
-              "name": "800℃×1000h-σb",
+              "name": "800℃×1000h-σb_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1221,7 +1221,7 @@
               ]
             },
             {
-              "name": "800℃×500h-σb",
+              "name": "800℃×500h-σb_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1248,7 +1248,7 @@
               ]
             },
             {
-              "name": "800℃×200h-σb",
+              "name": "800℃×200h-σb_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1382,7 +1382,40 @@
               "label": "σt/h/MPa①_σ200",
               "prop": "σt/h/MPa①_σ200"
             }
-          ]
+          ],
+          "seriesData": [
+            {
+              "name": "σ_y",
+              "type": "line",
+              "smooth": "smooth",
+              "data": [
+                [
+                  22.38261,
+                  271.59246
+                ],
+                [
+                  22.62883,
+                  237.11405
+                ],
+                [
+                  23.80538,
+                  181.9031
+                ],
+                [
+                  24.685,
+                  105.54667
+                ]
+              ]
+            }
+          ],
+          "xAxisData": [],
+          "echartMsg": {
+            "echartId": "381",
+            "xName": "",
+            "yName": "",
+            "minX": 22.38261,
+            "minY": 105.54667
+          }
         },
         {
           "name": "3.8.2、板材经不同长期时效，不同试验条件的持久性能见表3-6。",
@@ -1514,7 +1547,7 @@
               "identifier": "图3-5",
               "seriesData": [
                 {
-                  "name": "750℃，275MPa-δ₅",
+                  "name": "750℃，275MPa-δ₅_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -1533,7 +1566,7 @@
                   ]
                 },
                 {
-                  "name": "800℃，177MPa-δ₅",
+                  "name": "800℃，177MPa-δ₅_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -1552,7 +1585,7 @@
                   ]
                 },
                 {
-                  "name": "850℃，103MPa-δ₅",
+                  "name": "850℃，103MPa-δ₅_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -1571,7 +1604,7 @@
                   ]
                 },
                 {
-                  "name": "750℃，275MPa-τ",
+                  "name": "750℃，275MPa-τ_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -1586,7 +1619,7 @@
                   ]
                 },
                 {
-                  "name": "800℃，177MPa-τ",
+                  "name": "800℃，177MPa-τ_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -1601,7 +1634,7 @@
                   ]
                 },
                 {
-                  "name": "850℃，103MPa-τ",
+                  "name": "850℃，103MPa-τ_y",
                   "type": "line",
                   "smooth": "smooth",
                   "data": [
@@ -1633,7 +1666,7 @@
           ],
           "seriesData": [
             {
-              "name": "800℃，177MPa-δ₅",
+              "name": "800℃，177MPa-δ₅_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1652,7 +1685,7 @@
               ]
             },
             {
-              "name": "750℃，275MPa-δ₅",
+              "name": "750℃，275MPa-δ₅_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1671,7 +1704,7 @@
               ]
             },
             {
-              "name": "850℃，103MPa-δ₅",
+              "name": "850℃，103MPa-δ₅_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1690,7 +1723,7 @@
               ]
             },
             {
-              "name": "750℃，275MPa-τ",
+              "name": "750℃，275MPa-τ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1709,7 +1742,7 @@
               ]
             },
             {
-              "name": "800℃，177MPa-τ",
+              "name": "800℃，177MPa-τ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1728,7 +1761,7 @@
               ]
             },
             {
-              "name": "850℃，103MPa-τ",
+              "name": "850℃，103MPa-τ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1863,7 +1896,7 @@
           "con": "",
           "seriesData": [
             {
-              "name": "850℃-59MPa",
+              "name": "850℃-59MPa-εt_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1926,7 +1959,7 @@
               ]
             },
             {
-              "name": "850℃-69MPa",
+              "name": "850℃-69MPa-εt_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1993,7 +2026,7 @@
               ]
             },
             {
-              "name": "800℃-83MPa",
+              "name": "800℃-83MPa-εt_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -2048,7 +2081,7 @@
               ]
             },
             {
-              "name": "800℃-103MPa",
+              "name": "800℃-103MPa-εt_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -2115,7 +2148,7 @@
               ]
             },
             {
-              "name": "800℃-157MPa",
+              "name": "800℃-157MPa-εt_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -2170,7 +2203,7 @@
               ]
             },
             {
-              "name": "800℃-167MPa",
+              "name": "800℃-167MPa-εt_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -2297,7 +2330,68 @@
               "label": "σ-1/MPa",
               "prop": "σ-1/MPa"
             }
-          ]
+          ],
+          "seriesData": [
+            {
+              "name": "σmax_y",
+              "type": "line",
+              "smooth": "smooth",
+              "data": [
+                [
+                  86438.4501205293,
+                  295.107928982997
+                ],
+                [
+                  133939.751539852,
+                  295.377717984512
+                ],
+                [
+                  180677.476221422,
+                  295.377717984512
+                ],
+                [
+                  1177823.62366267,
+                  274.890615681988
+                ],
+                [
+                  3368445.0504321,
+                  274.890615681988
+                ],
+                [
+                  3863254.12159143,
+                  274.890615681988
+                ],
+                [
+                  10373736.5427613,
+                  264.857837188159
+                ],
+                [
+                  11897590.6850507,
+                  266.189920383138
+                ],
+                [
+                  15092822.4556144,
+                  265.397415191188
+                ],
+                [
+                  12201295.1043414,
+                  264.318259185129
+                ],
+                [
+                  14903799.8471653,
+                  263.913575682857
+                ]
+              ]
+            }
+          ],
+          "xAxisData": [],
+          "echartMsg": {
+            "echartId": "3101",
+            "xName": "",
+            "yName": "",
+            "minX": 86438.4501205293,
+            "minY": 263.913575682857
+          }
         },
         {
           "name": "3.10.2、低周疲劳",

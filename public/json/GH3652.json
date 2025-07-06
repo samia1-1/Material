@@ -386,7 +386,7 @@
           "identifier": "图2-2",
           "seriesData": [
             {
-              "name": "1200℃",
+              "name": "1200℃-氧化速率_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -426,7 +426,7 @@
       ],
       "seriesData": [
         {
-          "name": "1100℃",
+          "name": "1100℃-氧化速率_y",
           "type": "line",
           "smooth": "smooth",
           "data": [

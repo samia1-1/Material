@@ -550,7 +550,7 @@
       ],
       "seriesData": [
         {
-          "name": "1200℃",
+          "name": "1200℃-氧化增重值，g^2_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -573,7 +573,7 @@
           ]
         },
         {
-          "name": "1100℃",
+          "name": "1100℃-氧化增重值，g^2_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -596,7 +596,7 @@
           ]
         },
         {
-          "name": "1000℃",
+          "name": "1000℃-氧化增重值，g^2_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -619,7 +619,7 @@
           ]
         },
         {
-          "name": "900℃",
+          "name": "900℃-氧化增重值，g^2_y",
           "type": "line",
           "smooth": "smooth",
           "data": [
@@ -1538,7 +1538,7 @@
           "con": "",
           "seriesData": [
             {
-              "name": "700℃",
+              "name": "700℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1577,7 +1577,7 @@
               ]
             },
             {
-              "name": "800℃",
+              "name": "800℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
@@ -1604,7 +1604,7 @@
               ]
             },
             {
-              "name": "900℃",
+              "name": "900℃-σ_y",
               "type": "line",
               "smooth": "smooth",
               "data": [
