@@ -8,6 +8,7 @@ import permission from './modules/permission'
 import settings from './modules/settings'
 import getters from './getters'
 import news from './modules/news'
+import imageRecognition from './modules/imageRecognition'
 
 Vue.use(Vuex)
 
@@ -19,7 +20,8 @@ const store = new Vuex.Store({
     tagsView,
     permission,
     settings,
-    news
+    news,
+    imageRecognition
   },
   getters
 })

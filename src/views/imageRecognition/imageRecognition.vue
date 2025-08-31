@@ -15,33 +15,7 @@
       <small-nav></small-nav>
     </div>
 
-    <!-- 优化标题区域结构，保留标题流光效果 -->
-    <div class="page-header">
-      <div class="header-container">
-        <!-- 左侧标题图标，保留脉冲效果 -->
-        <div class="title-icon">
-          <div class="icon-pulse"></div>
-          <i class="el-icon-picture-outline"></i>
-        </div>
-
-        <!-- 中间标题内容，保留流光效果 -->
-        <div class="title-content">
-          <h1 class="image-tit glow-text">分割一切微观组织模型</h1>
-          <div class="title-divider">
-            <div class="flowing-light"></div>
-          </div>
-          <p class="title-subtitle">Segmentation of All Microscopic Tissue Models</p>
-        </div>
-
-        <!-- 右侧装饰元素，保留动态效果 -->
-        <div class="title-decoration">
-          <div class="decoration-line">
-            <div class="line-pulse"></div>
-          </div>
-          <div class="decoration-dot"></div>
-        </div>
-      </div>
-    </div>
+    <page-header />
 
     <!-- 内容容器 -->
     <div class="content-container">
@@ -53,11 +27,18 @@
 <script>
 import SmallNav from '../../components/smallNav/smallNav.vue'
 import ImageContent from './component/imageContent.vue'
+import PageHeader from './component/PageHeader.vue'
 
 export default {
   name: 'ImageRecognition',
-  components: { ImageContent, SmallNav },
-  data: () => ({ particleCount: 20 }),
+  components: {
+    ImageContent,
+    SmallNav,
+    PageHeader
+  },
+  data: () => ({
+    particleCount: 20
+  }),
   methods: {
     randomParticleStyle() {
       const size = Math.random() * 6 + 2;
@@ -74,7 +55,7 @@ export default {
         top: `${top}%`,
         animationDuration: `${duration}s`,
         animationDelay: `${delay}s`,
-        opacity
+        opacity: opacity
       };
     }
   }
@@ -82,345 +63,173 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-// 动画定义
-@keyframes beam-move {
-  0% { opacity: 0; transform: translateX(-100px) rotate(45deg); }
-  20%, 80% { opacity: 0.3; }
-  100% { opacity: 0; transform: translateX(calc(100vw + 200px)) rotate(45deg); }
-}
-
-@keyframes float-up {
-  0% { transform: translateY(100vh) scale(1); opacity: 0.5; }
-  70% { opacity: 0.3; }
-  100% { transform: translateY(-100px) scale(0); opacity: 0; }
-}
-
-@keyframes icon-pulse {
-  0%, 100% { opacity: 0; transform: scale(0.5); }
-  50% { opacity: 0.5; transform: scale(1.2); }
-}
-
-@keyframes text-glow {
-  0%, 100% { text-shadow: 0 0 5px rgba(58, 123, 189, 0.3), 0 0 10px rgba(14, 58, 109, 0.2); }
-  50% { text-shadow: 0 0 15px rgba(58, 123, 189, 0.5), 0 0 25px rgba(14, 58, 109, 0.4); }
-}
-
-@keyframes light-flow {
-  from { left: -100%; }
-  to { left: 100%; }
-}
-
-@keyframes line-pulse {
-  0%, 100% { opacity: 0.3; height: 50%; top: 25%; }
-  50% { opacity: 1; height: 100%; top: 0; }
-}
-
-@keyframes dot-pulse {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 5px #56a9ff; }
-  50% { transform: scale(1.5); box-shadow: 0 0 15px #56a9ff, 0 0 25px rgba(58, 123, 189, 0.5); }
-}
-
-@keyframes subtitle-fade {
-  0% { opacity: 0.7; }
-  100% { opacity: 1; }
-}
-
-@keyframes text-flow {
-  0%, 100% { opacity: 0; filter: blur(4px); }
-  50% { opacity: 1; filter: blur(1px); }
-}
-
-// 基础样式
 .image-recognition {
+  height: 100vh;
   width: 100%;
-  min-height: 100vh;
-  background-color: #000000;
+  background: linear-gradient(135deg, #0c1445 0%, #1a2754 25%, #2a4978 50%, #0f1b3c 75%, #050a1a 100%);
+  overflow: hidden;
   position: relative;
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  margin: 0;
-  overflow-x: hidden;
-  color: #d0e0f0;
 
   &::before {
-    content: "";
-    position: fixed;
+    content: '';
+    position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 60px;
-    background-color: #000000;
-    z-index: 9;
-    will-change: transform;
+    bottom: 0;
+    background: radial-gradient(circle at 30% 20%, rgba(58, 123, 189, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(58, 123, 189, 0.05) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 1;
   }
 }
 
-// 背景效果
 .dynamic-background {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  overflow: hidden;
   z-index: 1;
   pointer-events: none;
-}
-
-.once-animation {
-  animation-iteration-count: 1 !important;
-  animation-fill-mode: forwards !important;
+  overflow: hidden;
 }
 
 .light-beam {
   position: absolute;
-  background: linear-gradient(90deg, transparent, rgba(58, 123, 189, 0.05), transparent);
-  width: 150px;
-  height: 100%;
-  transform: rotate(45deg);
-  filter: blur(15px);
-  opacity: 0;
-  animation: beam-move 12s;
+  background: linear-gradient(45deg, transparent, rgba(58, 123, 189, 0.15), transparent);
+  filter: blur(1px);
 
-  &.beam-1 { left: -100px; top: 0; animation-delay: 0s; }
-  &.beam-2 { left: 50%; top: -100px; animation-delay: 3s; }
-  &.beam-3 { right: -100px; top: 30%; animation-delay: 5s; }
+  &.beam-1 {
+    width: 2px;
+    height: 100vh;
+    left: 15%;
+    animation: beam-move-1 25s ease-in-out infinite;
+  }
+
+  &.beam-2 {
+    width: 1px;
+    height: 120vh;
+    left: 65%;
+    animation: beam-move-2 30s ease-in-out infinite;
+  }
+
+  &.beam-3 {
+    width: 1.5px;
+    height: 110vh;
+    right: 20%;
+    animation: beam-move-3 35s ease-in-out infinite;
+  }
+}
+
+@keyframes beam-move-1 {
+  0%, 100% {
+    transform: translateY(-100%) rotate(15deg);
+    opacity: 0;
+  }
+  50% {
+    transform: translateY(0) rotate(15deg);
+    opacity: 0.4;
+  }
+}
+
+@keyframes beam-move-2 {
+  0%, 100% {
+    transform: translateY(-120%) rotate(-10deg);
+    opacity: 0;
+  }
+  50% {
+    transform: translateY(0) rotate(-10deg);
+    opacity: 0.3;
+  }
+}
+
+@keyframes beam-move-3 {
+  0%, 100% {
+    transform: translateY(-110%) rotate(8deg);
+    opacity: 0;
+  }
+  50% {
+    transform: translateY(0) rotate(8deg);
+    opacity: 0.35;
+  }
 }
 
 .floating-particles {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  right: 0;
+  bottom: 0;
 
   .particle {
     position: absolute;
-    background-color: rgba(58, 123, 189, 0.3);
+    background: rgba(58, 123, 189, 0.6);
     border-radius: 50%;
-    box-shadow: 0 0 10px rgba(58, 123, 189, 0.5);
-    animation: float-up 60s linear;
-    z-index: 1;
+    animation: float 40s linear infinite;
+    filter: blur(0.5px);
   }
 }
 
-// 导航
-.nav-container {
-  width: 100%;
-  background-color: #000000;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
-  z-index: 10;
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-
-  ::v-deep .el-menu {
-    background-color: #000000 !important;
-    border-bottom: 1px solid #101010 !important;
-  }
-
-  ::v-deep .el-menu-item {
-    color: #d0e0f0 !important;
-    background-color: #000000 !important;
-    height: 50px;
-    line-height: 50px;
-
-    &:hover, &:focus {
-      background-color: #080808 !important;
-      color: #ffffff !important;
-    }
-
-    &.is-active {
-      color: #3a7cbd !important;
-      border-bottom-color: #3a7cbd !important;
-      font-weight: 500;
-    }
-  }
-
-  ::v-deep .datasearch-nav {
-    width: 100% !important;
-    background-color: #000000 !important;
-    color: #d0e0f0 !important;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.7) !important;
-  }
-}
-
-// 页眉
-.page-header {
-  margin-top: 60px;
-  background: #000000;
-  margin-bottom: 15px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.7);
-  position: relative;
-  overflow: hidden;
-  z-index: 5;
-}
-
-.header-container {
-  display: flex;
-  align-items: center;
-  padding: 18px 25px;
-  max-width: 1600px;
-  margin: 0 auto;
-  position: relative;
-  z-index: 2;
-}
-
-.title-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 55px;
-  height: 55px;
-  background: linear-gradient(135deg, #1e5792, #0e3a6d);
-  border-radius: 4px;
-  margin-right: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  position: relative;
-  z-index: 2;
-  overflow: hidden;
-
-  .icon-pulse {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, rgba(58, 123, 189, 0.8) 0%, rgba(14, 58, 109, 0) 70%);
+@keyframes float {
+  0% {
+    transform: translateY(100vh) scale(0);
     opacity: 0;
-    animation: icon-pulse 3s infinite;
   }
-
-  i {
-    font-size: 30px;
-    color: #ffffff;
-    text-shadow: 0 2px 3px rgba(0, 0, 0, 0.5);
-    position: relative;
-    z-index: 2;
+  10% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) scale(0);
+    opacity: 0;
   }
 }
 
-.title-content {
-  flex: 1;
-  padding-left: 5px;
+.nav-container {
   position: relative;
-
-  .image-tit {
-    font-size: 28px;
-    margin: 0;
-    padding: 0;
-    font-weight: 600;
-    color: #f0f8ff;
-    letter-spacing: 1px;
-    font-family: 'Microsoft YaHei', 'SimHei', serif;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-    position: relative;
-
-    &.glow-text {
-      animation: text-glow 3s infinite alternate;
-      position: relative;
-
-      &::after {
-        content: "分割一切微观组织模型";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        color: #f0f8ff;
-        text-shadow: 0 0 10px rgba(58, 123, 189, 0.8), 0 0 20px rgba(58, 123, 189, 0.4);
-        opacity: 0;
-        animation: text-flow 8s infinite;
-      }
-    }
-  }
-
-  .title-divider {
-    width: 60px;
-    height: 3px;
-    background: linear-gradient(90deg, #56a9ff, #3a7cbd);
-    margin: 8px 0;
-    position: relative;
-    overflow: hidden;
-
-    .flowing-light {
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 0) 100%);
-      animation: light-flow 3s infinite;
-    }
-  }
-
-  .title-subtitle {
-    font-size: 16px;
-    color: #a0c0e0;
-    margin: 6px 0 0 0;
-    font-weight: normal;
-    letter-spacing: 0.5px;
-    font-family: 'Times New Roman', serif;
-    font-style: italic;
-    animation: subtitle-fade 5s infinite alternate;
-  }
-}
-
-.title-decoration {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-left: 20px;
-  height: 60px;
-
-  .decoration-line {
-    width: 2px;
-    height: 40px;
-    background: linear-gradient(to bottom, transparent, #3a7cbd, transparent);
-    margin-bottom: 5px;
-    position: relative;
-
-    .line-pulse {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(to bottom, transparent, rgba(86, 169, 255, 0.8), transparent);
-      animation: line-pulse 2s infinite;
-    }
-  }
-
-  .decoration-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background-color: #56a9ff;
-    box-shadow: 0 0 5px #56a9ff;
-    animation: dot-pulse 2s infinite;
-  }
+  z-index: 100;
 }
 
 .content-container {
-  width: 98%;
-  margin: 0 15px 15px 20px;
-  background-color: #050505;
-  border-radius: 2px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
   position: relative;
-  z-index: 5;
+  z-index: 10;
+  height: calc(100vh - 50px);
 }
 
-::v-deep body, ::v-deep html {
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-  background-color: #000000;
+/* 全局响应式设计 */
+@media (max-width: 1200px) {
+  .content-container {
+    padding: 0 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .image-recognition {
+    min-height: 100vh;
+  }
+
+  .light-beam {
+    display: none; /* 移动端隐藏光束以提高性能 */
+  }
+
+  .floating-particles .particle {
+    display: none; /* 移动端隐藏粒子以提高性能 */
+  }
+}
+
+/* 减少动画频率以提高性能 */
+.once-animation {
+  animation-iteration-count: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .light-beam,
+  .particle {
+    animation: none;
+  }
 }
 </style>
