@@ -38,8 +38,7 @@ import Loading from "@/components/Loading/index.vue";
 import OperationPanel from './OperationPanel.vue';
 import ImageViewer from './ImageViewer.vue';
 import ExampleGallery from './ExampleGallery.vue';
-import categoryConfig from './config/categoryConfig';
-import { getImagesByCategory } from './config/preloadImages';
+import { categoryConfig, getImagesByCategory } from '../imageConfig';
 import Tiff from 'tiff.js';
 
 // 共享的TIFF处理工具

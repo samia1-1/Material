@@ -48,7 +48,7 @@
 
 <script>
 import { mapState, mapActions } from 'vuex';
-import categoryConfig from './config/categoryConfig';
+import { categoryConfig } from '../imageConfig';
 
 // 使用共享的TIFF工具 - TiffUtils已在imageContent.vue中定义
 

@@ -73,7 +73,7 @@ export default {
 // 页眉
 .page-header {
   margin-top: 60px;
-  background: #000000;
+  background: 32, 56, 97;
   margin-bottom: 15px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.7);
   position: relative;
