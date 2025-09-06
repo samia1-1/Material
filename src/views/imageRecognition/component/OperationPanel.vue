@@ -63,57 +63,56 @@
 export default {
   name: 'OperationPanel',
   props: {
-    operationButtons: {
-      type: Array,
-      required: true
-    },
-    dataFields: {
-      type: Array,
-      required: true
-    }
+    operationButtons: { type: Array, required: true },
+    dataFields: { type: Array, required: true }
   },
   emits: ['operation-click', 'get-statistic']
 }
 </script>
 
 <style lang="scss" scoped>
+// 变量定义
+$bg-black: #000;
+$bg-dark: #030303;
+$bg-darker: #050505;
+$bg-light: #080808;
+$border-dark: #0f0f0f;
+$border-light: #101010;
+$border-lighter: #151515;
+$blue-bright: #56a9ff;
+$blue-dark: #071525;
+$blue-border: #0e2740;
+$text-white: #fff;
+
+// 侧边栏
 .left-sidebar {
-  background-color: #000;
-  border-right: 1px solid #0f0f0f;
+  background: $bg-black;
+  border-right: 1px solid $border-dark;
   padding: 8px;
   display: flex;
   flex-direction: column;
   box-shadow: 1px 0 3px rgba(0, 0, 0, 0.4);
   width: 440px !important;
   flex: 0 0 440px;
-  overflow-y: auto; /* 添加垂直滚动 */
-  height: 100%; /* 使用父容器的100%高度 */
+  overflow-y: auto;
+  height: 100%;
 
-  /* 深色主题滚动条样式 */
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: rgba(15, 23, 42, 0.6);
-    border-radius: 3px;
-  }
-
+  // 滚动条样式
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); border-radius: 3px; }
   &::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+    background: linear-gradient(135deg, #1e3a8a, #1e40af);
     border-radius: 3px;
     transition: background 0.3s ease;
-
-    &:hover {
-      background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
-    }
+    &:hover { background: linear-gradient(135deg, #2563eb, #3b82f6); }
   }
 }
 
+// 卡片
 .combined-card {
   border-radius: 2px;
-  background-color: #050505;
-  border: 1px solid #101010;
+  background: $bg-darker;
+  border: 1px solid $border-light;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
   margin-bottom: 12px;
   display: flex;
@@ -123,14 +122,14 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #101010;
+    border-bottom: 1px solid $border-light;
     padding: 10px 12px;
-    background-color: #030303;
+    background: $bg-dark;
 
     span {
       font-weight: bold;
       font-size: 14px;
-      color: #ffffff;
+      color: $text-white;
       text-transform: uppercase;
       letter-spacing: 0.7px;
       text-shadow: 0 0 5px rgba(58, 123, 189, 0.6);
@@ -138,27 +137,26 @@ export default {
   }
 }
 
+// 面板区域
 .panel-section {
   padding: 8px 5px;
 
   .section-title {
     font-size: 14px;
     font-weight: 600;
-    color: #ffffff;
+    color: $text-white;
     margin-bottom: 10px;
     padding-bottom: 6px;
-    border-bottom: 1px dashed #151515;
+    border-bottom: 1px dashed $border-lighter;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     text-shadow: 0 0 8px rgba(58, 123, 189, 0.6);
 
-    i {
-      margin-right: 5px;
-      color: #56a9ff;
-    }
+    i { margin-right: 5px; color: $blue-bright; }
   }
 }
 
+// 操作区域
 .operation-section {
   width: 100%;
   margin-bottom: 15px;
@@ -172,6 +170,7 @@ export default {
   }
 }
 
+// 按钮样式
 .op-button, .analysis-button {
   display: flex;
   align-items: center;
@@ -181,46 +180,35 @@ export default {
   transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
-  color: #ffffff;
+  color: $text-white;
   width: 100% !important;
   height: 38px;
   padding: 0 10px;
   margin: 0;
   font-size: 13px;
 
-  i {
-    margin-right: 6px;
-    font-size: 16px;
-    color: #56a9ff;
-  }
+  i { margin-right: 6px; font-size: 16px; color: $blue-bright; }
 }
 
 .op-button {
-  background-color: #080808;
-  border: 1px solid #151515;
+  background: $bg-light;
+  border: 1px solid $border-lighter;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-
-  &:hover {
-    background-color: #101010;
-    border-color: #1e1e1e;
-  }
+  &:hover { background: #101010; border-color: #1e1e1e; }
 }
 
 .special-button, .analysis-button {
-  background-color: #071525;
-  border-color: #0e2740;
-
-  &:hover {
-    background-color: #0a2235;
-    border-color: #15304d;
-  }
+  background: $blue-dark;
+  border-color: $blue-border;
+  &:hover { background: #0a2235; border-color: #15304d; }
 }
 
+// 数据区域
 .data-section {
   width: 100%;
-  background-color: #030303;
+  background: $bg-dark;
   border-radius: 2px;
-  border: 1px solid #101010;
+  border: 1px solid $border-light;
   padding: 12px;
   margin: 0 3px;
 
@@ -234,7 +222,7 @@ export default {
       flex-direction: row;
 
       &__label {
-        color: #ffffff !important;
+        color: $text-white !important;
         font-size: 13px;
         line-height: 32px;
         font-weight: 500;
@@ -249,17 +237,13 @@ export default {
         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
       }
 
-      &__content {
-        line-height: 32px;
-        margin-left: 0 !important;
-        flex: 1;
-      }
+      &__content { line-height: 32px; margin-left: 0 !important; flex: 1; }
     }
 
     ::v-deep .el-input__inner {
-      background-color: #071525 !important;
-      border-color: #0e2740 !important;
-      color: #ffffff !important;
+      background: $blue-dark !important;
+      border-color: $blue-border !important;
+      color: $text-white !important;
       height: 32px;
       font-size: 13px;
       border-radius: 2px;
@@ -270,16 +254,10 @@ export default {
       font-weight: 500;
       text-align: left;
 
-      &::placeholder {
-        color: rgba(255, 255, 255, 0.5) !important;
-      }
+      &::placeholder { color: rgba(255, 255, 255, 0.5) !important; }
     }
   }
 
-  .chart-action {
-    margin-top: 12px;
-    text-align: center;
-    padding: 0 5px;
-  }
+  .chart-action { margin-top: 12px; text-align: center; padding: 0 5px; }
 }
 </style>

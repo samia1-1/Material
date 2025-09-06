@@ -2,11 +2,9 @@
   <div class="image-recognition">
     <!-- 背景动态元素 -->
     <div class="dynamic-background">
-      <div class="light-beam beam-1 once-animation"></div>
-      <div class="light-beam beam-2 once-animation"></div>
-      <div class="light-beam beam-3 once-animation"></div>
+      <div v-for="i in 3" :key="`beam-${i}`" :class="`light-beam beam-${i}`"></div>
       <div class="floating-particles">
-        <span v-for="i in 20" :key="i" class="particle once-animation" :style="randomParticleStyle()"></span>
+        <span v-for="i in particleCount" :key="`particle-${i}`" class="particle" :style="getParticleStyle(i)"></span>
       </div>
     </div>
 
@@ -29,34 +27,40 @@ import SmallNav from '../../components/smallNav/smallNav.vue'
 import ImageContent from './component/imageContent.vue'
 import PageHeader from './component/PageHeader.vue'
 
+// 预计算粒子样式以提高性能
+const generateParticleStyles = (count) => {
+  return Array.from({ length: count }, (_, i) => {
+    const size = Math.random() * 6 + 2;
+    const left = Math.random() * 100;
+    const top = Math.random() * 100;
+    const duration = Math.random() * 20 + 30;
+    const delay = Math.random() * 15;
+    const opacity = Math.random() * 0.5 + 0.1;
+
+    return {
+      width: `${size}px`,
+      height: `${size}px`,
+      left: `${left}%`,
+      top: `${top}%`,
+      animationDuration: `${duration}s`,
+      animationDelay: `${delay}s`,
+      opacity
+    };
+  });
+};
+
 export default {
   name: 'ImageRecognition',
-  components: {
-    ImageContent,
-    SmallNav,
-    PageHeader
+  components: { ImageContent, SmallNav, PageHeader },
+  data() {
+    return {
+      particleCount: 20,
+      particleStyles: generateParticleStyles(20)
+    };
   },
-  data: () => ({
-    particleCount: 20
-  }),
   methods: {
-    randomParticleStyle() {
-      const size = Math.random() * 6 + 2;
-      const left = Math.random() * 100;
-      const top = Math.random() * 100;
-      const duration = Math.random() * 20 + 30;
-      const delay = Math.random() * 15;
-      const opacity = Math.random() * 0.5 + 0.1;
-
-      return {
-        width: `${size}px`,
-        height: `${size}px`,
-        left: `${left}%`,
-        top: `${top}%`,
-        animationDuration: `${duration}s`,
-        animationDelay: `${delay}s`,
-        opacity: opacity
-      };
+    getParticleStyle(index) {
+      return this.particleStyles[index - 1] || {};
     }
   }
 }
@@ -78,7 +82,7 @@ export default {
     right: 0;
     bottom: 0;
     background: radial-gradient(circle at 30% 20%, rgba(58, 123, 189, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 70% 80%, rgba(58, 123, 189, 0.05) 0%, transparent 40%);
+      radial-gradient(circle at 70% 80%, rgba(58, 123, 189, 0.05) 0%, transparent 40%);
     pointer-events: none;
     z-index: 1;
   }
@@ -123,10 +127,13 @@ export default {
 }
 
 @keyframes beam-move-1 {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(-100%) rotate(15deg);
     opacity: 0;
   }
+
   50% {
     transform: translateY(0) rotate(15deg);
     opacity: 0.4;
@@ -134,10 +141,13 @@ export default {
 }
 
 @keyframes beam-move-2 {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(-120%) rotate(-10deg);
     opacity: 0;
   }
+
   50% {
     transform: translateY(0) rotate(-10deg);
     opacity: 0.3;
@@ -145,10 +155,13 @@ export default {
 }
 
 @keyframes beam-move-3 {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(-110%) rotate(8deg);
     opacity: 0;
   }
+
   50% {
     transform: translateY(0) rotate(8deg);
     opacity: 0.35;
@@ -176,13 +189,16 @@ export default {
     transform: translateY(100vh) scale(0);
     opacity: 0;
   }
+
   10% {
     opacity: 1;
     transform: scale(1);
   }
+
   90% {
     opacity: 1;
   }
+
   100% {
     transform: translateY(-100px) scale(0);
     opacity: 0;
@@ -229,13 +245,13 @@ export default {
     font-weight: 600 !important;
   }
 
-  ::v-deep .el-menu--horizontal > .el-menu-item {
+  ::v-deep .el-menu--horizontal>.el-menu-item {
     border-bottom: none !important;
     height: 60px !important;
     line-height: 60px !important;
   }
 
-  ::v-deep .el-menu--horizontal > .el-menu-item:not(.is-disabled):hover {
+  ::v-deep .el-menu--horizontal>.el-menu-item:not(.is-disabled):hover {
     background-color: rgba(100, 181, 246, 0.15) !important;
     color: #64b5f6 !important;
   }
@@ -301,36 +317,17 @@ export default {
   height: calc(100vh - 50px);
 }
 
-/* 全局响应式设计 */
+// 响应式设计
 @media (max-width: 1200px) {
-  .content-container {
-    padding: 0 10px;
-  }
+  .content-container { padding: 0 10px; }
 }
 
 @media (max-width: 768px) {
-  .image-recognition {
-    min-height: 100vh;
-  }
-
-  .light-beam {
-    display: none; /* 移动端隐藏光束以提高性能 */
-  }
-
-  .floating-particles .particle {
-    display: none; /* 移动端隐藏粒子以提高性能 */
-  }
-}
-
-/* 减少动画频率以提高性能 */
-.once-animation {
-  animation-iteration-count: 1;
+  .image-recognition { min-height: 100vh; }
+  .light-beam, .floating-particles .particle { display: none; } // 移动端隐藏动画以提高性能
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .light-beam,
-  .particle {
-    animation: none;
-  }
+  .light-beam, .particle { animation: none; }
 }
 </style>

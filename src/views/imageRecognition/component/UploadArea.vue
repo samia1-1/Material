@@ -27,13 +27,11 @@
 <script>
 export default {
   name: 'UploadArea',
-  data() {
-    return {
-      isDragOver: false,
-      lastUploadTime: 0
-    }
-  },
   emits: ['upload-file'],
+  data: () => ({
+    isDragOver: false,
+    lastUploadTime: 0
+  }),
   methods: {
     triggerUpload() {
       const now = Date.now();
@@ -41,28 +39,28 @@ export default {
       this.lastUploadTime = now;
       this.$refs.fileInput?.click();
     },
+
     handleFileChange(event) {
       const file = event.target.files?.[0];
-      if (file) {
-        this.$emit('upload-file', file);
-      }
+      if (file) this.$emit('upload-file', file);
       event.target.value = '';
     },
+
     handleDragOver(e) {
       e.preventDefault();
       this.isDragOver = true;
     },
+
     handleDragLeave(e) {
       e.preventDefault();
       this.isDragOver = false;
     },
+
     handleDrop(e) {
       e.preventDefault();
       this.isDragOver = false;
       const files = e.dataTransfer.files;
-      if (files.length > 0) {
-        this.$emit('upload-file', files[0]);
-      }
+      if (files.length > 0) this.$emit('upload-file', files[0]);
     }
   }
 }
